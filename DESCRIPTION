@@ -1,6 +1,6 @@
 Package: TreeTools
 Title: Create, Modify and Analyse Phylogenetic Trees
-Version: 0.1.2
+Version: 0.1.3
 Authors@R: c(person("Martin R.", 'Smith',
                   email="martin.smith@durham.ac.uk", 
                   role=c("aut", "cre", "cph"), 
@@ -40,11 +40,11 @@ LinkingTo: Rcpp
 VignetteBuilder: knitr
 RoxygenNote: 6.1.1
 NeedsCompilation: yes
-Packaged: 2019-12-17 16:54:52 UTC; ms609
+Packaged: 2019-12-19 17:20:16 UTC; ms609
 Author: Martin R. Smith [aut, cre, cph]
     (<https://orcid.org/0000-0001-5660-1727>),
   Emmanuel Paradis [cph] (<https://orcid.org/0000-0003-3092-2199>),
   Klaus Schliep [cph] (<https://orcid.org/0000-0003-2941-0161>)
 Maintainer: Martin R. Smith <martin.smith@durham.ac.uk>
 Repository: CRAN
-Date/Publication: 2019-12-18 15:00:14 UTC
+Date/Publication: 2019-12-19 18:20:07 UTC
