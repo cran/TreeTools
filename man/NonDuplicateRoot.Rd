@@ -7,11 +7,11 @@
 NonDuplicateRoot(parent, child, nEdge = length(parent))
 }
 \arguments{
-\item{parent}{the first column of the edge matrix of a tree of class
-\code{\link{phylo}}, i.e. \code{tree$edge[, 1]}.}
+\item{parent}{Integer vector corresponding to the first column of the edge
+matrix of a tree of class \code{\link{phylo}}, i.e. \code{tree$edge[, 1]}}
 
-\item{child}{the second column of the edge matrix of a tree of class
-\code{\link{phylo}}, i.e. \code{tree$edge[, 2]}.}
+\item{child}{Integer vector corresponding to the second column of the edge
+matrix of a tree of class \code{\link{phylo}}, i.e. \code{tree$edge[, 2]}.}
 
 \item{nEdge}{(optional) integer specifying the number of edges of a tree of
 class \code{\link{phylo}}, i.e. \code{dim(tree$edge)[1]}}
@@ -37,11 +37,13 @@ which(!NonDuplicateRoot(parent, child))
 
 }
 \seealso{
-Other tree navigation: \code{\link{AllAncestors}},
-  \code{\link{AncestorEdge}},
-  \code{\link{DescendantEdges}},
-  \code{\link{EdgeAncestry}}, \code{\link{EdgeDistances}},
-  \code{\link{MRCA}}
+Other tree navigation: 
+\code{\link{AllAncestors}()},
+\code{\link{AncestorEdge}()},
+\code{\link{DescendantEdges}()},
+\code{\link{EdgeAncestry}()},
+\code{\link{EdgeDistances}()},
+\code{\link{MRCA}()}
 }
 \author{
 Martin R. Smith (\href{mailto:martin.smith@durham.ac.uk}{martin.smith@durham.ac.uk})

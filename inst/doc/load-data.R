@@ -1,4 +1,4 @@
-## ----Contrast matrix-----------------------------------------------------
+## ----Contrast matrix----------------------------------------------------------
 contrast.matrix <- matrix(data=c(
 # 0 1 -  # Each column corresponds to a character-state
   1,0,0, # Each row corresponds to a token, here 0, denoting the 

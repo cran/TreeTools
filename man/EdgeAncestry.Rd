@@ -10,14 +10,15 @@ EdgeAncestry(edge, parent, child, stopAt = (parent == min(parent)))
 \item{edge}{Integer specifying the number of the edge whose child edges
 should be returned.}
 
-\item{parent}{the first column of the edge matrix of a tree of class
-\code{\link{phylo}}, i.e. \code{tree$edge[, 1]}.}
+\item{parent}{Integer vector corresponding to the first column of the edge
+matrix of a tree of class \code{\link{phylo}}, i.e. \code{tree$edge[, 1]}}
 
-\item{child}{the second column of the edge matrix of a tree of class
-\code{\link{phylo}}, i.e. \code{tree$edge[, 2]}.}
+\item{child}{Integer vector corresponding to the second column of the edge
+matrix of a tree of class \code{\link{phylo}}, i.e. \code{tree$edge[, 2]}.}
 
-\item{stopAt}{number of the edge at which the search should terminate;
-defaults to the root edges.}
+\item{stopAt}{Integer or logical vector specifying the edge(s) at which to
+terminate the search; defaults to the edges with the smallest parent,
+which will be the root edges if nodes are numbered cladewise or in Preorder.}
 }
 \value{
 \code{EdgeAncestry} returns a logical vector stating whether each edge in
@@ -37,11 +38,13 @@ which(EdgeAncestry(7, parent, child, stopAt = 4))
 
 }
 \seealso{
-Other tree navigation: \code{\link{AllAncestors}},
-  \code{\link{AncestorEdge}},
-  \code{\link{DescendantEdges}},
-  \code{\link{EdgeDistances}}, \code{\link{MRCA}},
-  \code{\link{NonDuplicateRoot}}
+Other tree navigation: 
+\code{\link{AllAncestors}()},
+\code{\link{AncestorEdge}()},
+\code{\link{DescendantEdges}()},
+\code{\link{EdgeDistances}()},
+\code{\link{MRCA}()},
+\code{\link{NonDuplicateRoot}()}
 }
 \author{
 Martin R. Smith (\href{mailto:martin.smith@durham.ac.uk}{martin.smith@durham.ac.uk})

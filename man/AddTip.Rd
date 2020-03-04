@@ -5,8 +5,11 @@
 \alias{AddTipEverywhere}
 \title{Add a tip to a phylogenetic tree}
 \usage{
-AddTip(tree, where = sample.int(tree$Nnode * 2 + 2L, size = 1) - 1L,
-  label = "New tip")
+AddTip(
+  tree,
+  where = sample.int(tree$Nnode * 2 + 2L, size = 1) - 1L,
+  label = "New tip"
+)
 
 AddTipEverywhere(tree, label = "New tip", includeRoot = FALSE)
 }
@@ -23,10 +26,10 @@ new tip is added to a random edge.}
 to the root edge are considered to represent distinct edges.}
 }
 \value{
-\code{AddTip} returns a tree of class \code{phylo} with an additional tip
+\code{AddTip()} returns a tree of class \code{phylo} with an additional tip
 at the desired location.
 
-\code{AddTipEverywhere} returns a list of class \code{multiPhylo} containing
+\code{AddTipEverywhere()} returns a list of class \code{multiPhylo} containing
 the trees produced by adding \code{label} to each edge of \code{tree} in turn.
 }
 \description{
@@ -67,8 +70,10 @@ par(oldPar)
 
 \code{\link{nodelabels}}
 
-Other tree manipulation: \code{\link{Renumber}},
-  \code{\link{SingleTaxonTree}}, \code{\link{Subtree}}
+Other tree manipulation: 
+\code{\link{Renumber}()},
+\code{\link{SingleTaxonTree}()},
+\code{\link{Subtree}()}
 }
 \author{
 Martin R. Smith (\href{mailto:martin.smith@durham.ac.uk}{martin.smith@durham.ac.uk})

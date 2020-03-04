@@ -1,7 +1,7 @@
 #' Renumber a tree's nodes and tips
 #'
-#' \code{Renumber} numbers the nodes and tips in a tree to conform with the
-#' phylo standards.
+#' `Renumber()` numbers the nodes and tips in a tree to conform with the
+#' `phylo` standards.
 #'
 #' @template treeParam
 #'
@@ -9,7 +9,7 @@
 #' tree <- RandomTree(letters[1:10])
 #' Renumber(tree)
 #'
-#' @return This function returns a tree of class \code{phylo}.
+#' @return `Renumber()` returns a tree of class `phylo`.
 #'
 #' @template MRS
 #' @family tree manipulation
@@ -43,15 +43,13 @@ Renumber <- function (tree) {
   Cladewise(tree)
 }
 
-#' SingleTaxonTree
-#'
-#' Single taxon tree
+#' Single Taxon Tree
 #'
 #' Create a phylogenetic 'tree' that comprises a single taxon.
 #'
 #' @usage SingleTaxonTree(label)
 #' @param  label a character vector specifying the label of the tip.
-#' @return `SingleTaxonTree` returns a \code{phylo} object containing a single
+#' @return `SingleTaxonTree()` returns a \code{phylo} object containing a single
 #' tip with the specified label.
 #'
 #' @examples
@@ -151,7 +149,7 @@ Subtree <- function (tree, node) {
 #' new tip is added to a random edge.
 #' @param label Character string providing the label to apply to the new tip.
 #'
-#' @return `AddTip` returns a tree of class \code{phylo} with an additional tip
+#' @return `AddTip()` returns a tree of class \code{phylo} with an additional tip
 #' at the desired location.
 #'
 #' @template MRS
@@ -231,7 +229,7 @@ AddTip <- function (tree,
 #' @describeIn AddTip Add a tip to each edge in turn.
 #' @param includeRoot Logical; if `TRUE`, the three positions adjacent
 #' to the root edge are considered to represent distinct edges.
-#' @return `AddTipEverywhere` returns a list of class `multiPhylo` containing
+#' @return `AddTipEverywhere()` returns a list of class `multiPhylo` containing
 #' the trees produced by adding `label` to each edge of `tree` in turn.
 #'
 #' @examples
@@ -247,13 +245,16 @@ AddTip <- function (tree,
 #'
 #' par(oldPar)
 #'
+#' @importFrom ape is.rooted
 #' @export
 AddTipEverywhere <- function (tree, label = 'New tip', includeRoot = FALSE) {
   nTip <- length(tree$tip.label)
   whichNodes <- if (includeRoot) {
     seq_len(tree$Nnode * 2 + 1L)
   } else {
-    c(seq_len(nTip), nTip + 2L + seq_len(tree$Nnode - 2L))
+    c(seq_len(nTip),
+      if (!is.rooted(tree)) nTip + 2L,
+      nTip + 2L + seq_len(tree$Nnode - 2L))
   }
   lapply(whichNodes, AddTip, tree = tree, label = label)
 }
@@ -277,7 +278,7 @@ AddTipEverywhere <- function (tree, label = 'New tip', includeRoot = FALSE) {
 #'   edge <- tr$edge
 #'   AllAncestors(edge[, 1], edge[, 2])
 #'
-#' @return `AllAncestors` returns a list. Entry _i_ contains a vector containing,
+#' @return `AllAncestors()` returns a list. Entry _i_ contains a vector containing,
 #' in order, the nodes encountered when traversing the tree from node _i_ to the
 #' root node.
 #' The last entry of each member of the list is therefore the root node,
@@ -300,7 +301,7 @@ AllAncestors <- function (parent, child) {
 #' @template treeParam
 #' @param nodes whose descendants should be returned
 #'
-#' @return `CladeSizes` returns the number of nodes (including tips) that are
+#' @return `CladeSizes()` returns the number of nodes (including tips) that are
 #' descended from each node.
 #'
 #' @examples

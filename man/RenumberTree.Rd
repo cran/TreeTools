@@ -10,11 +10,11 @@ RenumberTree(parent, child)
 RenumberEdges(parent, child, nEdge = length(parent))
 }
 \arguments{
-\item{parent}{the first column of the edge matrix of a tree of class
-\code{\link{phylo}}, i.e. \code{tree$edge[, 1]}.}
+\item{parent}{Integer vector corresponding to the first column of the edge
+matrix of a tree of class \code{\link{phylo}}, i.e. \code{tree$edge[, 1]}}
 
-\item{child}{the second column of the edge matrix of a tree of class
-\code{\link{phylo}}, i.e. \code{tree$edge[, 2]}.}
+\item{child}{Integer vector corresponding to the second column of the edge
+matrix of a tree of class \code{\link{phylo}}, i.e. \code{tree$edge[, 2]}.}
 }
 \value{
 \code{RenumberTree} returns an edge matrix for a tree of class \code{phylo}
@@ -30,16 +30,12 @@ guaranteed to be identical for any tree of an equivalent topology.
 At each node, child edges are arranged from left to right according to the
 lowest-numbered tip in the subtree subtended by each edge.
 }
-\section{Functions}{
-\itemize{
-\item \code{RenumberEdges}: Returns in list format
-}}
-
 \seealso{
 \code{\link{SortTree}}
 
-Other C wrappers: \code{\link{Cladewise}},
-  \code{\link{Neworder}}
+Other C wrappers: 
+\code{\link{Neworder}},
+\code{\link{Reorder}}
 }
 \concept{C wrappers}
 \keyword{internal}

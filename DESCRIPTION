@@ -1,6 +1,6 @@
 Package: TreeTools
 Title: Create, Modify and Analyse Phylogenetic Trees
-Version: 0.1.3
+Version: 0.1.4
 Authors@R: c(person("Martin R.", 'Smith',
                   email="martin.smith@durham.ac.uk", 
                   role=c("aut", "cre", "cph"), 
@@ -24,9 +24,9 @@ Description: Efficient implementations of functions for the creation,
   and TNT <http://www.lillo.org.ar/phylogeny/tnt/> formats;
   and
   analysis of partitions and partition information.
-URL: https://ms609.github.io/TreeTools,
-        https://github.com/ms609/TreeTools
-BugReports: https://github.com/ms609/TreeTools/issues
+URL: https://ms609.github.io/TreeTools/,
+        https://github.com/ms609/TreeTools/
+BugReports: https://github.com/ms609/TreeTools/issues/
 SystemRequirements: C++11
 Depends: R (>= 3.4.0), ape (>= 5.0)
 Imports: colorspace, phangorn (>= 2.2.1), R.cache
@@ -38,13 +38,13 @@ Encoding: UTF-8
 Language: en-GB
 LinkingTo: Rcpp
 VignetteBuilder: knitr
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2
 NeedsCompilation: yes
-Packaged: 2019-12-19 17:20:16 UTC; ms609
+Packaged: 2020-03-04 15:25:09 UTC; ms609
 Author: Martin R. Smith [aut, cre, cph]
     (<https://orcid.org/0000-0001-5660-1727>),
   Emmanuel Paradis [cph] (<https://orcid.org/0000-0003-3092-2199>),
   Klaus Schliep [cph] (<https://orcid.org/0000-0003-2941-0161>)
 Maintainer: Martin R. Smith <martin.smith@durham.ac.uk>
 Repository: CRAN
-Date/Publication: 2019-12-19 18:20:07 UTC
+Date/Publication: 2020-03-04 16:30:05 UTC

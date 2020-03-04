@@ -1,19 +1,18 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <meta name="author" content="Martin R. Smith" />
 
-<meta name="date" content="2019-12-19" />
+<meta name="date" content="2020-03-04" />
 
 <title>Loading phylogenetic trees into R</title>
 
@@ -118,9 +117,6 @@ padding-right: 2em;
 font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 font-size: 14px;
 line-height: 1.35;
-}
-#header {
-text-align: center;
 }
 #TOC {
 clear: both;
@@ -289,7 +285,8 @@ code > span.st { color: #d14; }
 code > span.co { color: #888888; font-style: italic; } 
 code > span.ot { color: #007020; } 
 code > span.al { color: #ff0000; font-weight: bold; } 
-code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
 
 
@@ -304,7 +301,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 <h1 class="title toc-ignore">Loading phylogenetic trees into R</h1>
 <h4 class="author">Martin R. Smith</h4>
-<h4 class="date">2019-12-19</h4>
+<h4 class="date">2020-03-04</h4>
 
 
 
@@ -355,6 +352,10 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <h3>Other formats</h3>
 <p>Are there other formats that should be listed here? Please let me know by <a href="https://github.com/ms609/TreeSearch/issues/new?title=Loading%20trees">opening an issue</a>.</p>
 </div>
+</div>
+<div id="export-write-trees" class="section level2">
+<h2>Export (write) trees</h2>
+<p>To save a tree to a text file, use <code>ape::write.tree(tree, file=&#39;filename.txt&#39;)</code> for Newick format (widely supported by most phylogenetic software), or <code>ape::write.nexus(tree, file=&#39;filename.nex&#39;)</code> for Nexus format.</p>
 </div>
 <div id="what-next" class="section level2">
 <h2>What next?</h2>
