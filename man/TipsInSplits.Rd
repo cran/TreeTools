@@ -4,24 +4,28 @@
 \alias{TipsInSplits}
 \title{Tips contained within splits}
 \usage{
-TipsInSplits(splits, nTip = attr(splits, "nTip"))
+TipsInSplits(splits)
 }
 \arguments{
 \item{splits}{Object of class \code{Splits}.}
-
-\item{nTip}{Number of tips in \code{Splits} object (inferred if not specified).}
 }
 \value{
-A named vector of integers, specifying the number of tips contained
-within each split in \code{splits}.
+\code{TipsInSplits()} returns a named vector of integers, specifying the
+number of tips contained within each split in \code{splits}.
 }
 \description{
-\code{TipsInSplits} specifies the number of tips that occur within each
+\code{TipsInSplits()} specifies the number of tips that occur within each
 bipartition split in a \code{Splits} object.
 }
 \examples{
-splits <- as.Splits(PectinateTree(8))
+tree <- PectinateTree(8)#'
+splits <- as.Splits(tree)
 TipsInSplits(splits)
+
+plot(tree)
+LabelSplits(tree, as.character(splits), frame = 'none', pos = 3L, cex = 0.7)
+LabelSplits(tree, TipsInSplits(splits), unit = ' tips', frame = 'none',
+            pos = 1L)
 
 }
 \seealso{
@@ -30,7 +34,6 @@ Other Splits operations:
 \code{\link{NTip}()},
 \code{\link{TipLabels}()},
 \code{\link{as.Splits}()},
-\code{\link{in.Splits}()},
-\code{\link{match.Splits}()}
+\code{\link{match}()}
 }
 \concept{Splits operations}

@@ -34,12 +34,17 @@ which(AncestorEdge(5, parent, child))
 }
 \seealso{
 Other tree navigation: 
-\code{\link{AllAncestors}()},
+\code{\link{CladeSizes}()},
 \code{\link{DescendantEdges}()},
 \code{\link{EdgeAncestry}()},
 \code{\link{EdgeDistances}()},
+\code{\link{ListAncestors}()},
 \code{\link{MRCA}()},
-\code{\link{NonDuplicateRoot}()}
+\code{\link{NDescendants}()},
+\code{\link{NodeDepth}()},
+\code{\link{NodeOrder}()},
+\code{\link{NonDuplicateRoot}()},
+\code{\link{RootNode}()}
 }
 \concept{tree navigation}
 \keyword{internal}

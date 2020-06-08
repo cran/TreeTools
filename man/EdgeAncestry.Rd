@@ -2,7 +2,7 @@
 % Please edit documentation in R/tree_properties.R
 \name{EdgeAncestry}
 \alias{EdgeAncestry}
-\title{Edge ancestry}
+\title{Ancestors of an edge}
 \usage{
 EdgeAncestry(edge, parent, child, stopAt = (parent == min(parent)))
 }
@@ -18,11 +18,12 @@ matrix of a tree of class \code{\link{phylo}}, i.e. \code{tree$edge[, 2]}.}
 
 \item{stopAt}{Integer or logical vector specifying the edge(s) at which to
 terminate the search; defaults to the edges with the smallest parent,
-which will be the root edges if nodes are numbered cladewise or in Preorder.}
+which will be the root edges if nodes are numbered \link{Cladewise} or in
+\link{Preorder}.}
 }
 \value{
-\code{EdgeAncestry} returns a logical vector stating whether each edge in
-turn is a descendant of the specified edge.
+\code{EdgeAncestry()} returns a logical vector stating whether each edge
+in turn is a descendant of the specified edge.
 }
 \description{
 Quickly identify edges that are 'ancestral' to a particular edge in a tree.
@@ -39,12 +40,17 @@ which(EdgeAncestry(7, parent, child, stopAt = 4))
 }
 \seealso{
 Other tree navigation: 
-\code{\link{AllAncestors}()},
 \code{\link{AncestorEdge}()},
+\code{\link{CladeSizes}()},
 \code{\link{DescendantEdges}()},
 \code{\link{EdgeDistances}()},
+\code{\link{ListAncestors}()},
 \code{\link{MRCA}()},
-\code{\link{NonDuplicateRoot}()}
+\code{\link{NDescendants}()},
+\code{\link{NodeDepth}()},
+\code{\link{NodeOrder}()},
+\code{\link{NonDuplicateRoot}()},
+\code{\link{RootNode}()}
 }
 \author{
 Martin R. Smith (\href{mailto:martin.smith@durham.ac.uk}{martin.smith@durham.ac.uk})

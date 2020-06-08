@@ -3,54 +3,87 @@
 \name{NRooted}
 \alias{NRooted}
 \alias{NUnrooted}
+\alias{NRooted64}
+\alias{NUnrooted64}
 \alias{LnUnrooted}
 \alias{LnUnrooted.int}
+\alias{Log2Unrooted}
+\alias{Log2Unrooted.int}
 \alias{LnRooted}
 \alias{LnRooted.int}
+\alias{Log2Rooted}
+\alias{Log2Rooted.int}
 \alias{LnUnrootedSplits}
+\alias{Log2UnrootedSplits}
 \alias{NUnrootedSplits}
 \alias{LnUnrootedMult}
+\alias{Log2UnrootedMult}
 \alias{NUnrootedMult}
-\title{Number of rooted/unrooted trees}
+\title{Number of trees}
 \usage{
 NRooted(tips)
 
 NUnrooted(tips)
 
+NRooted64(tips)
+
+NUnrooted64(tips)
+
 LnUnrooted(tips)
 
 LnUnrooted.int(tips)
+
+Log2Unrooted(tips)
+
+Log2Unrooted.int(tips)
 
 LnRooted(tips)
 
 LnRooted.int(tips)
 
-LnUnrootedSplits(splits)
+Log2Rooted(tips)
 
-NUnrootedSplits(splits)
+Log2Rooted.int(tips)
 
-LnUnrootedMult(splits)
+LnUnrootedSplits(...)
 
-NUnrootedMult(splits)
+Log2UnrootedSplits(...)
+
+NUnrootedSplits(...)
+
+LnUnrootedMult(...)
+
+Log2UnrootedMult(...)
+
+NUnrootedMult(...)
 }
 \arguments{
-\item{tips}{Integer specifying the number of tips.}
+\item{tips}{Integer specifying the number of leaves.}
 
-\item{splits}{Integer vector listing the number of taxa in each tree
-bipartition.}
+\item{\dots}{Integer vector, or series of integers, listing the number of
+leaves in each split.}
 }
 \description{
-These functions return the number of rooted or unrooted trees consistent with
-a given pattern of splits.
+These functions return the number of rooted or unrooted binary trees
+consistent with a given pattern of splits.
 }
 \details{
-Functions starting N return the number of rooted or unrooted trees, functions
-starting Ln provide the natural logarithm of this number.
-Calculations follow Carter \emph{et al.} 1990, Theorem 2.
+Functions starting \code{N} return the number of rooted or unrooted trees.
+Replace this initial \code{N} with \code{Ln} for the natural logarithm of this number;
+or \code{Log2} for its base 2 logarithm.
+
+Calculations follow Cavalli-Sforza & Edwards (1967) and
+Carter \emph{et al.} 1990, Theorem 2.
 }
 \section{Functions}{
 \itemize{
 \item \code{NUnrooted}: Number of unrooted trees
+
+\item \code{NRooted64}: Exact number of rooted trees as 64-bit integer
+(13 < \code{nTip} < 19)
+
+\item \code{NUnrooted64}: Exact number of unrooted trees as 64-bit integer
+(14 < \code{nTip} < 20)
 
 \item \code{LnUnrooted}: Log Number of unrooted trees
 
@@ -60,35 +93,43 @@ Calculations follow Carter \emph{et al.} 1990, Theorem 2.
 
 \item \code{LnRooted.int}: Log Number of rooted trees (as integer)
 
-\item \code{LnUnrootedSplits}: Log number of unrooted trees
-
 \item \code{NUnrootedSplits}: Number of unrooted trees consistent with a bipartition
 split.
-
-\item \code{LnUnrootedMult}: Log unrooted with multi-partition splits.
 
 \item \code{NUnrootedMult}: Number of unrooted trees consistent with a multi-partition
 split.
 }}
 
 \examples{
-  NRooted(10)
-  NUnrooted(10)
-  LnRooted(10)
-  LnUnrooted(10)
-  # Number of trees consistent with a character whose states are
-  # 00000 11111 222
-  NUnrootedMult(c(5,5,3))
+NRooted(10)
+NUnrooted(10)
+LnRooted(10)
+LnUnrooted(10)
+Log2Unrooted(10)
+# Number of trees consistent with a character whose states are
+# 00000 11111 222
+NUnrootedMult(c(5,5,3))
 
+NUnrooted64(18)
 LnUnrootedSplits(c(2,4))
-LnUnrootedSplits(c(3,3))
+LnUnrootedSplits(3, 3)
+Log2UnrootedSplits(c(2,4))
+Log2UnrootedSplits(3, 3)
 NUnrootedSplits(c(2,4))
-NUnrootedSplits(c(3,3))
+NUnrootedSplits(3, 3)
 }
 \references{
 \insertRef{Carter1990}{TreeTools}
+
+\insertRef{CavalliSforza1967}{TreeTools}
+}
+\seealso{
+Other tree information functions: 
+\code{\link{CladisticInfo}()},
+\code{\link{TreesMatchingTree}()}
 }
 \author{
 Martin R. Smith (\href{mailto:martin.smith@durham.ac.uk}{martin.smith@durham.ac.uk})
 }
 \concept{split information function}
+\concept{tree information functions}

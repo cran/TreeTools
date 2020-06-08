@@ -1,7 +1,7 @@
-#' As splits
+#' Convert object to `Splits`
 #'
-#' Converts a phylogenetic tree to an array of bipartition splits.
-#'
+#' `as.Splits()` converts a phylogenetic tree to a `Splits` object representing
+#' its constituent bipartition splits.
 #'
 #' @param x Object to convert into splits: perhaps a tree of class
 #'  \code{\link[ape:read.tree]{phylo}}.
@@ -11,10 +11,14 @@
 #' tip labels.  Label order must (currently) match to combine or compare separate
 #' `Splits` objects.
 #' @param \dots Presently unused.
-#' @return `as.Splits` returns an object of class `Splits`, or
-#' (if `asSplits = FALSE`) a two-dimensional array of 32-bit integers, which
-#' each bit specifying whether a tip is a member of the split.
-#' Splits are named according to the node that defines them.
+#'
+#' @return `as.Splits()` returns an object of class `Splits`, or
+#' (if `asSplits = FALSE`) a two-dimensional array of `raw` objects, with
+#' each bit specifying whether or not the leaf corresponding to the respective
+#' bit position is a member of the split.
+#' Splits are named according to the node at the non-root end of the edge that
+#' defines them. In rooted trees, the child of the rightmost root edge names
+#' the split.
 #'
 #' @template MRS
 #'
@@ -32,12 +36,11 @@
 #'
 #' moreSplits <- as.Splits(PectinateTree(letters[6:1]), tipLabel = splits)
 #' print(moreSplits, details = TRUE)
-#' match.Splits(splits, moreSplits)
-#' in.Splits(moreSplits, splits)
+#' match(splits, moreSplits)
+#' moreSplits %in% splits
 #'
 #' @family Splits operations
 #' @importFrom ape reorder.phylo
-#' @exportClass Splits
 #' @export
 as.Splits <- function (x, tipLabels = NULL, ...) UseMethod('as.Splits')
 
@@ -50,16 +53,23 @@ as.Splits.phylo <- function (x, tipLabels = NULL, asSplits = TRUE, ...) {
   if (!is.null(tipLabels)) {
     x <- RenumberTips(x, tipLabels)
   }
-  edge <- PostorderEdges(x$edge)
-  nTip <- length(x$tip.label)
-  splits <- cpp_edge_to_splits(edge, nTip)
+  edge <- Postorder(x, renumber = FALSE)$edge # In case tree already postordered
 
+  # Return:
+  .as.Splits.edge(edge, tipLabels = x$tip.label, asSplits = asSplits,
+                  nTip = NTip(x), ...)
+}
+
+.as.Splits.edge <- function (edge, tipLabels = NULL, asSplits = TRUE,
+                             nTip = NTip(edge), ...) {
+  splits <- cpp_edge_to_splits(Postorder(edge), nTip)
   nSplits <- dim(splits)[1]
+
   # Return:
   if (asSplits) {
     structure(splits,
               nTip = nTip,
-              tip.label = x$tip.label,
+              tip.label = tipLabels,
               class = 'Splits')
   }
   else {
@@ -78,7 +88,7 @@ as.Splits.multiPhylo <- function (x, tipLabels = x[[1]]$tip.label,
 #' @export
 as.Splits.Splits <- function (x, tipLabels = NULL, ...) {
   if (is.null(tipLabels)) {
-    # Nothing needs doing
+    # Nothing needs doing.
     # Return:
     x
   } else {
@@ -92,16 +102,15 @@ as.Splits.Splits <- function (x, tipLabels = NULL, ...) {
       } else {
         stop (length(tipLabels), " labels provided; expecting ", nTip)
       }
-    }
-    if (!identical(oldLabels, tipLabels)) {
+    } else if (!identical(oldLabels, tipLabels)) {
       nTip <- attr(x, 'nTip')
       if (length(x) == 0) {
         attr(x, 'tip.label') <- tipLabels
         x
       } else {
         if (all(oldLabels %in% tipLabels) && all(tipLabels %in% oldLabels)) {
-          as.Splits.logical(t(apply(x, 1, .DecodeBinary, nTip = nTip)
-                            [match(tipLabels, oldLabels), ]),
+          as.Splits.logical(as.logical(x, tipLabels = tipLabels)
+                            [, match(tipLabels, oldLabels), drop = FALSE],
                             tipLabels = tipLabels)
         } else {
           stop ("Old and new labels must match")
@@ -131,6 +140,34 @@ as.Splits.list <- function (x, tipLabels = NULL, asSplits = TRUE, ...) {
     lapply(x, as.Splits, tipLabels = tipLabels, asSplits = asSplits)
   } else {
     stop("Unsupported list type.")
+  }
+}
+
+#' @rdname as.Splits
+#' @export
+as.Splits.matrix <- function (x, tipLabels = NULL, ...) {
+  if (all(c('edge', 'Nnode') %in% rownames(x))) {
+    col1 <- x[, 1]
+    if (is.list(col1)) {
+      if (is.null(tipLabels)) {
+        tipLabels <- col1$tip.label
+        if (is.null(tipLabels)) {
+          nTip <- dim(col1$edge)[1] - col1$Nnode + 1L
+          tipLabels <- seq_len(nTip)
+          x <- rbind(x, replicate(ncol(x), list(tip.label = tipLabels)))
+          rownames(x)[nrow(x)] <- 'tip.label'
+        }
+      }
+      lapply(seq_len(ncol(x)), function (i) {
+        as.Splits(structure(x[, i], class = 'phylo'), tipLabels = tipLabels)
+      })
+    } else {
+      stop("Unsupported matrix. Columns should correspond to trees.")
+    }
+  } else if (dim(x)[2] == 2) {
+    .as.Splits.edge(x, tipLabels = NULL, asSplits = TRUE, ...)
+  } else {
+    NextMethod()
   }
 }
 
@@ -176,11 +213,13 @@ as.Splits.logical <- function (x, tipLabels = NULL, ...) {
 #' @export
 as.logical.Splits <- function (x, tipLabels = NULL, ...) {
   nTip <- attr(x, 'nTip')
-  ret <- t(apply(x, 1, function (split) {
-    unlist(.DecodeBinary(split, nTip = nTip, print = FALSE))
-  }))
-  colnames(ret) <- attr(x, 'tip.label')
-  rownames(ret) <- rownames(x)
+  if (dim(x)[1] == 0) {
+    ret <- matrix(logical(0), 0, nTip)
+  } else {
+    ret <- matrix(as.logical(rawToBits(t(x))),
+                  nrow = nrow(x), byrow = TRUE)[, seq_len(nTip), drop = FALSE]
+  }
+  dimnames(ret) <- list(rownames(x), attr(x, 'tip.label'))
   ret
 }
 
@@ -197,24 +236,25 @@ print.Splits <- function (x, details = FALSE, ...) {
              paste("tips,", tipLabels[1], "..", tipLabels[nTip]))
       )
   if (details) {
-    names <- rownames(x)
-    if (!is.null(names)) {
+    splitNames <- rownames(x)
+    if (!is.null(splitNames)) {
 
-      nameLengths <- vapply(names, nchar, 0)
+      nameLengths <- vapply(splitNames, nchar, 0)
       namePads <- vapply(nameLengths, function (thisLength)
         paste0(rep(' ', max(nameLengths) - thisLength), collapse=''), character(1))
-      names <- paste0(names, namePads)
+      splitNames <- paste0(splitNames, namePads)
     } else {
-      names <- rep('', length(x))
+      splitNames <- rep('', length(x))
       nameLengths = 0L
     }
     cat("\n ", paste0(rep(' ', max(nameLengths)), collapse = ''),
-        paste0(rep(c(1:9, ' '), length.out = nTip), collapse=''))
+        paste0(rep(c(1:9, ' '), length.out = nTip), collapse = ''))
 
     for (i in seq_len(dim(x)[1])) {
       split <- x[i, , drop = FALSE]
-      cat("\n", names[i], ' ')
-      .DecodeBinary(split, nTip, print = TRUE)
+      cat("\n", splitNames[i], '',
+          paste(ifelse(as.logical(rawToBits(split)[seq_len(nTip)]), '*', '.'),
+                collapse = ''))
     }
   }
 }
@@ -240,119 +280,44 @@ as.character.Splits <- function (x, ...) {
   tipLabels <- attr(x, 'tip.label')
   nTip <- attr(x, 'nTip')
 
-  apply(x, 1, function (split) {
-    inSplit <- unlist(.DecodeBinary(split, nTip))
+  apply(as.logical(x), 1L, function (inSplit) {
     paste0(paste(tipLabels[inSplit], collapse=' '), ' | ',
            paste(tipLabels[!inSplit], collapse=' '))
-
   })
-}
 
-
-#' Number of tips in a phylogenetic tree
-#'
-#' Extends ape's function [`Ntip`][ape::summary.phylo] to handle objects of
-#' class `Splits` and `list`.
-#'
-#' @param phy Object to count.
-#'
-#' @return `NTip` returns an integer specifying the number of tips in each
-#' object in `phy`.
-#'
-#' @export
-NTip <- function (phy) UseMethod('NTip')
-
-NTip.default <- function (phy) UseMethod('Ntip')
-
-#' @rdname NTip
-#' @family Splits operations
-#' @export
-NTip.Splits <- function (phy) attr(phy, 'nTip')
-
-#' @rdname NTip
-#' @export
-NTip.list <- function (phy) vapply(phy, NTip, integer(1))
-
-#' @rdname NTip
-#' @export
-NTip.phylo <- function (phy) length(phy$tip.label)
-
-#' @rdname NTip
-#' @export
-NTip.multiPhylo <- function (phy) {
-  ret <- attr(phy, 'TipLabel')
-  if (is.null(ret)) {
-    vapply(phy, NTip.phylo, integer(1))
-  } else {
-    rep(length(ret), length(phy))
-  }
 }
 
 #' Tips contained within splits
 #'
-#' `TipsInSplits` specifies the number of tips that occur within each
+#' `TipsInSplits()` specifies the number of tips that occur within each
 #' bipartition split in a `Splits` object.
 #'
 #' @param splits Object of class `Splits`.
-#' @param nTip Number of tips in `Splits` object (inferred if not specified).
 #'
-#' @return A named vector of integers, specifying the number of tips contained
-#' within each split in `splits`.
+#' @return `TipsInSplits()` returns a named vector of integers, specifying the
+#' number of tips contained within each split in `splits`.
 #'
 #' @examples
-#' splits <- as.Splits(PectinateTree(8))
+#' tree <- PectinateTree(8)#'
+#' splits <- as.Splits(tree)
 #' TipsInSplits(splits)
+#'
+#' plot(tree)
+#' LabelSplits(tree, as.character(splits), frame = 'none', pos = 3L, cex = 0.7)
+#' LabelSplits(tree, TipsInSplits(splits), unit = ' tips', frame = 'none',
+#'             pos = 1L)
 #'
 #' @family Splits operations
 #' @export
-TipsInSplits <- function (splits, nTip = attr(splits, 'nTip')) {
-  apply(splits, 1, function (split) sum(unlist(.DecodeBinary(split, nTip = nTip))))
+TipsInSplits <- function (splits) {
+  dims <- dim(splits)
+  ret <- .colSums(as.logical(rawToBits(t(splits))), 8L * dims[2], dims[1])
+  names(ret) <- names(splits)
+  ret
 }
 
 #' @export
 names.Splits <- function (x) rownames(x)
-
-#' @rdname Decoders
-#' @keywords internal
-#' @export
-.DecodeRaw <- function (n, stopAt = 8L, print = FALSE, appendLF = FALSE) {
-  bitMasks <- as.raw(c(1, 2, 4, 8, 16, 32, 64, 128)[seq_len(stopAt)])
-  ret <- as.logical(n & bitMasks)
-  if (print) cat(paste0(ifelse(ret, '*', '.'), collapse = ''))
-  if (print && appendLF) cat("\n")
-  ret
-}
-
-#' @rdname Decoders
-#' @keywords internal
-#' @export
-.DecodeLastRaw <- function (n, nTip, ...) {
-  remainder <- nTip %% 8L
-  .DecodeRaw(n, stopAt = ifelse(remainder, remainder, 8L), ...)
-}
-
-#' Decode Splits objects
-#'
-#' Internal functions to decode raw representation of splits.
-#'
-#' @name Decoders
-#' @param n Number to decode.
-#' @param stopAt Integer specifying number of tips in partial raw element.
-#' @param nTip Integer specifying number of tips in original tree.
-#' @param print Logical specifying whether output is to be printed.
-#' @param appendLF Logical specifying whether to append line feed character to
-#'  output.
-#'
-#' @return Return a human-readable representation of split content.
-#'
-#' @keywords internal
-#' @export
-.DecodeBinary <- function (n, nTip, print = FALSE, appendLF = FALSE, ...) {
-  nN <- length(n)
-  c(vapply(n[-nN], .DecodeRaw, print = print, appendLF = appendLF,
-           FUN.VALUE = logical(8L)),
-    .DecodeLastRaw(n[nN], nTip, print = print, appendLF = appendLF))
-}
 
 #' @family Splits operations
 #' @export
@@ -384,7 +349,7 @@ c.Splits <- function (...) {
 #' @family Splits operations
 #' @export
 `-.Splits` <- function (x, y) {
-  x[[!in.Splits(x, y)]]
+  x[[!x %in% y]]
 }
 
 #' @family Splits operations
@@ -447,60 +412,104 @@ unique.Splits <- function (x, incomparables = FALSE, ...) {
   x
 }
 
-#' Match splits
+#' Split matching
 #'
-#' Equivalent of `match` for `Splits` objects.
+#' `match()` returns a vector of the positions of (first) matches of splits in
+#' its first argument in its second.
+#' `%in%` is a more intuitive interface as a binary operator, which returns
+#' a logical vector indicating whether there is a match or not for each
+#' split in its left operand.
+#'
+#' `in.Splits()` is an alias for `%in%`, included for backwards compatability.
+#' It will be deprecated in a future release.
 #'
 #' @param x,table Object of class `Splits`.
-#' @param nomatch The value to be returned in the case where no match is found.
-#' @param incomparables A vector of values that cannot be matched. Any value in
-#' `x` matching a value in this vector is assigned the `nomatch` value.
-#' For historical reasons, `FALSE` is equivalent to `NULL`.
+#' @param \dots Specify `nomatch =` to provide an integer value that will be
+#' used in place of `NA` in the case where no match is found.
+# @param incomparables A vector of values that cannot be matched. Any value in
+# `x` matching a value in this vector is assigned the `nomatch` value.
+# For historical reasons, `FALSE` is equivalent to `NULL`.
 #'
-#' @return An integer vector specifying the position in `table` that matches
-#' each element in `x`, or `nomatch` if no match is found.
+#' @return `match()` returns an integer vector specifying the position in
+#' `table` that matches each element in `x`, or `nomatch` if no match is found.
 #'
 #' @examples
 #' splits1 <- as.Splits(BalancedTree(7))
 #' splits2 <- as.Splits(PectinateTree(7))
 #'
-#' match.Splits(splits1, splits2)
+#' match(splits1, splits2)
+# Turns base functions into S3 generics that can handle `Splits` objects
+# (as well as `integer64`s).  This follows equivalent functions in the
+# '\pkg{bit64}' package.
+#
+#' @seealso Corresponding base functions are documented in
+#' [`match()`][base::match].
 #'
-#' @family Splits operations
 #' @export
-match.Splits <- function (x, table, nomatch = NA_integer_,
-                          incomparables = NULL) {
+#' @keywords methods
+# Following https://github.com/cran/bit64/blob/master/R/patch64.R
+"match" <- if (!exists("match.default")) {
+  function(x, table, ...) UseMethod("match")
+} else {
+  match
+}
+
+#' @method match default
+#' @export
+"match.default" <- if (!exists("match.default")) {
+  function(x, table, ...) base::"match"(x, table, ...)
+} else {
+  match.default
+}
+
+#' @rdname match
+#' @family Splits operations
+#' @method match Splits
+#' @export
+match.Splits <- function (x, table, ...) {
+  nomatch <- as.integer(c(...)['nomatch'])
+  if (length(nomatch) != 1L) {
+    nomatch <- NA_integer_
+  }
+
   vapply(seq_along(x), function (i) {
-    ret <- which(in.Splits(table, x[[i]], incomparables))
+    ret <- which(table %in% x[[i]])
     if (length(ret) == 0) ret <- nomatch
     ret
   }, integer(1))
 }
 
-#' Splits in Splits object
+#' @rdname match
+#' @export
+#' @keywords methods
+`%in%` <- if (!exists("%in%.default")) {
+  function(x, table) UseMethod("%in%")
+} else {
+  `%in%`
+}
+
+#' @method %in% default
+#' @export
+"%in%.default" <- if (!exists("%in%.default")) {
+  function(x, table) base::"%in%"(x, table)
+} else {
+  `%in%.default`
+}
+
+#' @rdname match
 #'
-#' `in.Splits` is an equivalent to `%in%` that can be applied to objects
-#' of class `Splits`.
-#'
-#' @param x,table Object of class `Splits`.
-#' @param incomparables A vector of values that cannot be matched. Any value in
-#' `x` matching a value in this vector is assigned the `nomatch` value.
-#' For historical reasons, `FALSE` is equivalent to `NULL`.
-#'
-#' @return A logical vector specifying which of the splits in `x` are present
-#' in `table`.
-#'
-#' @template MRS
+#' @return `%in%` returns a logical vector specifying which of the splits in
+#' `x` are present in `table`.
 #'
 #' @examples
-#' splits1 <- as.Splits(BalancedTree(7))
-#' splits2 <- as.Splits(PectinateTree(7))
+#' splits1 %in% splits2
 #'
-#' in.Splits(splits1, splits2)
-#'
-#' @family Splits operations
+#' @method %in% Splits
 #' @export
-in.Splits <- function (x, table, incomparables = NULL) {
-  duplicated(c(x, table), fromLast = TRUE,
-             incomparables = incomparables)[seq_along(x)]
+`%in%.Splits` <- function (x, table) {
+  duplicated(c(x, table), fromLast = TRUE)[seq_along(x)]
 }
+
+#' @rdname match
+#' @export
+in.Splits <- `%in%.Splits`

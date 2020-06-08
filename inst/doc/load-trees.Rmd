@@ -1,6 +1,6 @@
 ---
 title: "Loading phylogenetic trees into R"
-author: "Martin R. Smith"
+author: "Martin R. Smith <martin.smith@durham.ac.uk>"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -81,7 +81,7 @@ single descendant (which will often denote a misspecified tree).
 ### Trees from TNT
 
 Trees saved using [TNT](http://www.lillo.org.ar/phylogeny/tnt/) can be opened in
-R using `TreeTools::ReadTntTree`.
+R using `ReadTntTree()`.
 
 Trees should be saved  in parenthetical format (TNT command `tsav*`),
 rather than TNT's compressed format (TNT command `tsav`). 
