@@ -3,6 +3,7 @@
 \name{match}
 \alias{match}
 \alias{match.Splits}
+\alias{match.list}
 \alias{\%in\%}
 \alias{\%in\%.Splits}
 \alias{in.Splits}
@@ -11,6 +12,8 @@
 match(x, table, ...)
 
 \method{match}{Splits}(x, table, ...)
+
+\method{match}{list}(x, table, ...)
 
 x \%in\% table
 
@@ -39,7 +42,7 @@ a logical vector indicating whether there is a match or not for each
 split in its left operand.
 }
 \details{
-\code{in.Splits()} is an alias for \code{\%in\%}, included for backwards compatability.
+\code{in.Splits()} is an alias for \code{\%in\%}, included for backwards compatibility.
 It will be deprecated in a future release.
 }
 \examples{
@@ -57,6 +60,7 @@ Corresponding base functions are documented in
 Other Splits operations: 
 \code{\link{NSplits}()},
 \code{\link{NTip}()},
+\code{\link{SplitsInBinaryTree}()},
 \code{\link{TipLabels}()},
 \code{\link{TipsInSplits}()},
 \code{\link{as.Splits}()}

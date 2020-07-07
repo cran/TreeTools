@@ -420,7 +420,7 @@ unique.Splits <- function (x, incomparables = FALSE, ...) {
 #' a logical vector indicating whether there is a match or not for each
 #' split in its left operand.
 #'
-#' `in.Splits()` is an alias for `%in%`, included for backwards compatability.
+#' `in.Splits()` is an alias for `%in%`, included for backwards compatibility.
 #' It will be deprecated in a future release.
 #'
 #' @param x,table Object of class `Splits`.
@@ -477,6 +477,16 @@ match.Splits <- function (x, table, ...) {
     if (length(ret) == 0) ret <- nomatch
     ret
   }, integer(1))
+}
+
+#' @rdname match
+#' @export
+match.list <- function (x, table, ...) {
+  if (inherits(x, 'Splits')) {
+    match.Splits(x, table, ...)
+  } else {
+    NextMethod()
+  }
 }
 
 #' @rdname match

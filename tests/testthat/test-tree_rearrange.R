@@ -113,6 +113,14 @@ test_that("RootOnNode() works", {
 
 })
 
+test_that("RootOnNode() supports lists of trees", {
+  rootOn <- 8L
+  expect_equal(structure(list(RootOnNode(as.phylo(1, 5), rootOn),
+                              RootOnNode(as.phylo(2, 5), rootOn)),
+                         class = 'multiPhylo'),
+               RootOnNode(as.phylo(1:2, 5), rootOn))
+})
+
 test_that("RootOnNode() supports nasty node ordering", {
   expect_equal(Preorder(nasty),
                RootOnNode(nasty, 12L, resolveRoot = TRUE))
@@ -134,6 +142,12 @@ test_that("RootTree() works", {
   expect_equal(EnforceOutgroup(bal8, c('t5', 't6')),
                RootTree(bal8, c('t5', 't6')))
   expect_equal(RootTree(bal8, c('t1', 't2')), RootTree(bal8, c('t4', 't5')))
+
+  expect_equal(structure(list(RootTree(as.phylo(1, 5), 't5'),
+                              RootTree(as.phylo(2, 5), 't5')),
+                         class = 'multiPhylo'),
+               RootTree(as.phylo(1:2, 5), 't5'))
+
 })
 
 test_that("UnrootTree() works", {
@@ -151,6 +165,11 @@ test_that("UnrootTree() works", {
   # Unrooting when already unrooted
   expect_equal(UnrootTree(PectinateTree(6)),
                UnrootTree(UnrootTree(PectinateTree(6))))
+
+  expList <- list(UnrootTree(as.phylo(1, 5)), UnrootTree(as.phylo(2, 5)))
+  expect_equal(expList, UnrootTree(list(as.phylo(1, 5), as.phylo(2, 5))))
+  expect_equal(structure(expList, class = 'multiPhylo'),
+                    UnrootTree(as.phylo(1:2, 5)))
 })
 
 test_that("CollapseNodes() works", {
@@ -204,6 +223,41 @@ test_that("DropTip() works", {
   expect_equal(ape::drop.tip(bigTree, bigTip), DropTip(bigTree, bigTip))
   #microbenchmark(ape::drop.tip(bigTree, bigTip), DropTip(bigTree, bigTip), times = 25)
   #profvis(replicate(25, DropTip(bigTree, bigTip)), interval = 0.005)
+})
+
+test_that("Binarification is uniform", {
+  set.seed(0)
+  Test <- function (tree, nTree, nSamples = 200L, ape = FALSE) {
+
+    if (ape) {
+      # Ape's trees are not uniformly distributed:
+      counts <- table(replicate64(nSamples, as.TreeNumber(multi2di(tree))))
+      expect_equal(nTree, length(counts))
+      expect_lt(chisq.test(counts)$p.value, 0.001)
+    }
+
+    # Our trees are:
+    counts <- table(replicate64(nSamples, as.TreeNumber(MakeTreeBinary(tree))))
+    expect_equal(nTree, length(counts))
+    expect_gt(chisq.test(counts)$p.value, 0.001)
+
+  }
+
+  Test(CollapseNode(PectinateTree(5), 8:9), NUnrooted(5), nSamples = 300L,
+       ape = TRUE) # Rooted four-star
+  Test(CollapseNode(PectinateTree(6), 8:9), NUnrooted(4))
+  Test(CollapseNode(PectinateTree(6), 9:10), NRooted(4))
+  Test(CollapseNode(PectinateTree(6), c(8, 10)), NUnrooted(3) * NRooted(3))
+  Test(CollapseNode(BalancedTree(8), c(10:12)), NUnrooted(5))
+  Test(CollapseNode(BalancedTree(7), c(10, 13)), NRooted(3) * NRooted(3))
+
+  bal7 <- BalancedTree(7)
+  expect_equal(bal7, MakeTreeBinary(bal7))
+  expect_equal(list(bal7, bal7), MakeTreeBinary(list(bal7, bal7)))
+  expect_equal(structure(list(bal7, bal7), class = 'multiPhylo'),
+               MakeTreeBinary(structure(list(bal7, bal7),
+                                        class = 'multiPhylo')))
+
 })
 
 test_that("LeafLabelInterchange() works", {

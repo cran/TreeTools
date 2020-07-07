@@ -14,7 +14,9 @@
 #' @template MRS
 #' @keywords internal
 #' @export
-SampleOne <- function (x, len = length(x)) x[sample.int(len, 1L, FALSE, NULL, FALSE)]
+SampleOne <- function (x, len = length(x)) {
+  x[sample.int(len, 1L, FALSE, NULL, FALSE)]
+}
 
 #' Add tree to start of list
 #'
@@ -44,7 +46,7 @@ SampleOne <- function (x, len = length(x)) x[sample.int(len, 1L, FALSE, NULL, FA
 #' @template MRS
 #'
 #' @export
-UnshiftTree <- function(add, treeList) {
+UnshiftTree <- function (add, treeList) {
   if (inherits(treeList, 'multiPhylo')) {
     structure(c(list(add), lapply(treeList, I)), class = 'multiPhylo')
   } else if (inherits(treeList, 'phylo')) {
@@ -52,4 +54,46 @@ UnshiftTree <- function(add, treeList) {
   } else { # including: if (is.list(trees)) {
     c(list(add), treeList)
   }
+}
+
+#' Apply a function that returns 64-bit integers over a list or vector
+#'
+#' Wrappers for members of the [`lapply()`] family intended for use when a
+#' function `FUN` returns a vector of `integer64` objects.
+#' `vapply()`, `sapply()` or `replicate()` drop the `integer64` class,
+#' resulting in a vector of numerics that require conversion back to
+#' 64-bit integers.  These functions restore the missing `class` attribute.
+#'
+#' @inheritParams base::lapply
+#' @param X a vector (atomic or list) or an [`expression`][base::expression]
+#' object.  Other objects (including classed objects) will be coerced
+#' by [`base::as.list()`][base::list].
+#' @param expr the expression (a [language object][base::is.language],
+#' usually a call) to evaluate repeatedly.
+#' @param FUN.LEN Integer specifying the length of the output of `FUN`.
+#' @details For details of the underlying functions, see [`base::lapply()`].
+#' @examples
+#' sapply64(as.phylo(1:6, 6), as.TreeNumber)
+#' vapply64(as.phylo(1:6, 6), as.TreeNumber, 1)
+#' set.seed(0)
+#' replicate64(6, as.TreeNumber(RandomTree(6)))
+#' @template MRS
+#' @seealso [`bit64::integer64()`][bit64-package]
+#' @export
+sapply64 <- function (X, FUN, ..., simplify = TRUE, USE.NAMES = TRUE) {
+  structure(sapply(X, FUN, ..., simplify, USE.NAMES), class = 'integer64')
+}
+
+#' @rdname sapply64
+#' @export
+vapply64 <- function (X, FUN, FUN.LEN = 1, ...) {
+  structure(vapply(X, FUN, FUN.VALUE = numeric(FUN.LEN), ...),
+            class = 'integer64')
+}
+
+#' @rdname sapply64
+#' @export
+replicate64 <- function (n, expr, simplify = "array") {
+  sapply64(integer(n), eval.parent(substitute(function (...) expr)),
+           simplify = simplify)
 }
