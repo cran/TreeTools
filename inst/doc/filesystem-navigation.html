@@ -12,7 +12,7 @@
 
 <meta name="author" content="Martin R. Smith martin.smith@durham.ac.uk" />
 
-<meta name="date" content="2020-07-06" />
+<meta name="date" content="2020-08-03" />
 
 <title>File system navigation in R</title>
 
@@ -26,22 +26,6 @@ document.addEventListener('DOMContentLoaded', function(e) {
     if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
     a = h.attributes;
     while (a.length > 0) h.removeAttribute(a[0].name);
-  }
-});
-</script>
-<script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
-// v0.0.1
-// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
-
-document.addEventListener('DOMContentLoaded', function() {
-  const codeList = document.getElementsByClassName("sourceCode");
-  for (var i = 0; i < codeList.length; i++) {
-    var linkList = codeList[i].getElementsByTagName('a');
-    for (var j = 0; j < linkList.length; j++) {
-      if (linkList[j].innerHTML === "") {
-        linkList[j].setAttribute('aria-hidden', 'true');
-      }
-    }
   }
 });
 </script>
@@ -331,25 +315,25 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">File system navigation in R</h1>
 <h4 class="author">Martin R. Smith <a href="mailto:martin.smith@durham.ac.uk" class="email">martin.smith@durham.ac.uk</a></h4>
-<h4 class="date">2020-07-06</h4>
+<h4 class="date">2020-08-03</h4>
 
 
 
 <p>Before you can open a file, you need to tell R where to find it. You can do this by providing the full path to the file on your system. Be careful to use forward slashes (<code>/</code>, not <code>\</code>, which you’ll get if you copy file paths in Windows).</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a>filename &lt;-<span class="st"> &quot;C:/nexus/matrix.nex&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a>filename &lt;-<span class="st"> &quot;C:/nexus/matrix.nex&quot;</span></span></code></pre></div>
 <p>You can save typing by giving R a working directory. You can think of R as having a file explorer window open invisibly in the background.</p>
 <p>You can see the folder that’s open at the moment by typing <code>getwd()</code> at the console.</p>
 <p><code>setwd()</code> tells R to open a different folder instead.</p>
 <p><code>setwd(&#39;../&#39;)</code> tells R to go up to a parent directory. (You can <a href="https://dss.princeton.edu/training/RStudio101.pdf">do this using the Graphical User Interface</a> in RStudio).</p>
 <p>By setting the directory that your files are in as the working directory, you only need to specify the filename:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">setwd</span>(<span class="st">&quot;C:/nexus/&quot;</span>) <span class="co"># You only need to do this once</span></span>
-<span id="cb2-2"><a href="#cb2-2"></a>filename &lt;-<span class="st"> &quot;matrix.nex&quot;</span></span>
-<span id="cb2-3"><a href="#cb2-3"></a><span class="co"># Do something with this file</span></span>
-<span id="cb2-4"><a href="#cb2-4"></a><span class="co">#</span></span>
-<span id="cb2-5"><a href="#cb2-5"></a></span>
-<span id="cb2-6"><a href="#cb2-6"></a>filename &lt;-<span class="st"> &quot;tree.nex&quot;</span></span>
-<span id="cb2-7"><a href="#cb2-7"></a><span class="co"># Do something with this file</span></span>
-<span id="cb2-8"><a href="#cb2-8"></a><span class="co">#</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true"></a><span class="kw">setwd</span>(<span class="st">&quot;C:/nexus/&quot;</span>) <span class="co"># You only need to do this once</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true"></a>filename &lt;-<span class="st"> &quot;matrix.nex&quot;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true"></a><span class="co"># Do something with this file</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true"></a><span class="co">#</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true"></a>filename &lt;-<span class="st"> &quot;tree.nex&quot;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true"></a><span class="co"># Do something with this file</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true"></a><span class="co">#</span></span></code></pre></div>
 <div id="what-next" class="section level2">
 <h2>What next?</h2>
 <p>Now you know how to locate files, you might want to load a <a href="load-data.html">dataset</a> or <a href="load-trees.html">phylogenetic tree</a> into R.</p>

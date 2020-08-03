@@ -8,7 +8,7 @@
 \alias{CladisticInfo.multiPhylo}
 \alias{PhylogeneticInformation}
 \alias{CladisticInformation}
-\title{Cladistic information content}
+\title{Cladistic information content of a tree}
 \usage{
 CladisticInfo(x)
 
@@ -28,7 +28,7 @@ CladisticInformation(x)
 \item{x}{Tree of class \code{phylo}, or a list thereof.}
 }
 \value{
-\code{CladisticInfo()} returns a numeric giving the clustering information
+\code{CladisticInfo()} returns a numeric giving the cladistic information
 content of the input tree(s), in bits.
 }
 \description{

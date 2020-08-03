@@ -1,3 +1,12 @@
+# TreeTools 1.2.0
+
+ - `ArtificialExtinction()`: Remove characters that are absent in a fossil 
+   template.
+ - `WriteTntCharacters()`: Write morphological dataset in TNT format.
+ - Improve TNT dataset parsing.
+ - Documentation improvements.
+
+
 # TreeTools 1.1.0
 
 ## New functions

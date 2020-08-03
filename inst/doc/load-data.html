@@ -12,7 +12,7 @@
 
 <meta name="author" content="Martin R. Smith martin.smith@durham.ac.uk" />
 
-<meta name="date" content="2020-07-06" />
+<meta name="date" content="2020-08-03" />
 
 <title>Loading phylogenetic data into R</title>
 
@@ -26,22 +26,6 @@ document.addEventListener('DOMContentLoaded', function(e) {
     if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
     a = h.attributes;
     while (a.length > 0) h.removeAttribute(a[0].name);
-  }
-});
-</script>
-<script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
-// v0.0.1
-// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
-
-document.addEventListener('DOMContentLoaded', function() {
-  const codeList = document.getElementsByClassName("sourceCode");
-  for (var i = 0; i < codeList.length; i++) {
-    var linkList = codeList[i].getElementsByTagName('a');
-    for (var j = 0; j < linkList.length; j++) {
-      if (linkList[j].innerHTML === "") {
-        linkList[j].setAttribute('aria-hidden', 'true');
-      }
-    }
   }
 });
 </script>
@@ -331,7 +315,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Loading phylogenetic data into R</h1>
 <h4 class="author">Martin R. Smith <a href="mailto:martin.smith@durham.ac.uk" class="email">martin.smith@durham.ac.uk</a></h4>
-<h4 class="date">2020-07-06</h4>
+<h4 class="date">2020-08-03</h4>
 
 
 
@@ -341,76 +325,76 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div id="from-an-excel-spreadsheet" class="section level2">
 <h2>From an Excel spreadsheet</h2>
 <p>If your data is in an Excel spreadsheet, one way to load it into R is using the <code>xlsx</code> package. First you’ll have to install it:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">install.packages</span>(<span class="st">&#39;xlsx&#39;</span>) <span class="co"># You only need to do this once</span></span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="kw">install.packages</span>(<span class="st">&#39;xlsx&#39;</span>) <span class="co"># You only need to do this once</span></span></code></pre></div>
 <p>Then you should prepare your Excel spreadsheet such that each row corresponds to a taxon, and each column to a character.</p>
 <p>Then you can read the data from the Excel file by telling R which sheet, rows and columns contain your data:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">library</span>(<span class="st">&#39;xlsx&#39;</span>)</span>
-<span id="cb2-2"><a href="#cb2-2"></a>raw_data &lt;-<span class="st"> </span><span class="kw">as.matrix</span>(<span class="kw">read.xlsx</span>(filename, </span>
-<span id="cb2-3"><a href="#cb2-3"></a>                      <span class="dt">sheetIndex =</span> <span class="dv">1</span>, <span class="co"># Loads sheet number 1 from the excel file</span></span>
-<span id="cb2-4"><a href="#cb2-4"></a>                      <span class="dt">rowIndex =</span> <span class="dv">2</span><span class="op">:</span><span class="dv">21</span>, <span class="co"># Extracts rows 2 to 21</span></span>
-<span id="cb2-5"><a href="#cb2-5"></a>                      <span class="dt">colIndex =</span> <span class="dv">2</span><span class="op">:</span><span class="dv">26</span>, <span class="co"># Extracts columns B to Z</span></span>
-<span id="cb2-6"><a href="#cb2-6"></a>                      <span class="dt">header =</span> <span class="ot">FALSE</span></span>
-<span id="cb2-7"><a href="#cb2-7"></a>                      ))</span>
-<span id="cb2-8"><a href="#cb2-8"></a></span>
-<span id="cb2-9"><a href="#cb2-9"></a><span class="co"># In this example, the names of taxa are in column 1</span></span>
-<span id="cb2-10"><a href="#cb2-10"></a>taxon_names &lt;-<span class="st"> </span><span class="kw">read.xlsx</span>(filename, <span class="dt">sheetIndex =</span> <span class="dv">1</span>, <span class="dt">rowIndex =</span> <span class="dv">2</span><span class="op">:</span><span class="dv">21</span>, </span>
-<span id="cb2-11"><a href="#cb2-11"></a>                         <span class="dt">colIndex =</span> <span class="dv">1</span>, <span class="dt">as.data.frame=</span><span class="ot">FALSE</span>)</span>
-<span id="cb2-12"><a href="#cb2-12"></a>                         </span>
-<span id="cb2-13"><a href="#cb2-13"></a><span class="kw">rownames</span>(raw_data) &lt;-<span class="st"> </span>taxon_names</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true"></a><span class="kw">library</span>(<span class="st">&#39;xlsx&#39;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true"></a>raw_data &lt;-<span class="st"> </span><span class="kw">as.matrix</span>(<span class="kw">read.xlsx</span>(filename, </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true"></a>                      <span class="dt">sheetIndex =</span> <span class="dv">1</span>, <span class="co"># Loads sheet number 1 from the excel file</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true"></a>                      <span class="dt">rowIndex =</span> <span class="dv">2</span><span class="op">:</span><span class="dv">21</span>, <span class="co"># Extracts rows 2 to 21</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true"></a>                      <span class="dt">colIndex =</span> <span class="dv">2</span><span class="op">:</span><span class="dv">26</span>, <span class="co"># Extracts columns B to Z</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true"></a>                      <span class="dt">header =</span> <span class="ot">FALSE</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true"></a>                      ))</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true"></a><span class="co"># In this example, the names of taxa are in column 1</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true"></a>taxon_names &lt;-<span class="st"> </span><span class="kw">read.xlsx</span>(filename, <span class="dt">sheetIndex =</span> <span class="dv">1</span>, <span class="dt">rowIndex =</span> <span class="dv">2</span><span class="op">:</span><span class="dv">21</span>, </span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true"></a>                         <span class="dt">colIndex =</span> <span class="dv">1</span>, <span class="dt">as.data.frame=</span><span class="ot">FALSE</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true"></a>                         </span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true"></a><span class="kw">rownames</span>(raw_data) &lt;-<span class="st"> </span>taxon_names</span></code></pre></div>
 </div>
 <div id="from-a-nexus-file" class="section level2">
 <h2>From a Nexus file</h2>
 <p><code>TreeTools</code> contains an inbuilt Nexus parser:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>raw_data &lt;-<span class="st"> </span><span class="kw">ReadCharacters</span>(filename)</span>
-<span id="cb3-2"><a href="#cb3-2"></a><span class="co"># Or, to go straight to PhyDat format:</span></span>
-<span id="cb3-3"><a href="#cb3-3"></a>as_phydat &lt;-<span class="st"> </span><span class="kw">ReadAsPhyDat</span>(filename)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a>raw_data &lt;-<span class="st"> </span><span class="kw">ReadCharacters</span>(filename)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true"></a><span class="co"># Or, to go straight to PhyDat format:</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true"></a>as_phydat &lt;-<span class="st"> </span><span class="kw">ReadAsPhyDat</span>(filename)</span></code></pre></div>
 <p>This will extract character names and codings from a dataset. It’s been written to work with datasets downloaded from <a href="https://morphobank.org/">MorphoBank</a>, but my aim is for this function to handle most valid (and many invalid) NEXUS files. If you find a file that this function can’t handle, please <a href="https://github.com/ms609/TreeTools/issues/new?title=Unsupported+NEXUS+file&amp;body=Please%20attach%20the%20problematic%20NEXUS%20file%20and%20describe%20the%20issue&amp;labels=enhancement">let me know</a> and I’ll try to fix it.</p>
 <p>In the meantime, alternative Nexus parsers are available: try</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>raw_data &lt;-<span class="st"> </span>ape<span class="op">::</span><span class="kw">read.nexus.data</span>(filename)</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true"></a>raw_data &lt;-<span class="st"> </span>ape<span class="op">::</span><span class="kw">read.nexus.data</span>(filename)</span></code></pre></div>
 <p>Non-standard elements of a Nexus file might be beyond the capabilities of ape’s parser. In particular, you will need to replace spaces in taxon names with an underscore, and to arrange all data into a single block starting <code>BEGIN DATA</code>. You’ll need to strip out comments, character definitions and separate taxon blocks.</p>
 <p>The function <code>readNexus</code> in package <code>phylobase</code> uses the NCL library and promises to be more powerful, but I’ve not been able to get it to work.</p>
 </div>
 <div id="from-a-tnt-file" class="section level2">
 <h2>From a TNT file</h2>
 <p>A TNT format dataset downloaded from <a href="https://morphobank.org">MorphoBank</a> can be parsed with <code>ReadTntCharacters</code>, which might also handle other TNT-compatible files. If there’s a file that’s not being read correctly, please <a href="https://github.com/ms609/TreeTools/issues/new?title=Unsupported+TNT+file&amp;body=Please%20attach%20the%20problematic%20TNT%20file%20and%20describe%20the%20issue&amp;labels=enhancement">let me know</a> and I’ll try to fix it.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>raw_data &lt;-<span class="st"> </span><span class="kw">ReadTntCharacters</span>(filename)</span>
-<span id="cb5-2"><a href="#cb5-2"></a><span class="co"># Or, to go straight to PhyDat format:</span></span>
-<span id="cb5-3"><a href="#cb5-3"></a>my_data &lt;-<span class="st"> </span><span class="kw">ReadTntAsPhyDat</span>(filename)</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true"></a>raw_data &lt;-<span class="st"> </span><span class="kw">ReadTntCharacters</span>(filename)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true"></a><span class="co"># Or, to go straight to PhyDat format:</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true"></a>my_data &lt;-<span class="st"> </span><span class="kw">ReadTntAsPhyDat</span>(filename)</span></code></pre></div>
 </div>
 <div id="processing-raw-data" class="section level1">
 <h1>Processing raw data</h1>
 <p>The next stage is to get the raw data into a format that most R packages can understand. If you’ve used the <code>ReadAsPhyDat</code> or <code>ReadTntAsPhyDat</code> functions, then you can skip this step – you’re already there.</p>
 <p>Otherwise, you can try</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>my_data &lt;-<span class="st"> </span><span class="kw">PhyDat</span>(raw_data)</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true"></a>my_data &lt;-<span class="st"> </span><span class="kw">PhyDat</span>(raw_data)</span></code></pre></div>
 <p>or if that doesn’t work,</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>my_data &lt;-<span class="st"> </span><span class="kw">MatrixToPhyDat</span>(raw_data)</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true"></a>my_data &lt;-<span class="st"> </span><span class="kw">MatrixToPhyDat</span>(raw_data)</span></code></pre></div>
 <p>These functions are pretty robust, but might return an error when they encounter an unexpected dataset format – if they don’t work on your dataset, please<br />
 <a href="https://github.com/ms609/TreeTools/issues/new?title=data+to+PhyDat+conversion+issue&amp;body=Please%20describe+the+problem+here:&amp;labels=bug">let me know</a>.</p>
 <p>Failing that, you can enlist the help of the ‘phangorn’ package, which was installed when you installed ‘TreeTools’:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a><span class="kw">library</span>(<span class="st">&#39;phangorn&#39;</span>)</span>
-<span id="cb8-2"><a href="#cb8-2"></a>my_data &lt;-<span class="st"> </span><span class="kw">phyDat</span>(raw_data, <span class="dt">type=</span><span class="st">&#39;USER&#39;</span>, <span class="dt">levels=</span><span class="kw">c</span>(<span class="dv">0</span><span class="op">:</span><span class="dv">9</span>, <span class="st">&#39;-&#39;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true"></a><span class="kw">library</span>(<span class="st">&#39;phangorn&#39;</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true"></a>my_data &lt;-<span class="st"> </span><span class="kw">phyDat</span>(raw_data, <span class="dt">type=</span><span class="st">&#39;USER&#39;</span>, <span class="dt">levels=</span><span class="kw">c</span>(<span class="dv">0</span><span class="op">:</span><span class="dv">9</span>, <span class="st">&#39;-&#39;</span>))</span></code></pre></div>
 <p><code>type=&#39;USER&#39;</code> tells the parser to expect morphological data.</p>
 <p>The <code>levels</code> parameter simply lists all the states that any character might take. <code>0:9</code> includes all the integer digits from 0 to 9. If you have inapplicable data in your matrix, you should list <code>-</code> as a separate level as it represents an additional state (as handled by the Morphy implementation of <span class="citation">(Brazeau, Guillerme, &amp; Smith, 2019)</span>). If you have more complicated ambiguities, you may need to use a contrast matrix to decode your matrix.</p>
 <p>A contrast matrix translates the tokens used in your dataset to the character states to which they correspond: for example decoding ‘A’ to {01}. For more details, see the ‘phangorn-specials’ vignette in the phangorn package, accessible by typing ‘?phangorn’ in the R prompt and navigating to index &gt; package vignettes.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>contrast.matrix &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="dt">data=</span><span class="kw">c</span>(</span>
-<span id="cb9-2"><a href="#cb9-2"></a><span class="co"># 0 1 -  # Each column corresponds to a character-state</span></span>
-<span id="cb9-3"><a href="#cb9-3"></a>  <span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>, <span class="co"># Each row corresponds to a token, here 0, denoting the </span></span>
-<span id="cb9-4"><a href="#cb9-4"></a>         <span class="co"># character-state set {0} </span></span>
-<span id="cb9-5"><a href="#cb9-5"></a>  <span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">0</span>, <span class="co"># 1 | {1}</span></span>
-<span id="cb9-6"><a href="#cb9-6"></a>  <span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>, <span class="co"># - | {-}</span></span>
-<span id="cb9-7"><a href="#cb9-7"></a>  <span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">0</span>, <span class="co"># A | {01}</span></span>
-<span id="cb9-8"><a href="#cb9-8"></a>  <span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">0</span>, <span class="co"># + | {01}</span></span>
-<span id="cb9-9"><a href="#cb9-9"></a>  <span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>  <span class="co"># ? | {01-}</span></span>
-<span id="cb9-10"><a href="#cb9-10"></a>), <span class="dt">ncol=</span><span class="dv">3</span>, <span class="co"># ncol should correspond to the number of columns in the matrix</span></span>
-<span id="cb9-11"><a href="#cb9-11"></a><span class="dt">byrow=</span><span class="ot">TRUE</span>); </span>
-<span id="cb9-12"><a href="#cb9-12"></a><span class="kw">dimnames</span>(contrast.matrix) &lt;-<span class="st"> </span><span class="kw">list</span>(</span>
-<span id="cb9-13"><a href="#cb9-13"></a>  <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="st">&#39;-&#39;</span>, <span class="st">&#39;A&#39;</span>, <span class="st">&#39;+&#39;</span>, <span class="st">&#39;?&#39;</span>), <span class="co"># A list of the tokens corresponding to each row</span></span>
-<span id="cb9-14"><a href="#cb9-14"></a>                               <span class="co"># in the contrast matrix</span></span>
-<span id="cb9-15"><a href="#cb9-15"></a>  <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="st">&#39;-&#39;</span>) <span class="co"># A list of the character-states corresponding to the columns </span></span>
-<span id="cb9-16"><a href="#cb9-16"></a>               <span class="co"># in the contrast matrix</span></span>
-<span id="cb9-17"><a href="#cb9-17"></a>)</span>
-<span id="cb9-18"><a href="#cb9-18"></a></span>
-<span id="cb9-19"><a href="#cb9-19"></a>contrast.matrix</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true"></a>contrast.matrix &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="dt">data=</span><span class="kw">c</span>(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true"></a><span class="co"># 0 1 -  # Each column corresponds to a character-state</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true"></a>  <span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>, <span class="co"># Each row corresponds to a token, here 0, denoting the </span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true"></a>         <span class="co"># character-state set {0} </span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true"></a>  <span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">0</span>, <span class="co"># 1 | {1}</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true"></a>  <span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>, <span class="co"># - | {-}</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true"></a>  <span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">0</span>, <span class="co"># A | {01}</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true"></a>  <span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">0</span>, <span class="co"># + | {01}</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true"></a>  <span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>  <span class="co"># ? | {01-}</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true"></a>), <span class="dt">ncol=</span><span class="dv">3</span>, <span class="co"># ncol should correspond to the number of columns in the matrix</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true"></a><span class="dt">byrow=</span><span class="ot">TRUE</span>); </span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true"></a><span class="kw">dimnames</span>(contrast.matrix) &lt;-<span class="st"> </span><span class="kw">list</span>(</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true"></a>  <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="st">&#39;-&#39;</span>, <span class="st">&#39;A&#39;</span>, <span class="st">&#39;+&#39;</span>, <span class="st">&#39;?&#39;</span>), <span class="co"># A list of the tokens corresponding to each row</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true"></a>                               <span class="co"># in the contrast matrix</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true"></a>  <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="st">&#39;-&#39;</span>) <span class="co"># A list of the character-states corresponding to the columns </span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true"></a>               <span class="co"># in the contrast matrix</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true"></a>)</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true"></a></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true"></a>contrast.matrix</span></code></pre></div>
 <pre><code>##   0 1 -
 ## 0 1 0 0
 ## 1 0 1 0
@@ -419,7 +403,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 ## + 1 1 0
 ## ? 1 1 1</code></pre>
 <p>If you need to use a contrast matrix, convert the data using</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a>my.phyDat &lt;-<span class="st"> </span><span class="kw">phyDat</span>(my.data, <span class="dt">type=</span><span class="st">&#39;USER&#39;</span>, <span class="dt">contrast=</span>contrast.matrix)</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true"></a>my.phyDat &lt;-<span class="st"> </span><span class="kw">phyDat</span>(my.data, <span class="dt">type=</span><span class="st">&#39;USER&#39;</span>, <span class="dt">contrast=</span>contrast.matrix)</span></code></pre></div>
 </div>
 <div id="what-next" class="section level1">
 <h1>What next?</h1>
