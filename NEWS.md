@@ -1,3 +1,23 @@
+# TreeTools 1.3.0
+
+## New functions
+ 
+ - `SisterSize()` and `RootNodeDist()` measure sister-clade size and root-node
+   distance.
+ - `MSTEdges()`: Edges of minimum spanning tree.
+ - `SplitImbalance()`: how balanced is each split?
+ - New C++ functions `root_on_node()` and `root_binary()` to root trees quickly
+   and robustly.
+
+## Enhancements
+
+ - `TNTReadTree()` handles additional punctuation characters.
+ - Import RdMacros package 'Rdpack'.
+ 
+ - C++ implementation of `TipsInSplits()`.
+ - Export C++ functions `preorder_edges_and_nodes()` and `postorder_edges()`.
+ - Remove obsolete copy of C++ code from 'phangorn'.
+
 # TreeTools 1.2.0
 
  - `ArtificialExtinction()`: Remove characters that are absent in a fossil 
@@ -91,5 +111,5 @@
 
 # TreeTools 0.1.0
 
-- Pre-release version spun out of ['TreeSearch'](https://ms609.github.io/TreeSearch)
+- Pre-release version spun out of ['TreeSearch'](https://ms609.github.io/TreeSearch/)
   package.  Some functionality is subject to change.

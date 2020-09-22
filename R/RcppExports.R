@@ -17,20 +17,12 @@ edge_to_num <- function(parent, child, nTip) {
     .Call(`_TreeTools_edge_to_num`, parent, child, nTip)
 }
 
-phangorn_bipCPP <- function(orig, nTips) {
-    .Call(`_TreeTools_phangorn_bipCPP`, orig, nTips)
-}
-
-preorder_edges_and_nodes <- function(parent, child) {
-    .Call(`_TreeTools_preorder_edges_and_nodes`, parent, child)
-}
-
-postorder_edges <- function(edge) {
-    .Call(`_TreeTools_postorder_edges`, edge)
-}
-
 cpp_edge_to_splits <- function(edge, nTip) {
     .Call(`_TreeTools_cpp_edge_to_splits`, edge, nTip)
+}
+
+tips_in_splits <- function(splits) {
+    .Call(`_TreeTools_tips_in_splits`, splits)
 }
 
 edge_to_rooted_shape <- function(parent, child, nTip) {

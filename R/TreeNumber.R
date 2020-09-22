@@ -139,7 +139,7 @@ as.TreeNumber.phylo <- function (x, ...) {
   structure(.Int64(edge_to_num(edge[, 1], edge[, 2], nTip)),
             nTip = nTip,
             tip.labels = TipLabels(x),
-            class = 'TreeNumber')
+            class = c('TreeNumber', 'integer64'))
 }
 
 #' @rdname TreeNumber
@@ -154,7 +154,7 @@ as.TreeNumber.character <- function (x, nTip, tipLabels = TipLabels(nTip), ...) 
   structure(as.integer64(x),
             nTip = nTip,
             tip.labels = tipLabels,
-            class = 'TreeNumber')
+            class = c('TreeNumber', 'integer64'))
 }
 
 #' @rdname TreeNumber
@@ -197,16 +197,47 @@ as.phylo.numeric <- function (x, nTip = attr(x, 'nTip'),
   }
 }
 
+# Copied from as.phylo.numeric except if length > 1
 #' @export
-as.phylo.integer64 <- as.phylo.numeric
-
-.Int64.to.C <- function (i64) {
-  INT_MAX <- 2147483647L
-  if (i64 > INT_MAX) c(i64 %/% INT_MAX, i64 %% INT_MAX) else as.integer(i64[1])
+as.phylo.integer64 <- function (x, nTip = attr(x, 'nTip'),
+                                tipLabels = attr(x, 'tip.label'), ...) {
+  if (is.null(nTip)) {
+    if (is.null(tipLabels)) {
+      stop("Either nTip or tipLabels must be specified.")
+    } else {
+      nTip <- length(tipLabels)
+    }
+  }
+  if (is.null(tipLabels)) tipLabels <- paste0('t', seq_len(nTip))
+  if (nTip == 1) {
+    SingleTaxonTree(tipLabels)
+  } else {
+    if (length(x) > 1) {
+      ret <- vector('list', length(x))
+      for (i in seq_along(x)) {
+        ret[[i]] <- as.phylo(x[i], nTip = nTip, tipLabels = tipLabels)
+      }
+      ret <- structure(ret, tip.label = tipLabels, class = 'multiPhylo')
+    } else {
+      edge <- RenumberEdges(num_to_parent(.Int64.to.C(x), nTip),
+                            seq_len(nTip + nTip - 2L))
+      structure(list(edge = do.call(cbind, edge),
+                     tip.label = tipLabels,
+                     Nnode = nTip - 1L),
+                order = 'preorder',
+                class = 'phylo')
+    }
+  }
 }
 
-.TreeNumber.to.C <- function (tn64) {
-  .Int64.to.C(structure(tn64[1], class = 'integer64'))
+.Int64.to.C <- function (i64) {
+  INT_MAX <- as.integer64(2147483647L)
+  i64 <- as.integer64(i64)
+  if (i64 > INT_MAX) {
+    as.integer(c(i64 %/% INT_MAX, i64 %% INT_MAX))
+  } else {
+    as.integer(i64[1])
+  }
 }
 
 #' @rdname TreeNumber
@@ -214,7 +245,7 @@ as.phylo.integer64 <- as.phylo.numeric
 as.phylo.TreeNumber <- function (x, nTip = attr(x, 'nTip'),
                                  tipLabels = attr(x, 'tip.label'), ...) {
   if (is.null(tipLabels)) tipLabels <- paste0('t', seq_len(nTip))
-  edge <- RenumberEdges(num_to_parent(.TreeNumber.to.C(x), nTip),
+  edge <- RenumberEdges(num_to_parent(.Int64.to.C(x), nTip),
                         seq_len(nTip + nTip - 2L))
   structure(list(edge = do.call(cbind, edge),
                  tip.label = tipLabels,

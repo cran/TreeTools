@@ -189,9 +189,9 @@ as.Splits.logical <- function (x, tipLabels = NULL, ...) {
     }
 
     structure(matrix(packBits(c(x, rep(F, (8L - nTip) %% 8))), nrow = 1L),
-    nTip = nTip,
-    tip.label = tipLabels,
-    class = 'Splits')
+              nTip = nTip,
+              tip.label = tipLabels,
+              class = 'Splits')
   } else {
     nTip <- dimX[2]
     if (is.null(tipLabels)) {
@@ -287,34 +287,6 @@ as.character.Splits <- function (x, ...) {
 
 }
 
-#' Tips contained within splits
-#'
-#' `TipsInSplits()` specifies the number of tips that occur within each
-#' bipartition split in a `Splits` object.
-#'
-#' @param splits Object of class `Splits`.
-#'
-#' @return `TipsInSplits()` returns a named vector of integers, specifying the
-#' number of tips contained within each split in `splits`.
-#'
-#' @examples
-#' tree <- PectinateTree(8)#'
-#' splits <- as.Splits(tree)
-#' TipsInSplits(splits)
-#'
-#' plot(tree)
-#' LabelSplits(tree, as.character(splits), frame = 'none', pos = 3L, cex = 0.7)
-#' LabelSplits(tree, TipsInSplits(splits), unit = ' tips', frame = 'none',
-#'             pos = 1L)
-#'
-#' @family Splits operations
-#' @export
-TipsInSplits <- function (splits) {
-  dims <- dim(splits)
-  ret <- .colSums(as.logical(rawToBits(t(splits))), 8L * dims[2], dims[1])
-  names(ret) <- names(splits)
-  ret
-}
 
 #' @export
 names.Splits <- function (x) rownames(x)

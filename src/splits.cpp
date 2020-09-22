@@ -1,5 +1,5 @@
 #include <Rcpp.h>
-#include "types.h"
+#include "../inst/include/TreeTools.h"
 using namespace Rcpp;
 
 const uintx powers_of_two[16] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024,
@@ -13,7 +13,7 @@ RawMatrix cpp_edge_to_splits(IntegerMatrix edge, IntegerVector nTip) {
   if (edge.cols() != 2) {
     throw std::invalid_argument("Edge matrix must contain two columns");
   }
-  if (1L + edge.rows() > UINTX_MAX - 1) { /* UINT_MAX denotes NOT_TRIVAL */
+  if (1UL + edge.rows() > UINTX_MAX - 1U) { /* UINT_MAX denotes NOT_TRIVAL */
     throw(std::length_error("Too many edges in tree for edge_to_splits: "       // # nocov
                             "Contact maintainer for advice"));                  // # nocov
   }
