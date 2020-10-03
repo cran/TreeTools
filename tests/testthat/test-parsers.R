@@ -1,7 +1,7 @@
 context("parse_files.R")
 
 TestFile <- function (filename = '') {
-  paste0(system.file(package='TreeTools'), '/extdata/tests/', filename)
+  system.file('extdata', 'tests', filename, package = 'TreeTools')
 }
 
 test_that("File time is read correctly", {
@@ -29,6 +29,26 @@ test_that("Nexus file can be parsed", {
   expect_equal(3L, unique(as.integer(read[3, ])))
 })
 
+test_that("ReadTntCharacter()", {
+  testFile <- TestFile('tnt-trees-and-matrix.tnt')
+  expect_equal(
+    structure(c("0", "0", "1", "1", "1", "1", "-", "-", "0", "0",
+              "0", "0", "-", "-", "0", "0", "1", "1", "-", "-", "-", "-", "0",
+              "1", "-", "-", "1", "1", "1", "0", "-", "-", "0", "0", "1", "-",
+              "-", "-", "0", "1", "0", "-"), .Dim = 6:7,
+            .Dimnames = list(c("a", "b", "c", "d", "e", "f"), NULL)),
+    ReadTntCharacters(testFile)
+  )
+  expect_equal(
+    phangorn::as.phyDat(
+      ReadTntCharacters(testFile),
+      type = 'USER',
+      contrast = structure(c(0, 0, 1, 1, 0, 0, 0, 1, 0), .Dim = c(3L, 3L),
+                           .Dimnames = list(c("0", "1", "-"), c("-", "0", "1")))
+      ),
+    ReadTntAsPhyDat(testFile))
+})
+
 test_that("TNT trees parsed correctly", {
   trees <- ReadTntTree(TestFile('tnt-tree.tre'), relativePath = TestFile())
   expect_equal(2, length(trees))
@@ -52,6 +72,11 @@ test_that("TNT trees parsed correctly", {
   namedLabels <- ReadTntTree(TestFile('tnt-namedtree.tre'))[[1]]$tip.label
   expect_equal('Flustra_sp.', namedLabels[1])
   expect_equal(74L, length(namedLabels))
+
+  tam <- ReadTntTree(TestFile('tnt-trees-and-matrix.tnt'))
+  expect_equal(3, length(tam))
+  expect_equal(ape::read.tree(text = '(a, (b, (c, (f, (d, e )))));'), tam[[1]])
+
 
   oldWD <- getwd()
   setwd(system.file(package = 'TreeTools'))
