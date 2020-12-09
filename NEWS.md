@@ -1,3 +1,8 @@
+# TreeTools 1.4.1
+
+ - `MSTEdges()` supports distance matrices with > 256 entries.
+ - Package 'vdiffr' used conditionally.
+
 # TreeTools 1.4.0
 
 ## New functions
