@@ -393,7 +393,7 @@ NexusTokens <- function (tokens, character_num = NULL, session = NULL) {
 ReadCharacters <- function (filepath, character_num = NULL, session = NULL) {
 
   lines <- readLines(filepath, warn = FALSE) # Missing EOL is quite common, so
-  # warning not helpful
+                                             # warning not helpful
   nexusComment.pattern <- "\\[[^\\]*\\]"
   lines <- gsub(nexusComment.pattern, "", lines)
   lines <- trimws(lines)
@@ -463,7 +463,7 @@ ReadTntCharacters <- function (filepath, character_num = NULL,
 
   lines <- readLines(filepath,
                      warn = FALSE) # Missing EOL might occur in user-generated
-  # file, so warning not helpful
+                                   # file, so warning not helpful
   tntComment.pattern <- "'[^']*'"
   lines <- gsub(tntComment.pattern, "", lines, perl = TRUE)
   multilineComments <- grep("'", lines, fixed = TRUE)
@@ -510,7 +510,7 @@ ReadTntCharacters <- function (filepath, character_num = NULL,
     blocks <- types %in% toupper(typeTags)
     if (sum(blocks) != length(type)) {
       message("Tags ", paste0(typeTags[!toupper(typeTags) %in% types], collapse = ', '),
-              " not found. Ignored: ", types[!blocks])
+      " not found. Ignored: ", types[!blocks])
     }
     if (!any(blocks)) return(NULL)
     blockSpan <- cbind(ctypeLines + 1L, c(ctypeLines[-1] - 1, length(matrixLines)))
@@ -670,10 +670,10 @@ PhyDat <- function (dataset) {
 #' @importFrom phangorn phyDat
 #' @export
 StringToPhyDat <- function (string, tips, byTaxon = TRUE) {
-  tokens <- matrix(NexusTokens(string), nrow = length(tips), byrow = byTaxon)
-  rownames(tokens) <- tips
-  MatrixToPhyDat(tokens)
-}
+    tokens <- matrix(NexusTokens(string), nrow = length(tips), byrow = byTaxon)
+    rownames(tokens) <- tips
+    MatrixToPhyDat(tokens)
+  }
 #' @rdname PhyToString
 StringToPhydat <- StringToPhyDat
 

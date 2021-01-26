@@ -62,7 +62,11 @@ RootTree.phylo <- function (tree, outgroupTips) {
     lca <- max(lineage[ancestryTable == length(outgroupTips)])
     rootNode <- length(tipLabels) + 1L
     if (lca == rootNode) {
-      lca <- lineage[lineage - c(lineage[-1], 0) != -1][1] + 1L
+      if (tree$Nnode > 2L) {
+        lca <- lineage[lineage - c(lineage[-1], 0) != -1][1] + 1L
+      } else {
+        return (tree)
+      }
     }
     outgroup <- lca
   }
@@ -249,10 +253,10 @@ UnrootTree.NULL <- function (tree) NULL
 #' edge.
 #'
 #' @examples
-#' set.seed(1)
 #' oldPar <- par(mfrow=c(3, 1), mar=rep(0.5, 4))
 #'
-#' tree <- ape::rtree(7)
+#' tree <- as.phylo(898, 7)
+#' tree$edge.length <- 11:22
 #' plot(tree)
 #' nodelabels()
 #' edgelabels()

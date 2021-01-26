@@ -2,6 +2,7 @@
 #define TreeTools_root_tree_
 
 #include <Rcpp.h>
+#include <memory>
 #include "renumber_tree.h"
 #include "types.h"
 
@@ -30,7 +31,8 @@ namespace TreeTools {
     if (outgroup > max_node) throw std::range_error("`outgroup` exceeds number of nodes");
     if (outgroup == root_node) return edge;
 
-    intx* edge_above = new intx[max_node + 1];
+
+    std::unique_ptr<intx[]> edge_above = std::make_unique<intx[]>(max_node + 1);
     intx root_edges[2] = {0, 0};
 
     for (intx i = n_edge; i--; ) {
@@ -39,7 +41,6 @@ namespace TreeTools {
 
       if (edge(i, 0) == root_node) {
         if (edge(i, 1) == outgroup) {
-          delete[] edge_above;
           return edge;
         }
         root_edges[root_edges[1] ? 0 : 1] = i;
@@ -60,8 +61,6 @@ namespace TreeTools {
       ret(invert_next, 1) = edge(invert_next, 0);
     } while (edge(invert_next, 0) != root_node);
 
-    delete[] edge_above;
-
     // second root i.e. 16 -- 24 must be replaced with root -> outgroup.
     intx spare_edge = (ret(root_edges[0], 0) == root_node ? 0 : 1);
     ret(invert_next, 1) = edge(root_edges[spare_edge], 1);
@@ -73,6 +72,7 @@ namespace TreeTools {
   // #TODO Write test cases
   // NB: If specifying internal node by number, note that node numbers will
   // change if tree is not already in preorder.
+  // NB: root_node must == n_tip + 1
   //
   //  [[Rcpp::export]]
   inline List root_on_node(const List phy, const int outgroup) {
@@ -97,7 +97,7 @@ namespace TreeTools {
     }
 
 
-    intx* edge_above = new intx[max_node + 1];
+    std::unique_ptr<intx[]> edge_above = std::make_unique<intx[]>(max_node + 1);
     intx root_edges[] = {0, 0};
     intx root_edges_found = 0;
 
@@ -114,7 +114,9 @@ namespace TreeTools {
     if (root_edges_found == 2) { // Root node is vapour, and can be repurposed
 
       if (edge(root_edges[0], 1) == outgroup ||
-          edge(root_edges[1], 1) == outgroup) return phy;
+          edge(root_edges[1], 1) == outgroup) {
+        return phy;
+      }
       // #TODO work in situ without clone
       IntegerMatrix new_edge = clone(edge);
 
@@ -127,8 +129,6 @@ namespace TreeTools {
         new_edge(invert_next, 0) = edge(invert_next, 1);
         new_edge(invert_next, 1) = edge(invert_next, 0);
       } while (edge(invert_next, 0) != root_node);
-
-      delete[] edge_above;
 
       // further root edges must be replaced with root -> outgroup.
       intx spare_edge = (new_edge(root_edges[0], 0) == root_node ? 0 : 1);
@@ -155,7 +155,6 @@ namespace TreeTools {
         new_edge(invert_next, 0) = edge(invert_next, 1);
         new_edge(invert_next, 1) = edge(invert_next, 0);
       }
-      delete[] edge_above;
 
       ret["Nnode"] = n_node + 1;
       ret["edge"] = preorder_edges_and_nodes(new_edge(_, 0), new_edge(_, 1));
