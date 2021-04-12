@@ -348,11 +348,24 @@ NexusTokens <- function (tokens, character_num = NULL, session = NULL) {
 #' maximum one matrix per file.  Continuous characters will be read as strings
 #' (i.e. base type 'character').
 #'
-#' @param filepath character string specifying location of file
+#' The encoding of an input file will be automatically determined by R.
+#' Errors pertaining to an `invalid multibyte string` or
+#' `string invalid at that locale` indicate that R has failed to detect
+#' the appropriate encoding.  Either
+#' [re-save the file](https://support.rstudio.com/hc/en-us/articles/200532197-Character-Encoding)
+#' in a supported encoding (`UTF-8` is a good choice) or
+#' specify the file encoding (which you can find by, for example, opening in
+#' [Notepad++](https://notepad-plus-plus.org/downloads/) and identifying
+#' the highlighted option in the "Encoding" menu) following the example below.
+#'
+#' @param filepath character string specifying location of file, or a
+#' [connection][base::connections] to the file.
 #' @param type Character vector specifying categories of data to extract from
 #' file. Setting `type = c('num', 'dna')` will return only characters
-#' following a `&[num]` or `&[dna]` tag in a TNT input file. Leave as `NULL`
-#' (the default) to return all characters.
+#' following a `&[num]` or `&[dna]` tag in a TNT input file, listing `num`
+#' character blocks before `dna` characters.
+#' Leave as `NULL` (the default) to return all characters in their original
+#' sequence.
 #' @template characterNumParam
 #' @template sessionParam
 #'
@@ -370,11 +383,11 @@ NexusTokens <- function (tokens, character_num = NULL, session = NULL) {
 #'   \insertRef{Maddison1997}{TreeTools}
 #'
 #' @examples
-#' fileName <- paste0(system.file(package='TreeTools'),
+#' fileName <- paste0(system.file(package = 'TreeTools'),
 #'                    '/extdata/input/dataset.nex')
 #' ReadCharacters(fileName)
 #'
-#' fileName <- paste0(system.file(package='TreeTools'),
+#' fileName <- paste0(system.file(package = 'TreeTools'),
 #'                    '/extdata/tests/continuous.nex')
 #' continuous <- ReadCharacters(fileName)
 #'
@@ -383,6 +396,20 @@ NexusTokens <- function (tokens, character_num = NULL, session = NULL) {
 #' continuous <- suppressWarnings(as.numeric(continuous))
 #' attributes(continuous) <- at
 #' continuous
+#'
+#'
+#' # Read a file with a known encoding that cannot be auto-detected by R
+#'
+#' # Specify appropriate encoding:
+#' fileEncoding <- "UTF-8"
+#'
+#' # Open connection to file
+#' con <- file(fileName, encoding = fileEncoding, open = "r")
+#'
+#' ReadCharacters(con)
+#'
+#' # Close connection after use
+#' close(con)
 #' @template MRS
 #'
 #' @seealso
@@ -479,7 +506,7 @@ ReadTntCharacters <- function (filepath, character_num = NULL,
   semicolons <- grep(';', lines, fixed = TRUE)
   upperLines <- toupper(lines)
 
-  xread <- grep('^XREAD\\b', upperLines, perl = TRUE)
+  xread <- grep('^XREAD\\b', lines, ignore.case = TRUE, perl = TRUE)
   if (length(xread) < 1) return(NULL)
   if (length(xread) > 1) {
     message("Multiple character blocks not yet supported;",
@@ -501,20 +528,22 @@ ReadTntCharacters <- function (filepath, character_num = NULL,
   nTip <- as.integer(substr(dimText, dimHit[3], dimHit[3] + attr(dimHit, 'match.length')[3] - 1L))
   matrixLines <- xreadLines[-seq_len(xDimLine)]
 
-  ctypeLines <- grep("^&\\[\\w+\\]$", matrixLines, perl = TRUE)
+  ctypeLines <- grep("^&\\[[\\w\\s]+\\]$", matrixLines, perl = TRUE)
   if (is.null(type)) {
     if (length(ctypeLines)) matrixLines <- matrixLines[-ctypeLines]
   } else {
-    types <- toupper(matrixLines[ctypeLines])
-    typeTags <- paste0('&[', type, ']')
-    blocks <- types %in% toupper(typeTags)
-    if (sum(blocks) != length(type)) {
-      message("Tags ", paste0(typeTags[!toupper(typeTags) %in% types], collapse = ', '),
-      " not found. Ignored: ", types[!blocks])
+    types <- matrixLines[ctypeLines]
+    blocks <- lapply(paste0("\\b", type, "\\b"), grep, types, ignore.case = TRUE)
+    nBlocks <- vapply(blocks, length, 0)
+    if (any(nBlocks == 0)) {
+      message("Tags ", paste0(type[nBlocks == 0], collapse = ', '),
+      " not found. Ignored: ", types[!seq_along(types) %in% unlist(blocks)])
     }
-    if (!any(blocks)) return(NULL)
+    if (all(nBlocks == 0L)) return(NULL)
     blockSpan <- cbind(ctypeLines + 1L, c(ctypeLines[-1] - 1, length(matrixLines)))
-    matrixLines <- matrixLines[unlist(apply(blockSpan[blocks, , drop = FALSE],  1, function(x) seq(x[1], x[2])))]
+    matrixLines <- matrixLines[unlist(
+      apply(blockSpan[unlist(blocks), , drop = FALSE],  1,
+            function(x) seq(x[1], x[2])))]
   }
 
   tokens <- ExtractTaxa(matrixLines, character_num, session)
@@ -607,8 +636,10 @@ MatrixToPhyDat <- function (tokens) {
 PhyDatToMatrix <- function (dataset) {#}, parentheses = c('[', ']'), sep = '') {
   at <- attributes(dataset)
   index <- at$index
-  allLevels <- at$allLevels
-  t(vapply(dataset, function (x) allLevels[x[index]], character(length(index))))
+  allLevels <- as.character(at$allLevels)
+  matrix(allLevels[unlist(dataset, recursive = FALSE, use.names = FALSE)],
+           ncol = max(index), byrow = TRUE,
+         dimnames = list(at$names, NULL))[, index]
 }
 
 #' @rdname ReadCharacters

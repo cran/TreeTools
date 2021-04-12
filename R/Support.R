@@ -53,6 +53,7 @@ SplitFrequency <- function(reference, forest) {
 #' @param labels Named vector listing annotations for each split. Names
 #' should correspond to the node associated with each split; see
 #' [`as.Splits()`] for details.
+#' If `NULL`, each splits will be labelled with its associated node.
 #' @param unit Character specifying units of `labels`, if desired. Include a
 #' leading space if necessary.
 #' @param \dots Additional parameters to [`ape::edgelabels()`][ape::nodelabels].
@@ -74,9 +75,14 @@ SplitFrequency <- function(reference, forest) {
 #'
 #' Colour labels according to value: [`SupportColour()`]
 #' @importFrom ape edgelabels
+#' @importFrom stats setNames
 #' @family Splits operations
 #' @export
-LabelSplits <- function (tree, labels, unit = '', ...) {
+LabelSplits <- function (tree, labels = NULL, unit = '', ...) {
+  if (is.null(labels)) {
+    splitNames <- names(as.Splits(tree))
+    labels <- setNames(splitNames, splitNames)
+  }
   edgelabels(paste0(labels, unit),
              edge = match(as.integer(names(labels)), tree$edge[, 2]),
              ...)
@@ -102,7 +108,7 @@ SplitNumber <- function (tips, tree, tipIndex, powersOf2) { # nocov start
 #' @export
 ForestSplits <- function (forest, powersOf2) {
   .Deprecated("SplitFrequency")
-  if (inherits(forest, 'phylo')) forest <- structure(list(forest), class='multiPhylo')
+  if (inherits(forest, 'phylo')) forest <- c(forest)
   tipIndex <- sort(forest[[1]]$tip.label)
   nTip <- length(tipIndex)
 

@@ -7,9 +7,14 @@
 #' encountered when using \code{\link[ape:root]{ape::unroot}()} on trees in
 #' preorder.
 #'
+#' Note: Edge lengths are not (yet) supported.  Contact the maintainer or file
+#' a GitHub issue if you would find this useful.
+#'
 #' @template tree(s)Param
 #' @param outgroupTips Vector of type character, integer or logical, specifying
-#' the names or indices of the tips to include in the outgroup.
+#' the names or indices of the tips to include in the outgroup.  If
+#' `outgroupTips` is a of type character, and a tree contains multiple tips
+#' with a matching label, the first will be used.
 #'
 #' @return `RootTree()` returns a tree of class `phylo`, rooted on the smallest
 #' clade that contains the specified tips, with edges and nodes numbered in
@@ -81,7 +86,8 @@ RootTree.list <- function (tree, outgroupTips) {
 
 #' @export
 RootTree.multiPhylo <- function (tree, outgroupTips) {
-  structure(RootTree.list(tree, outgroupTips), class = 'multiPhylo')
+  tree[] <- RootTree.list(tree, outgroupTips)
+  tree
 }
 
 #' @export
@@ -191,7 +197,8 @@ RootOnNode.list <- function (tree, node, resolveRoot = FALSE) {
 
 #' @export
 RootOnNode.multiPhylo <- function (tree, node, resolveRoot = FALSE) {
-  structure(RootOnNode.list(tree, node, resolveRoot), class = 'multiPhylo')
+  tree[] <- RootOnNode.list(tree, node, resolveRoot)
+  tree
 }
 
 #' @export
@@ -229,7 +236,8 @@ UnrootTree.list <- function (tree) lapply(tree, UnrootTree)
 
 #' @export
 UnrootTree.multiPhylo <- function (tree) {
-  structure(UnrootTree.list(tree), class = 'multiPhylo')
+  tree[] <- UnrootTree.list(tree)
+  tree
 }
 
 #' @export
@@ -452,7 +460,8 @@ DropTip.phylo <- function (tree, tip) {
 #' @rdname DropTip
 #' @export
 DropTip.multiPhylo <- function (tree, tip) {
-  structure(lapply(tree, DropTip, tip), class = 'multiPhylo')
+  tree[] <- lapply(tree, DropTip, tip)
+  tree
 }
 
 #' Generate binary tree by collapsing polytomies

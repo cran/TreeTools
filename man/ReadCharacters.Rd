@@ -19,7 +19,8 @@ ReadTntAsPhyDat(filepath)
 PhyDat(dataset)
 }
 \arguments{
-\item{filepath}{character string specifying location of file}
+\item{filepath}{character string specifying location of file, or a
+\link[base:connections]{connection} to the file.}
 
 \item{character_num}{Index of character(s) to return.
 \code{NULL}, the default, returns all characters.}
@@ -29,8 +30,10 @@ PhyDat(dataset)
 
 \item{type}{Character vector specifying categories of data to extract from
 file. Setting \code{type = c('num', 'dna')} will return only characters
-following a \verb{&[num]} or \verb{&[dna]} tag in a TNT input file. Leave as \code{NULL}
-(the default) to return all characters.}
+following a \verb{&[num]} or \verb{&[dna]} tag in a TNT input file, listing \code{num}
+character blocks before \code{dna} characters.
+Leave as \code{NULL} (the default) to return all characters in their original
+sequence.}
 
 \item{dataset}{list of taxa and characters, in the format produced by \link{read.nexus.data}:
 a list of sequences each made of a single character vector,
@@ -59,6 +62,16 @@ incorrectly parsed files.
 Matrices must contain only continuous or only discrete characters;
 maximum one matrix per file.  Continuous characters will be read as strings
 (i.e. base type 'character').
+
+The encoding of an input file will be automatically determined by R.
+Errors pertaining to an \verb{invalid multibyte string} or
+\verb{string invalid at that locale} indicate that R has failed to detect
+the appropriate encoding.  Either
+\href{https://support.rstudio.com/hc/en-us/articles/200532197-Character-Encoding}{re-save the file}
+in a supported encoding (\code{UTF-8} is a good choice) or
+specify the file encoding (which you can find by, for example, opening in
+\href{https://notepad-plus-plus.org/downloads/}{Notepad++} and identifying
+the highlighted option in the "Encoding" menu) following the example below.
 }
 \section{Functions}{
 \itemize{
@@ -71,11 +84,11 @@ instead.
 }}
 
 \examples{
-fileName <- paste0(system.file(package='TreeTools'),
+fileName <- paste0(system.file(package = 'TreeTools'),
                    '/extdata/input/dataset.nex')
 ReadCharacters(fileName)
 
-fileName <- paste0(system.file(package='TreeTools'),
+fileName <- paste0(system.file(package = 'TreeTools'),
                    '/extdata/tests/continuous.nex')
 continuous <- ReadCharacters(fileName)
 
@@ -84,6 +97,20 @@ at <- attributes(continuous)
 continuous <- suppressWarnings(as.numeric(continuous))
 attributes(continuous) <- at
 continuous
+
+
+# Read a file with a known encoding that cannot be auto-detected by R
+
+# Specify appropriate encoding:
+fileEncoding <- "UTF-8"
+
+# Open connection to file
+con <- file(fileName, encoding = fileEncoding, open = "r")
+
+ReadCharacters(con)
+
+# Close connection after use
+close(con)
 }
 \references{
 \insertRef{Maddison1997}{TreeTools}

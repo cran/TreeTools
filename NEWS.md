@@ -1,3 +1,15 @@
+# TreeTools 1.4.3
+
+ - `AddTip()` supports edge lengths.
+ - `CladisticInfo()` supports `Splits` objects.
+ - `as.multiPhylo()` converts trees, datasets and Splits objects into 
+     `multiPhylo` objects.
+ - `LabelSplits(labels = NULL)` labels each split with its associated node.
+ - `PhyDatToMatrix()` supports integer-only levels.
+ - `SortTree()` supports lists of trees.
+ - Improvements to `ReadTntCharacters()` character block extraction
+   ([#50](https://github.com/ms609/TreeTools/issues/50)).
+
 # TreeTools 1.4.2
 
  - Support star trees in `RootTree()`.

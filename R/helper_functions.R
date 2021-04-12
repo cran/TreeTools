@@ -21,7 +21,8 @@ SampleOne <- function (x, len = length(x)) {
 #' Add tree to start of list
 #'
 #' `UnshiftTree()` adds a phylogenetic tree to the start of a list of trees.
-#' This is useful where the class of a list of trees is unknown.
+#' This is useful where the class of a list of trees is unknown, or where
+#' names of trees should be retained.
 #'
 #' Caution: adding a tree to a `multiPhylo` object whose own attributes apply
 #' to all trees, for example trees read from a Nexus file, causes data to be
@@ -36,13 +37,16 @@ SampleOne <- function (x, len = length(x)) {
 #' (following the original class of `treeList`), whose first element is the
 #' tree specified as `add.
 #'
+#' @seealso
+#' [`c()`] joins a tree or series of trees to a `multiPhylo` object, but loses
+#' names and does not handle lists of trees.
+#'
 #' @examples
 #' forest <- as.phylo(0:5, 6)
 #' tree <- BalancedTree(6)
 #'
 #' UnshiftTree(tree, forest)
 #' UnshiftTree(tree, tree)
-#'
 #' @template MRS
 #'
 #' @export
