@@ -201,6 +201,11 @@ AddTip <- function (tree,
   edgeLengths <- tree$edge.length
   lengths <- !is.null(edgeLengths)
 
+  if (is.character(where)) {
+    tmp <- match(where, TipLabels(tree))
+    if (is.na(tmp)) stop("No tip labelled '", where, "'")
+    where <- tmp
+  }
   ## find the row of 'where' before renumbering
   if (where < 1L || where == rootNode) {
     case <- 1L
@@ -295,7 +300,7 @@ AddTip <- function (tree,
 #' the trees produced by adding `label` to each edge of `tree` in turn.
 #'
 #' @examples
-#' oldPar <- par(mfrow=c(2, 4), mar=rep(0.3, 4), cex=0.9)
+#' oldPar <- par(mfrow = c(2, 4), mar = rep(0.3, 4), cex = 0.9)
 #'
 #' backbone <- BalancedTree(4)
 #' # Treating the position of the root as instructive:
@@ -418,7 +423,7 @@ ListAncestors <- function (parent, child, node = NULL) {
 #' @family tree navigation
 #' @export
 AllAncestors <- function (parent, child) {
-  res <- lapply(rep(0L, max(parent)), integer)
+  res <- lapply(integer(max(parent)), integer)
   for (i in seq_along(parent)) {
     pa <- parent[i]
     res[[child[i]]] <- c(pa, res[[pa]])
@@ -457,7 +462,7 @@ CladeSizes <- function (tree, internal = FALSE, nodes = NULL) {
   edge <- Postorder(tree$edge, renumber = FALSE)
   nTip <- NTip(tree)
 
-  size <- c(rep(1L, nTip), rep(internal, max(edge[, 1]) - nTip))
+  size <- c(rep.int(1L, nTip), rep.int(internal, max(edge[, 1]) - nTip))
   for (i in seq_len(nrow(edge))) {
     edgeI <- edge[i, ]
     parent <- edgeI[1]

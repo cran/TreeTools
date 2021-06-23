@@ -109,6 +109,13 @@ test_that("Matrix converts to phyDat", {
   expect_equal(mat, PhyDatToMatrix(MatrixToPhyDat(mat)))
 })
 
+test_that("StringToPhyDat()", {
+  expect_equal(rep(1:2, each = 4),
+               as.integer(StringToPhyDat('1111????', letters[1:8])))
+  expect_equal(rep(1:2, each = 4),
+               as.integer(StringToPhyDat('----????', letters[1:8])))
+})
+
 test_that('PhyToString() works', {
   longLevels <- phyDat(rbind(x = c('-', '?', 0:12), y = c(12:0, '-', '?')),
                        type = 'USER', levels = c(0:6, '-', 7:12))
@@ -141,9 +148,27 @@ test_that('PhyToString() works', {
   expect_equal(str,
                PhyToString(StringToPhyDat(str, letters[1:4], byTaxon = TRUE),
                            byTaxon = TRUE))
+})
 
+test_that("EndSentence() works correctly", {
+  expect_equal('Hi.', EndSentence('Hi'))
+  expect_equal('Hi.', EndSentence('Hi.'))
+  expect_equal('Hi?', EndSentence('Hi?'))
+  expect_equal('Hi!', EndSentence('Hi!'))
+})
 
+test_that("Unquote() unquotes", {
+  expect_equal("Unquoted", Unquote("'Unquoted'"))
+  expect_equal("Unquoted", Unquote('"Unquoted"'))
+  expect_equal("Unquoted", Unquote("'Unquoted '"))
+  expect_equal("Unquoted", Unquote('" Unquoted "'))
+  expect_equal("Unquoted's", Unquote("'Unquoted's '"))
+  expect_equal("", Unquote('""'))
+  expect_equal("", Unquote("''"))
+})
 
+test_that("MorphoBankDecode() decodes", {
+  expect_equal("' -- x  \n 1--2", MorphoBankDecode("'' - x^n 1-2"))
 })
 
 test_that('NewickTree() works', {
