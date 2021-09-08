@@ -9,15 +9,26 @@
 \alias{PhyDat}
 \title{Read phylogenetic characters from file}
 \usage{
-ReadCharacters(filepath, character_num = NULL, session = NULL)
+ReadCharacters(
+  filepath,
+  character_num = NULL,
+  encoding = "UTF8",
+  session = NULL
+)
 
-ReadTntCharacters(filepath, character_num = NULL, type = NULL, session = NULL)
+ReadTntCharacters(
+  filepath,
+  character_num = NULL,
+  type = NULL,
+  session = NULL,
+  encoding = "UTF8"
+)
 
-ReadNotes(filepath)
+ReadNotes(filepath, encoding = "UTF8")
 
-ReadAsPhyDat(filepath)
+ReadAsPhyDat(...)
 
-ReadTntAsPhyDat(filepath)
+ReadTntAsPhyDat(...)
 
 PhyDat(dataset)
 }
@@ -27,6 +38,8 @@ PhyDat(dataset)
 
 \item{character_num}{Index of character(s) to return.
 \code{NULL}, the default, returns all characters.}
+
+\item{encoding}{Character encoding of input file.}
 
 \item{session}{(Optional) A Shiny session with a \code{numericInput} named
 \code{character_num} whose maximum should be updated.}
@@ -38,14 +51,16 @@ character blocks before \code{dna} characters.
 Leave as \code{NULL} (the default) to return all characters in their original
 sequence.}
 
+\item{\dots}{Parameters to pass to \verb{Read[Tnt]Characters()}.}
+
 \item{dataset}{list of taxa and characters, in the format produced by \link{read.nexus.data}:
 a list of sequences each made of a single character vector,
 and named with the taxon name.}
 }
 \value{
 \code{ReadCharacters()} and \code{ReadTNTCharacters()} return a matrix whose
-row names correspond to
-tip labels, and column names correspond to character labels, with the
+row names correspond to tip labels, and
+column names correspond to character labels, with the
 attribute \code{state.labels} listing the state labels for each character; or
 a list of length one containing a character string explaining why the
 function call was unsuccessful.
@@ -68,7 +83,7 @@ Parse a Nexus or TNT file, reading character states and names.
 Tested with matrices downloaded from \href{https://morphobank.org}{MorphoBank},
 but should also work more widely; please
 \href{https://github.com/ms609/TreeTools/issues/new?title=Error+parsing+Nexus+file&body=<!--Tell+me+more+and+attach+your+file...-->}{report}
-incorrectly parsed files.
+incompletely or incorrectly parsed files.
 
 Matrices must contain only continuous or only discrete characters;
 maximum one matrix per file.  Continuous characters will be read as strings
@@ -101,27 +116,14 @@ ReadCharacters(fileName)
 
 fileName <- paste0(system.file(package = 'TreeTools'),
                    '/extdata/tests/continuous.nex')
-continuous <- ReadCharacters(fileName)
+
+continuous <- ReadCharacters(fileName, encoding = 'UTF8')
 
 # To convert from strings to numbers:
 at <- attributes(continuous)
 continuous <- suppressWarnings(as.numeric(continuous))
 attributes(continuous) <- at
 continuous
-
-
-# Read a file with a known encoding that cannot be auto-detected by R
-
-# Specify appropriate encoding:
-fileEncoding <- "UTF-8"
-
-# Open connection to file
-con <- file(fileName, encoding = fileEncoding, open = "r")
-
-ReadCharacters(con)
-
-# Close connection after use
-close(con)
 }
 \references{
 \insertRef{Maddison1997}{TreeTools}

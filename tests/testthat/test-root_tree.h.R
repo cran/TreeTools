@@ -1,5 +1,3 @@
-context("root_tree.h")
-
 ApeRoot <- function (tree, root, rr = TRUE) ape::root(tree, root, resolve.root = rr)
 
 test_that("Memory leak not encountered", {
@@ -12,6 +10,9 @@ test_that("Memory leak not encountered", {
   # Check for memory leaks...
   root_on_node(RenumberTips(Preorder(tree2), LETTERS[1:5]), 1)[]
   root_on_node(RenumberTips(StarTree(LETTERS[5:1]), LETTERS[1:5]), 1)[]
+
+  expect_error(root_on_node(tree1, 0))
+  expect_error(root_on_node(tree1, 999))
 })
 
 test_that('Binary trees are rootable', {

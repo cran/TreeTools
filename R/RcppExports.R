@@ -5,6 +5,14 @@ as_newick <- function(edge) {
     .Call(`_TreeTools_as_newick`, edge)
 }
 
+consensus_tree <- function(trees, p) {
+    .Call(`_TreeTools_consensus_tree`, trees, p)
+}
+
+drop_tip <- function(edge, drop) {
+    .Call(`_TreeTools_drop_tip`, edge, drop)
+}
+
 num_to_parent <- function(n, nTip) {
     .Call(`_TreeTools_num_to_parent`, n, nTip)
 }
@@ -23,6 +31,10 @@ minimum_spanning_tree <- function(order) {
 
 cpp_edge_to_splits <- function(edge, nTip) {
     .Call(`_TreeTools_cpp_edge_to_splits`, edge, nTip)
+}
+
+splits_to_edge <- function(splits, nTip) {
+    .Call(`_TreeTools_splits_to_edge`, splits, nTip)
 }
 
 tips_in_splits <- function(splits) {

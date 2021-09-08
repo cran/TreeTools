@@ -1,3 +1,55 @@
+# TreeTools 1.5.0
+
+
+## New functions
+- `ConstrainedNJ()` returns an approximation to a neighbour-joining tree
+  that respects constraints.
+  
+- `PolarizeSplits()` marks a specified taxon as representing the ingroup of all
+  splits.
+
+- Add `KeepTip()` and improve performance of `DropTip()`.
+
+- `ImposeConstraint()` makes a tree consistent with topological constraints.
+
+- `as.phylo.Splits()` represents a `Splits` object as a tree.
+
+- `Consensus()` is a faster C++ implementation of `ape::consensus()`.
+
+- `ClusterTable()` C++ functionality imported from "TreeDist".
+
+
+## Improved functions
+
+- Warn when empty cells passed to `MatrixToPhyDat()`.
+
+- Warn when `LabelSplits(labels)` lack names.
+
+- `SplitFrequency()` drops tips from `forest` that aren't in `reference`.
+
+- `AddTipEverywhere()` supports trees with < 3 leaves.
+
+- Make `RootTree()` and `PhyDatToMatrix()` more robust.
+
+- `Read[Tnt]AsPhyDat()` passes additional parameters to `Read[Tnt]Characters()`.
+
+- Support `encoding` option in `ReadCharacters()` function family.
+
+- Support `CHARSTATELABELS` in `ReadCharacters()`.
+
+- Support for more formatting quirks in `ReadNotes()`.
+
+- Better support ambiguous tokens in `WriteTntCharacters()`.
+
+
+## Optimization
+
+- Fast matching functions from "fastmatch".
+
+- Improve efficiency of `Preorder()` and `Postorder()`,
+  and lift limit on tree size.
+
+
 # TreeTools 1.4.5
 
 - Correct calculation of minimum value in `TCIContext()`.

@@ -1,5 +1,3 @@
-context("parse_files.R")
-
 TestFile <- function (filename = '') {
   system.file('extdata', 'tests', filename, package = 'TreeTools')
 }
@@ -25,7 +23,7 @@ test_that("Nexus file can be parsed", {
   filename <- TestFile('continuous.nex')
   read <- ReadCharacters(filename)
   expect_equal(1L, unique(as.integer(read[1, ])))
-  expect_equivalent('?', read['B_alienus', 4])
+  expect_equal(setNames('?', 'B_alienus'), read['B_alienus', 4])
   expect_equal(3L, unique(as.integer(read[3, ])))
 })
 
@@ -54,7 +52,7 @@ test_that("ReadTntCharacter()", {
                      ReadTntCharacters(dnaTest, type = 'dna')))
   expect_equal(ReadTntCharacters(dnaTest),
                ReadTntCharacters(dnaTest, type = c('NUM', 'Dna')))
-  expect_null(ReadTntCharacters(dnaTest, type = 'NONE'))
+  expect_message(expect_null(ReadTntCharacters(dnaTest, type = 'NONE')))
 })
 
 test_that("TNT trees parsed correctly", {
@@ -109,6 +107,28 @@ test_that("Matrix converts to phyDat", {
   expect_equal(mat, PhyDatToMatrix(MatrixToPhyDat(mat)))
 })
 
+test_that("Modified phyDat objects can be converted", {
+  # Obtained by subsetting, i.e. dataset <- biggerDataset[1:4]
+  dataset <- structure(list(a = c(1L, 1L, 1L, 1L), c = c(2L, 1L, 1L, 2L),
+                            d = c(2L, 1L, 2L, 1L), e = c(2L, 2L, 2L, 2L)),
+                       weight = c(3L, 3L, 0L, 0L), nr = 4L, nc = 2L,
+                       index = c(2L, 1L, 1L, 1L, 2L, 2L),
+                       .Label = c("0", "1"), allLevels = c("0", "1"),
+                       type = "USER",
+                       contrast = structure(c(1, 0, 0, 1), .Dim = c(2L, 2L),
+                                            .Dimnames = list(NULL, c("0", "1"))),
+                       class = "phyDat")
+  expect_equal(c(4, 6), dim(PhyDatToMatrix(dataset)))
+})
+
+test_that("MatrixToPhyDat() warns when characters blank", {
+  # May occur when loading an excel file with empty cells
+  mat <- matrix(c(1,0,1,0,1,0,1,0,0,'','','',0,1,0,1,2,2,2,2,2,2,2,'?'),
+                nrow = 3, byrow = TRUE)
+  rownames(mat) <- LETTERS[1:3]
+  expect_warning(MatrixToPhyDat(mat))
+})
+
 test_that("StringToPhyDat()", {
   expect_equal(rep(1:2, each = 4),
                as.integer(StringToPhyDat('1111????', letters[1:8])))
@@ -151,10 +171,11 @@ test_that('PhyToString() works', {
 })
 
 test_that("EndSentence() works correctly", {
-  expect_equal('Hi.', EndSentence('Hi'))
-  expect_equal('Hi.', EndSentence('Hi.'))
-  expect_equal('Hi?', EndSentence('Hi?'))
-  expect_equal('Hi!', EndSentence('Hi!'))
+  expect_equal(EndSentence('Hi'), 'Hi.')
+  expect_equal(EndSentence('Hi.'), 'Hi.')
+  expect_equal(EndSentence('Hi?'), 'Hi?')
+  expect_equal(EndSentence('Hi!'), 'Hi!')
+  expect_equal(EndSentence(character(0)), character(0))
 })
 
 test_that("Unquote() unquotes", {
@@ -165,6 +186,43 @@ test_that("Unquote() unquotes", {
   expect_equal("Unquoted's", Unquote("'Unquoted's '"))
   expect_equal("", Unquote('""'))
   expect_equal("", Unquote("''"))
+})
+
+test_that("ReadNotes() reads notes", {
+  notes <- ReadNotes(system.file('extdata/input/notes.nex',
+                                 package = 'TreeTools'))
+  expect_equal(length(unlist(notes$`1`)), 0)
+  expect_equal(notes[[2]][[2]], setNames("Taxon 2, char 2.", "taxon_b"))
+  expect_equal(notes[[3]][[1]], "Three's a crowd.")
+  expect_equal(notes[[3]][[2]], setNames("Tax1-Char3.", "taxon_a"))
+})
+
+test_that("ReadCharacters() reads CHARSTATELABELS", {
+  labels <- ReadCharacters(system.file('extdata/input/dataset.nex',
+                                       package = 'TreeTools'))
+
+
+  expect_equal(colnames(labels), c('Character one',
+                                   'Character two',
+                                   'lots-of-punctuation, and "so on"!',
+                                   'Character n', 'Character 5',  'Character 6',
+                                   'final character'))
+
+  ap <- c('absent', 'present')
+  expect_equal(attr(labels, 'state.labels'),
+               list(ap, ap,
+                    c('here', 'there', 'everywhere'),
+                    c('a long description', 'present'),
+                    c('simple', 'more complex', 'with (parentheses)',
+                      'more complex, 6 still'),
+                    c('this one has', 'multiple lines'), ap));
+
+  labels3 <- ReadCharacters(system.file('extdata/input/dataset.nex',
+                                        package = 'TreeTools'), 3)
+  expect_equal(labels3, labels[, 3, drop = FALSE], ignore_attr = TRUE)
+  expect_equal(attr(labels3, 'state.labels'),
+               attr(labels, 'state.labels')[3])
+
 })
 
 test_that("MorphoBankDecode() decodes", {

@@ -1,5 +1,3 @@
-context("tree_numbering.R")
-
 nastyEdge <- structure(c(9, 12, 10, 13, 11, 10, 11, 13, 10, 13, 12, 9,
                          5, 10,  1,  2,  3, 13,  9,  4, 11,  7,  8, 6),
                        .Dim = c(12, 2))
@@ -8,13 +6,6 @@ nasty <- structure(list(edge = nastyEdge, Nnode = 5L, tip.label = letters[1:8]),
 
 test_that("RenumberTree() fails safely", {
   expect_error(RenumberTree(1:3, 1:4))
-
-  Preorder(PectinateTree(8191)) # Largest handled with 16-bit integers
-  expect_error(Preorder(PectinateTree(8192 * 2)))
-
-  bigEdge <- PectinateTree(16385)$edge
-  expect_error(postorder_edges(bigEdge))
-  expect_error(preorder_edges_and_nodes(bigEdge[, 1], bigEdge[, 2]))
 })
 
 test_that("RenumberTree() handles polytomies", {
@@ -63,10 +54,16 @@ test_that("Replacement reorder functions work correctly", {
   expect_equal(ape::reorder.phylo(tree, 'cladewise'), Cladewise(tree))
   expect_equal(ape::reorder.phylo(tree, 'pruningwise'), Pruningwise(tree))
 
-  expect_equal(matrix(c(9,9,11,11,10,10,8,8,7, 7,
-                        1,2, 4, 5, 6,11,3,9,8,10), ncol = 2),
-               Postorder(BalancedTree(6))$edge)
-
+  post6 <- Postorder(BalancedTree(6))$edge
+  parent6 <- post6[, 1]
+  child6 <- post6[, 2]
+  expect_equal(c(9, 9, 11, 11, 8, 8, 10, 10, 7, 7), parent6)
+  # Order of tip pairs is arbitrary\
+  expect_equal(1:2, sort(child6[parent6 == 9]))
+  expect_equal(4:5, sort(child6[parent6 == 11]))
+  expect_equal(c(6, 11), sort(child6[parent6 == 10]))
+  expect_equal(c(3, 9), sort(child6[parent6 == 8]))
+  expect_equal(c(8, 10), sort(child6[parent6 == 7]))
 
   star <- ape::read.tree(text = '(a, b, d, c);')
   edge <- RenumberTips(star, letters[1:4])$edge
@@ -90,11 +87,13 @@ test_that("RenumberTips() works correctly", {
   b7 <- list(bal7b, bal7b, pec7b)
   mp7 <- structure(l7, class = 'multiPhylo')
 
-  expect_equal(f7, RenumberTips(l7, abcd))
-  expect_equal(b7, RenumberTips(l7, dcba))
+  expect_true(all.equal(f7, RenumberTips(l7, abcd)))
+  expect_true(all.equal(b7, RenumberTips(l7, dcba)))
 
-  expect_equal(structure(f7, class = 'multiPhylo'), RenumberTips(mp7, abcd))
-  expect_equal(structure(b7, class = 'multiPhylo'), RenumberTips(mp7, dcba))
+  expect_true(all.equal(structure(f7, class = 'multiPhylo'),
+                        RenumberTips(mp7, abcd)))
+  expect_true(all.equal(structure(b7, class = 'multiPhylo'),
+                        RenumberTips(mp7, dcba)))
 
   expect_error(RenumberTips(l7, letters[1:5]))
   expect_error(RenumberTips(l7, letters[2:5]))
@@ -114,12 +113,13 @@ test_that("Reorder methods work correctly", {
   Test <- function (Method, ..., testEdges = TRUE) {
     expect_identical(Method(bal7, ...), Method(list7, ...)[[1]])
     expect_identical(Method(pec7, ...), Method(mp7, ...)[[2]])
-    expect_equal(stt, Method(stt))
+    expect_true(all.equal(Method(stt), stt))
     expect_identical(Method(bal7), Method(Method(bal7)))
     if (testEdges) expect_equal(Method(bal7)$edge, Method(bal7$edge))
     expect_error(Method(10))
     expect_error(Method(1:2))
     expect_error(Method(matrix('one')))
+    expect_null(Method(NULL))
   }
   Test(ApePostorder, testEdges = FALSE)
   expect_error(ApePostorder(bad))

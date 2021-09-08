@@ -346,7 +346,7 @@ NexusTokens <- function (tokens, character_num = NULL, session = NULL) {
 #' Tested with matrices downloaded from [MorphoBank](https://morphobank.org),
 #' but should also work more widely; please
 #' [report](https://github.com/ms609/TreeTools/issues/new?title=Error+parsing+Nexus+file&body=<!--Tell+me+more+and+attach+your+file...-->)
-#' incorrectly parsed files.
+#' incompletely or incorrectly parsed files.
 #'
 #' Matrices must contain only continuous or only discrete characters;
 #' maximum one matrix per file.  Continuous characters will be read as strings
@@ -371,11 +371,12 @@ NexusTokens <- function (tokens, character_num = NULL, session = NULL) {
 #' Leave as `NULL` (the default) to return all characters in their original
 #' sequence.
 #' @template characterNumParam
+#' @param encoding Character encoding of input file.
 #' @template sessionParam
 #'
 #' @return `ReadCharacters()` and `ReadTNTCharacters()` return a matrix whose
-#' row names correspond to
-#' tip labels, and column names correspond to character labels, with the
+#' row names correspond to tip labels, and
+#' column names correspond to character labels, with the
 #' attribute `state.labels` listing the state labels for each character; or
 #' a list of length one containing a character string explaining why the
 #' function call was unsuccessful.
@@ -393,27 +394,14 @@ NexusTokens <- function (tokens, character_num = NULL, session = NULL) {
 #'
 #' fileName <- paste0(system.file(package = 'TreeTools'),
 #'                    '/extdata/tests/continuous.nex')
-#' continuous <- ReadCharacters(fileName)
+#'
+#' continuous <- ReadCharacters(fileName, encoding = 'UTF8')
 #'
 #' # To convert from strings to numbers:
 #' at <- attributes(continuous)
 #' continuous <- suppressWarnings(as.numeric(continuous))
 #' attributes(continuous) <- at
 #' continuous
-#'
-#'
-#' # Read a file with a known encoding that cannot be auto-detected by R
-#'
-#' # Specify appropriate encoding:
-#' fileEncoding <- "UTF-8"
-#'
-#' # Open connection to file
-#' con <- file(fileName, encoding = fileEncoding, open = "r")
-#'
-#' ReadCharacters(con)
-#'
-#' # Close connection after use
-#' close(con)
 #' @template MRS
 #'
 #' @seealso
@@ -421,10 +409,10 @@ NexusTokens <- function (tokens, character_num = NULL, session = NULL) {
 #'
 #' - Write characters to TNT-format file: [`WriteTntCharacters()`]
 #' @export
-ReadCharacters <- function (filepath, character_num = NULL, session = NULL) {
+ReadCharacters <- function (filepath, character_num = NULL, encoding = 'UTF8',
+                            session = NULL) {
 
-  lines <- readLines(filepath, warn = FALSE) # Missing EOL is quite common, so
-                                             # warning not helpful
+  lines <- .UTFLines(filepath, encoding)
   nexusComment.pattern <- "\\[[^\\]*?\\]"
   lines <- gsub(nexusComment.pattern, "", lines)
   lines <- trimws(lines)
@@ -440,17 +428,29 @@ ReadCharacters <- function (filepath, character_num = NULL, session = NULL) {
   } else if (length (matrixStart) > 1) {
     return(list("Multiple MATRIX blocks found in Nexus file."))                 # nocov
   } else {
+
     matrixEnd <- semicolons[semicolons > matrixStart][1]
     if (lines[matrixEnd] == ';') matrixEnd <- matrixEnd - 1
 
     matrixLines <- lines[(matrixStart + 1):matrixEnd]
     tokens <- ExtractTaxa(matrixLines, character_num = character_num,
                           session = session, continuous = continuous)
-    if (is.null(character_num)) character_num <- seq_len(ncol(tokens))
+
+    nChar.pattern <- "DIMENSIONS\\s+.*NCHAR\\s*=\\s*(\\d+)"
+    nCharLines <- grepl(nChar.pattern, upperLines, perl = TRUE)
+    nChar <- .RegExpMatches("DIMENSIONS\\s+.*NCHAR\\s*=\\s*(\\d+)", upperLines[nCharLines])
+    if (length(unique(nChar)) > 1) {
+      return(list("Inconsistent DIMENSIONS NCHAR= counts in Nexus file."))
+    }
+    nChar <- as.integer(nChar[1])
+    if (is.null(character_num)) {
+      character_num <- seq_len(ncol(tokens))
+    }
 
     ## Written with MorphoBank format in mind: each label on separate line,
     ## each character introduced by integer and terminated with comma.
-    labelStart <- which(upperLines == 'CHARLABELS')
+    labelStart <- grep("^\\s*CHARLABELS\\s*$", upperLines,
+                       ignore.case = TRUE, perl = TRUE)
     if (length(labelStart) == 1) {
       labelEnd <- semicolons[semicolons > labelStart][1]
       if (lines[labelEnd] == ';') labelEnd <- labelEnd - 1
@@ -461,7 +461,8 @@ ReadCharacters <- function (filepath, character_num = NULL, session = NULL) {
         return(list("Multiple CharLabels blocks in Nexus file."))
     }
 
-    stateStart <- which(upperLines == 'STATELABELS')
+    stateStart <- grep("^\\s*STATELABELS\\s*$", upperLines,
+                                 ignore.case = TRUE, perl = TRUE)
     if (length(stateStart) == 1) {
       stateEnd <- semicolons[semicolons > stateStart][1]
       stateLines <- lines[stateStart:stateEnd]
@@ -480,6 +481,50 @@ ReadCharacters <- function (filepath, character_num = NULL, session = NULL) {
         return(list("Multiple StateLabels blocks in Nexus file."))
       }
     }
+
+    charStateLabelsStart <- grep("^\\s*CHARSTATELABELS\\s*$", upperLines,
+                                 ignore.case = TRUE, perl = TRUE)
+    endCommand <- grep(";$", upperLines, perl = TRUE)
+
+    if (length(charStateLabelsStart)) {
+      if (length(charStateLabelsStart) > 1) {
+        return(list("Multiple CHARSTATELABELS blocks found in Nexus file."))
+      }
+      charStateLabelsEnd <- endCommand[endCommand > charStateLabelsStart][1]
+      if (length(charStateLabelsEnd) == 0) {
+        return(list("Unterminated CHARSTATELABELS block in Nexus file."))
+      }
+
+      # csl: charStateLabels
+      csl <- lines[(charStateLabelsStart + 1):charStateLabelsEnd]
+      quote.pattern <- "'[^']*'"
+      cslEscapes <- unlist(regmatches(csl, gregexpr(quote.pattern, csl, perl = TRUE)))
+      cslEscapes <- substr(cslEscapes, 2L, vapply(cslEscapes, nchar, 1) - 1L)
+
+      cslEscaped <- strsplit(paste(gsub(quote.pattern,
+                                        "__TREETOOLS_ESCAPE_SEQUENCE__", csl,
+                                        perl = TRUE), collapse = '  '),
+                             ",\\s+\\d+", perl = TRUE)[[1]]
+      nCsl <- length(cslEscaped)
+      if (nCsl != nChar) {
+        return(list(paste0("CHARSTATELABELS length (", nCsl,
+                           ") does not match NCHAR (", nChar, ")")))
+      }
+      cslEscaped[1] <- sub("^\\s*1\\b", "", cslEscaped[1], perl = TRUE)
+      cslEscaped[nCsl] <- sub('\\s*;\\s*$', '', cslEscaped[nCsl], perl = TRUE)
+      cslEscaped <- trimws(sub("\\s*/\\s*", '__TREETOOLS_ESCAPE_SPLITTER__', cslEscaped, perl = TRUE))
+      cslEscaped <- gsub("\\s+", '__TREETOOLS_ESCAPE_LABEL_SPLITTER__', cslEscaped, perl = TRUE)
+      cslEscaped <- paste(cslEscaped, collapse = '__TREETOOLS_ESCAPE_CHAR_SPLITTER__')
+      for (escape in cslEscapes) {
+        cslEscaped <- sub('__TREETOOLS_ESCAPE_SEQUENCE__', escape, cslEscaped, fixed = TRUE)
+      }
+      cslEscaped <- strsplit(cslEscaped, '__TREETOOLS_ESCAPE_CHAR_SPLITTER__', fixed = TRUE)[[1]]
+      cslEscaped <- do.call(rbind, strsplit(cslEscaped, '__TREETOOLS_ESCAPE_SPLITTER__', fixed = TRUE))
+      colnames(tokens) <- gsub('_', ' ', cslEscaped[, 1])[character_num]
+      attr(tokens, 'state.labels') <- lapply(
+        strsplit(cslEscaped[character_num, 2], '__TREETOOLS_ESCAPE_LABEL_SPLITTER__', fixed = TRUE),
+        gsub, pattern = "_", replacement = " ", fixed = TRUE)
+    }
   }
 
   # Return:
@@ -490,11 +535,9 @@ ReadCharacters <- function (filepath, character_num = NULL, session = NULL) {
 #' @rdname ReadCharacters
 #' @export
 ReadTntCharacters <- function (filepath, character_num = NULL,
-                               type = NULL, session = NULL) {
+                               type = NULL, session = NULL, encoding = 'UTF8') {
 
-  lines <- readLines(filepath,
-                     warn = FALSE) # Missing EOL might occur in user-generated
-                                   # file, so warning not helpful
+  lines <- .UTFLines(filepath, encoding)
   tntComment.pattern <- "'[^']*'"
   lines <- gsub(tntComment.pattern, "", lines, perl = TRUE)
   multilineComments <- grep("'", lines, fixed = TRUE)
@@ -541,7 +584,7 @@ ReadTntCharacters <- function (filepath, character_num = NULL,
     nBlocks <- vapply(blocks, length, 0)
     if (any(nBlocks == 0)) {
       message("Tags ", paste0(type[nBlocks == 0], collapse = ', '),
-      " not found. Ignored: ", types[!seq_along(types) %in% unlist(blocks)])
+      " not found. Ignored: ", types[!seq_along(types) %fin% unlist(blocks)])
     }
     if (all(nBlocks == 0L)) return(NULL)
     blockSpan <- cbind(ctypeLines + 1L, c(ctypeLines[-1] - 1, length(matrixLines)))
@@ -593,6 +636,23 @@ ReadTntCharacters <- function (filepath, character_num = NULL,
   tokens
 }
 
+.UTFLines <- function (filepath, encoding) {
+  con <- file(filepath, encoding = encoding)
+  on.exit(close(con))
+  # Missing EOL might occur in user-generated file, so warning not helpful
+  enc2utf8(readLines(con, warn = FALSE))
+}
+
+.RegExpMatches <- function (pattern, string, i = TRUE, nMatch = 1) {
+  res <- regexpr(pattern, string, perl = TRUE, ignore.case = i)
+  matches <- regmatches(string, res)
+  res[res < 0] <- NA
+  res[!is.na(res)] <-
+    gsub(pattern, paste0(paste0("\\", seq_len(nMatch)), collapse = ''),
+       matches, ignore.case = i, perl = TRUE)
+  res
+}
+
 #' @rdname ReadCharacters
 #' @return `ReadNotes()` returns a list in which each entry corresponds to a
 #' single character, and itself contains a list of with two elements:
@@ -601,20 +661,22 @@ ReadTntCharacters <- function (filepath, character_num = NULL,
 #' 2. A named character vector listing the notes associated with each taxon
 #' for that character, named with the names of each note-bearing taxon.
 #'
+#' @importFrom stats setNames
 #' @export
-ReadNotes <- function (filepath) {
+ReadNotes <- function (filepath, encoding = 'UTF8') {
   taxon.pattern <- "^\\s+[\"']?([^;]*?)[\"']?\\s*$"
-  charNote.pattern <- "^\\s+TEXT\\s+CHARACTER=(\\d+)\\s+TEXT='(.*)';\\s*$"
-  stateNote.pattern <- "^\\s+TEXT\\s+TAXON=(\\d+)\\s+CHARACTER=(\\d+)\\s+TEXT='(.*)';\\s*$"
+  nTax.pattern <- "DIMENSIONS\\s+.*NTAX\\s*=\\s*(\\d+)"
 
-  lines <- enc2utf8(readLines(filepath, warn = FALSE))
+  lines <- .UTFLines(filepath, encoding)
   upperLines <- toupper(lines)
   trimUpperLines <- trimws(upperLines)
 
   notesStart <- which(trimUpperLines == "BEGIN NOTES;")
-  endBlocks <- which(trimUpperLines == "ENDBLOCK;")
+  endBlocks <- which(trimUpperLines %fin% c("END;", "ENDBLOCK;"))
   taxlabels <- which(trimUpperLines == "TAXLABELS")
   semicolons <- which(trimUpperLines == ";")
+  nTaxLines <- grepl(nTax.pattern, trimUpperLines, perl = TRUE)
+
 
   if (length(notesStart) == 0) {
     return(list("NOTES block not found in Nexus file."))
@@ -624,45 +686,50 @@ ReadNotes <- function (filepath) {
     return(list("Multiple NOTES blocks found in Nexus file."))
   } else if (length(taxlabels) > 1) {
     return(list("Multiple TAXLABELS found in Nexus file."))
+  } else if (!any(nTaxLines)) {
+    return(list("No DIMENSIONS NTAX= statment found in Nexus file."))
   } else {
+    nTax <- .RegExpMatches(nTax.pattern, trimUpperLines[nTaxLines])
+    if (length(unique(nTax)) > 1) {
+      return(list("Inconsistent DIMENSIONS NTAX= counts in Nexus file."))
+    }
+    nTax <- as.integer(nTax[1])
+
     taxaEnd <- semicolons[semicolons > taxlabels][1] - 1L
     taxaLines <- lines[(taxlabels + 1):taxaEnd]
-    taxon.matches <- grepl(taxon.pattern, taxaLines, perl=TRUE)
-    taxa <- gsub(taxon.pattern, "\\1", taxaLines[taxon.matches], perl=TRUE)
-    taxa <- gsub(' ', '_', taxa, fixed=TRUE)
+    taxon.matches <- grepl(taxon.pattern, taxaLines, perl = TRUE)
+    if (sum(taxon.matches) == nTax) {
+      taxa <- gsub(taxon.pattern, "\\1", taxaLines[taxon.matches], perl = TRUE)
+      taxa <- gsub(' ', '_', taxa, fixed = TRUE)
+    } else {
+      taxa <- gsub(taxon.pattern, "\\1", taxaLines[taxon.matches], perl = TRUE)
+      taxa <- unlist(strsplit(taxa, ' '))
+      if (length(taxa) != nTax) {
+        return(list(paste0("Mismatch: NTAX=", nTax, ", but ", length(taxa),
+                           " TAXLABELS found in Nexus file.")))
+      }
+    }
 
     notesEnd <- endBlocks[endBlocks > notesStart][1] - 1L
     notesLines <- lines[(notesStart + 1):notesEnd]
-    charNote.matches <- grepl(charNote.pattern, notesLines, perl=TRUE)
-    charNotes <- gsub(charNote.pattern, "\\2",
-                      notesLines[charNote.matches], perl=TRUE)
-    charNotes <- EndSentence(MorphoBankDecode(charNotes))
-    charNumbers <- gsub(charNote.pattern, "\\1",
-                        notesLines[charNote.matches], perl=TRUE)
 
-    stateNote.matches <- grepl(stateNote.pattern, notesLines, perl=TRUE)
-    stateNotes <- gsub(stateNote.pattern, "\\3",
-                       notesLines[stateNote.matches], perl=TRUE)
-    stateNotes <- EndSentence(MorphoBankDecode(stateNotes))
-    stateTaxon <- gsub(stateNote.pattern, "\\1",
-                       notesLines[stateNote.matches], perl=TRUE)
-    stateChar  <- gsub(stateNote.pattern, "\\2",
-                       notesLines[stateNote.matches], perl=TRUE)
+    noteTaxon <- as.integer(.RegExpMatches("\\bTAXON\\s*=\\s*(\\d+)", notesLines))
+    noteChar <- as.integer(.RegExpMatches("\\bCHARACTER\\s*=\\s*(\\d+)", notesLines))
+    noteText <- EndSentence(MorphoBankDecode(
+      .RegExpMatches("\\bTEXT\\s*=\\s*['\"](.+)['\"];\\s*$", notesLines)))
 
-    seqAlongNotes <- seq_len(max(as.integer(c(stateChar, charNumbers))))
-    charNotes <- lapply(seqAlongNotes, function (i) {
+    seqAlongNotes <- seq_len(max(noteChar, na.rm = TRUE))
+
+    # Return:
+    setNames(lapply(seqAlongNotes, function (i) {
+      byTaxon <- !is.na(noteChar) & noteChar == i & !is.na(noteTaxon)
       ret <- list(
-        charNotes[charNumbers == i],
-        stateNotes[stateChar == i])
-      names(ret[[2]]) <- taxa[as.integer(stateTaxon[stateChar == i])]
+        noteText[!is.na(noteChar) & noteChar == i & is.na(noteTaxon)],
+        setNames(noteText[byTaxon], taxa[noteTaxon[byTaxon]]))
 
       # Return:
       ret
-    })
-    names(charNotes) <- seqAlongNotes
-
-    # Return:
-    charNotes
+    }), seqAlongNotes)
   }
 }
 
@@ -679,10 +746,15 @@ ReadNotes <- function (filepath) {
 #' @family string parsing functions
 #' @export
 EndSentence <- function (string) {
-  ret <- gsub("\\s*\\.?\\s*\\.$", ".", paste0(string, '.'), perl = TRUE)
-  ret <- gsub("(\\.[\"'])\\.$", "\\1", ret, perl = TRUE)
-  ret <- gsub("([!\\?])\\.$", "\\1", ret, perl = TRUE)
-  ret
+  if (length(string)) {
+    ret <- gsub("\\s*\\.?\\s*\\.$", ".", paste0(string, '.'), perl = TRUE)
+    ret <- gsub("(\\.[\"'])\\.$", "\\1", ret, perl = TRUE)
+    ret <- gsub("([!\\?])\\.$", "\\1", ret, perl = TRUE)
+    ret[ret == '.'] <- ''
+    ret
+  } else {
+    string
+  }
 }
 
 #' Remove quotation marks from a string
@@ -746,13 +818,20 @@ MorphoBankDecode <- function (string) {
 #' @export
 MatrixToPhyDat <- function (tokens) {
   allTokens <- unique(as.character(tokens))
+  if (any(nchar(allTokens) == 0)) {
+    problems <- apply(tokens, 1, function (x) which(nchar(x) == 0))
+    problemTaxa <- vapply(problems, length, 1) > 0
+    problemTaxa <- names(problemTaxa[problemTaxa])
+    warning("Blank tokens ('') found in taxa: ",
+            paste0(problemTaxa, collapse = ', '))
+  }
   tokenNumbers <- seq_along(allTokens)
   names(tokenNumbers) <- allTokens
   matches <- gregexpr("[\\d\\-\\w]", allTokens, perl = TRUE)
   whichTokens <- regmatches(allTokens, matches)
   levels <- sort(unique(unlist(whichTokens)))
   whichTokens[allTokens == '?'] <- list(levels)
-  contrast <- vapply(whichTokens, function (x) levels %in% x,
+  contrast <- vapply(whichTokens, function (x) levels %fin% x,
                      logical(length(levels)))
   contrast <- 1 * if (is.null(dim(contrast))) {
     as.matrix(contrast)
@@ -781,23 +860,22 @@ PhyDatToMatrix <- function (dataset) {#}, parentheses = c('[', ']'), sep = '') {
   index <- at$index
   allLevels <- as.character(at$allLevels)
   matrix(allLevels[unlist(dataset, recursive = FALSE, use.names = FALSE)],
-           ncol = max(index), byrow = TRUE,
-         dimnames = list(at$names, NULL))[, index, drop = FALSE]
+         ncol = at$nr, byrow = TRUE, dimnames = list(at$names, NULL)
+         )[, index, drop = FALSE]
 }
 
 #' @rdname ReadCharacters
-#' @importFrom phangorn phyDat
 #' @export
-ReadAsPhyDat <- function (filepath) {
-  MatrixToPhyDat(ReadCharacters(filepath))
+ReadAsPhyDat <- function (...) {
+  MatrixToPhyDat(ReadCharacters(...))
 }
 
 
 #' @rdname ReadCharacters
-#' @importFrom phangorn phyDat
+#' @param \dots Parameters to pass to `Read[Tnt]Characters()`.
 #' @export
-ReadTntAsPhyDat <- function (filepath) {
-  MatrixToPhyDat(ReadTntCharacters(filepath))
+ReadTntAsPhyDat <- function (...) {
+  MatrixToPhyDat(ReadTntCharacters(...))
 }
 
 
@@ -816,7 +894,7 @@ ReadTntAsPhyDat <- function (filepath) {
 PhyDat <- function (dataset) {
   nChar <- length(dataset[[1]])
   if (nChar == 1) {
-    mat <- matrix(unlist(dataset), dimnames=list(names(dataset), NULL))
+    mat <- matrix(unlist(dataset), dimnames = list(names(dataset), NULL))
   } else {
     mat <- t(vapply(dataset, I, dataset[[1]]))
   }
@@ -904,7 +982,7 @@ PhyToString <- function (phy, parentheses = '{', collapse = '', ps = '',
   levelLengths <- vapply(outLevels, nchar, integer(1))
   longLevels <- levelLengths > 1
   if (any(longLevels)) {
-    if ('10' %in% outLevels && !(0 %in% outLevels)) {
+    if ('10' %fin% outLevels && !(0 %fin% outLevels)) {
       outLevels[outLevels == '10'] <- '0'
       longLevels['10'] <- FALSE
     }

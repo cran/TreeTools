@@ -1,5 +1,3 @@
-context('phylo.R')
-
 nasty <- structure(list(edge = structure(
   c(9, 12, 10, 13, 11, 10, 11, 13, 10, 13, 12, 9,
     5, 10,  1,  2,  3, 13,  9,  4, 11,  7,  8, 6),
@@ -20,10 +18,12 @@ test_that('AddTipEverywhere() correct', {
 })
 
 test_that("AddTip() at root", {
-  expect_equal(PectinateTree(8),
-               AddTip(DropTip(PectinateTree(8), 1), where = 0, label = 't1'))
+  expect_true(all.equal(
+    AddTip(DropTip(PectinateTree(8), 1), where = 0, label = 't1'),
+    PectinateTree(8)))
   AddTip(nasty, 1L)
   AddTip(nasty, 12L)
+  expect_true(TRUE) # no crashes!
 })
 
 test_that("AddTip() with tip name", {
@@ -57,16 +57,29 @@ test_that("AddTip() with edge lengths", {
 test_that('AddTipEverywhere() handles nasty tree', {
   added <- AddTipEverywhere(nasty)
   lapply(added, function (tr) expect_true(all(tr$edge > 0)))
-  expect_equal(AddTipEverywhere(Preorder(nasty)),
-               lapply(added, Preorder))
+  expect_true(all.equal(lapply(added, Preorder),
+                        AddTipEverywhere(Preorder(nasty))))
+})
+
+test_that('AddTipEverywhere() with tiny trees', {
+  added <- AddTipEverywhere(StarTree(2))
+  lapply(added, function (tr) expect_true(all(tr$edge > 0)))
+  expect_equal(2, length(added))
+  expect_equal(3, length(AddTipEverywhere(StarTree(2), include = TRUE)))
+
+  expect_equal(list(PectinateTree(c('t1', 'New tip'))),
+               AddTipEverywhere(StarTree(1)))
+  expect_equal(list(SingleTaxonTree('New tip')),
+               AddTipEverywhere(structure(list(tip.label = character(0)),
+                                          class = 'phylo')))
 })
 
 test_that("Subtree() works", {
   expect_error(Subtree(BalancedTree(8), 10)) # Nodes must be in preorder
   t4 <- Subtree(Preorder(BalancedTree(8)), 10)
-  expect_equal(BalancedTree(4), t4)
-  expect_equal(BalancedTree(4), Subtree(t4, 5))
-  expect_equal(SingleTaxonTree('t1'), Subtree(t4, 1))
+  expect_true(all.equal(BalancedTree(4), t4))
+  expect_true(all.equal(BalancedTree(4), Subtree(t4, 5)))
+  expect_true(all.equal(SingleTaxonTree('t1'), Subtree(t4, 1)))
 })
 
 
