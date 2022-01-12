@@ -3,17 +3,20 @@
 \name{DropTip}
 \alias{DropTip}
 \alias{DropTip.phylo}
+\alias{DropTipPhylo}
 \alias{DropTip.multiPhylo}
 \alias{KeepTip}
 \title{Drop tips from tree}
 \usage{
-DropTip(tree, tip, preorder = TRUE)
+DropTip(tree, tip, preorder = TRUE, check = TRUE)
 
-\method{DropTip}{phylo}(tree, tip, preorder = TRUE)
+\method{DropTip}{phylo}(tree, tip, preorder = TRUE, check = TRUE)
 
-\method{DropTip}{multiPhylo}(tree, tip, preorder = TRUE)
+DropTipPhylo(tree, tip, preorder = TRUE, check = TRUE)
 
-KeepTip(tree, tip, preorder = TRUE)
+\method{DropTip}{multiPhylo}(tree, tip, preorder = TRUE, check = TRUE)
+
+KeepTip(tree, tip, preorder = TRUE, check = TRUE)
 }
 \arguments{
 \item{tree}{A tree of class \code{\link[ape:read.tree]{phylo}}.}
@@ -25,6 +28,10 @@ node.}
 
 \item{preorder}{Logical specifying whether to \link{Preorder} the tree before
 dropping tips.  Necessary if a tree's edges may be unconventionally numbered.}
+
+\item{check}{Logical specifying whether to check validity of \code{tip}. If
+\code{FALSE} and \code{tip} contains entries that do not correspond to leaves of the
+tree, undefined behaviour may occur.}
 }
 \value{
 \code{DropTip()} returns a tree of class \code{phylo}, with the requested
@@ -41,6 +48,12 @@ incident branches.
 This function is more robust than \code{\link[ape:drop.tip]{ape::drop.tip()}} as it does not
 require any particular internal node numbering schema.
 }
+\section{Functions}{
+\itemize{
+\item \code{DropTipPhylo}: Direct call to \code{DropTip.phylo()}, to avoid overhead of
+querying object's class.
+}}
+
 \examples{
 tree <- BalancedTree(8)
 plot(tree)

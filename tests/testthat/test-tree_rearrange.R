@@ -6,15 +6,23 @@ nasty <- structure(list(edge = structure(
   tip.label = letters[1:8]),
   class = 'phylo') # Danger: Do not plot!
 
+test_that(".DescendantTips() recurses", {
+  nTip <- 19L
+  tree <- BalancedTree(nTip)
+  edge <- tree$edge
+  expect_equal(.DescendantTips(edge[, 1], edge[, 2], nTip, c(23, 32, 35)),
+               c(1:3, 11:13, 16:19))
+})
 
 test_that("RootOnNode() works", {
+  expect_null(RootOnNode(NULL, 1))
 
   tree <- structure(list(edge = structure(c(6L, 9L, 9L, 7L, 7L, 8L, 8L,
                                             6L, 9L, 2L, 7L, 3L, 8L, 4L, 5L, 1L),
                                           .Dim = c(8L, 2L)),
                          tip.label = c("t3", "t4", "t1", "t2", "t5"),
                          Nnode = 4L), class = "phylo", order = "cladewise")
-
+  
   exp8 <- structure(list(edge = structure(c(6L, 7L, 8L, 8L, 7L, 6L, 9L, 9L, 7L,
                                             8L, 1L, 2L, 3L, 9L, 4L, 5L),
                                           .Dim = c(8L, 2L)),
@@ -170,11 +178,19 @@ test_that("RootOnNode() supports nasty node ordering", {
                RootOnNode(nasty, 13L))
 })
 
+test_that("RootTree() handles null outgroups", {
+  bal8 <- BalancedTree(8)
+  expect_equal(bal8, RootTree(bal8))
+  expect_equal(bal8$edge, RootTree(bal8$edge))
+  expect_equal(bal8, RootTree(bal8, NULL))
+  expect_equal(bal8$edge, RootTree(bal8$edge, NULL))
+  expect_equal(bal8, RootTree(bal8, character(0)))
+  expect_null(RootTree(NULL))
+})
+
 test_that("RootTree() works", {
   bal8 <- BalancedTree(8)
   expect_error(RootTree(bal8, 1:8 %in% 0))
-  expect_error(RootTree(bal8, character(0)))
-  expect_error(RootTree(bal8, integer(0)))
   expect_error(RootTree(bal8, 'tip_not_there'))
   expect_equal(RootTree(bal8, 5:6), RootTree(bal8, 1:8 %in% 5:6))
   expect_equal(RootTree(bal8$edge, 5:6), RootTree(bal8, 5:6)$edge)
@@ -213,6 +229,7 @@ test_that("RootTree() works", {
 })
 
 test_that("UnrootTree() works", {
+  expect_null(UnrootTree(NULL))
   expect_equal(matrix(c(7, 8, 8, 7, 7, 9, 10, 10, 9,
                         8, 1, 2, 3, 9, 10, 4,  5, 6), ncol = 2L),
                UnrootTree(BalancedTree(6))$edge)
@@ -286,6 +303,16 @@ test_that("DropTip() works", {
   expect_true(all.equal(drop.tip(bigTree, bigTip), DropTip(bigTree, bigTip)))
   #microbenchmark(ape::drop.tip(bigTree, bigTip), DropTip(bigTree, bigTip), times = 25)
   #profvis(replicate(25, DropTip(bigTree, bigTip)), interval = 0.005)
+})
+
+test_that("DropTip.multiPhylo() with attributes", {
+  multi <- c(bal8 = BalancedTree(8), pec8 = PectinateTree(8))
+  attr(multi, 'TipLabel') <- paste0('t', 1:8)
+
+  expect_equal(attr(DropTip(multi, 't8'), 'TipLabel'),
+               paste0('t', 1:7))
+  expect_equal(names(DropTip(multi, 't8')), names(multi))
+  expect_equal(DropTip(multi[1], 't1')[[1]], DropTip(multi[[1]], 't1'))
 })
 
 test_that("KeepTip() works", {
