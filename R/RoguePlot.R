@@ -2,12 +2,10 @@
 #'
 #' Plots a consensus of trees with a rogue taxon omitted, with edges coloured
 #' according to the proportion of trees in which the taxon attaches to that
-#' edge, after Klopfstein &amp; Spasojevic (2019).
-#'
-#' `r lifecycle::badge("experimental")`
-#' This function is currently under development and is not fully tested.
-#' Please check that results are in line with expectations before using the
-#' output, and [report any errors](https://github.com/ms609/TreeTools/issues/53).
+#' edge, after \insertCite{Klopfstein2019;textual}{TreeTools}.
+#' 
+#' Rogue taxa can be identified using the package \pkg{Rogue}
+#' \insertCite{SmithCons}{TreeTools}.
 #'
 #' @param trees List or `multiPhylo` object containing phylogenetic trees
 #' of class `phylo` to be summarized.
@@ -33,8 +31,7 @@
 #' - `atNode`: a vector of integers specifying the number of trees in `trees`
 #' in which the rogue leaf is attached to an edge collapsed into each node
 #' of the consensus tree.
-#' @references
-#' \insertRef{Klopfstein2019}{TreeTools}
+#' @references \insertAllCited{}
 #' @examples
 #' trees <- list(read.tree(text = '(a, (b, (c, (rogue, (d, (e, f))))));'),
 #'               read.tree(text = '(a, (b, (c, (rogue, (d, (e, f))))));'),
@@ -52,7 +49,7 @@
 #' @importFrom grDevices colorRamp colorRampPalette rgb
 #' @family consensus tree functions
 #' @export
-RoguePlot <- function (trees, tip, p = 1, plot = TRUE,
+RoguePlot <- function(trees, tip, p = 1, plot = TRUE,
                        Palette = colorRampPalette(c(par('fg'), '#009E73'),
                                                   space = 'Lab'),
                        nullCol = rgb(colorRamp(unlist(par(c('fg', 'bg'))),
@@ -90,8 +87,8 @@ RoguePlot <- function (trees, tip, p = 1, plot = TRUE,
   #allTips <- logical(ceiling((nTip) / 8) * 8L + 2L) # Multiple of 8 for packBits
   allTips <- logical(nTip + 1L) # including dummy
   # dummyRoot is, by definition, always below rogue.
-  aboveRogue <- .vapply(trees, function (tr) {
-    edge <- AddTip(tr, 0, dummyRoot)$edge
+  aboveRogue <- .vapply(trees, function(tr) {
+    edge <- AddTip(tr, 0, dummyRoot)[["edge"]]
     parent <- edge[, 1]
     child <- edge[, 2]
     rogueEdge <- fmatch(tip, child)
@@ -123,8 +120,8 @@ RoguePlot <- function (trees, tip, p = 1, plot = TRUE,
               sum(tipsAboveRogue == nTip - 1L)) # At pole
   atTip <- tipsAboveRogue == 1L
   tipMatches <- apply(aboveRogue[, atTip, drop = FALSE], 2, which)
-  tab <- table(as.integer(tipMatches))
-  nAtTip[as.integer(names(tab))] <- tab
+  tab <- tabulate(as.integer(tipMatches))
+  nAtTip[seq_along(tab)] <- tab
 
   unmatchedTrees <- !(tipsAboveRogue %fin% c(0L, 1L, nTip - 1L))
   consSplits <- PolarizeSplits(as.Splits(cons), pole)
@@ -134,14 +131,14 @@ RoguePlot <- function (trees, tip, p = 1, plot = TRUE,
                         data.frame(t(splits[, -pole, drop = FALSE])))
 
   nAtSplit <- double(nSplits)
-  tab <- table(edgeMatches)
-  nAtSplit[as.integer(names(tab))] <- tab
-  decipher <- c(nAtTip, rep.int(NA, cons$Nnode))
+  tab <- tabulate(edgeMatches)
+  nAtSplit[which(as.logical(tab))] <- tab[as.logical(tab)]
+  decipher <- c(nAtTip, rep.int(NA, cons[["Nnode"]]))
   decipher[as.integer(names(consSplits))] <- nAtSplit
-  nOnEdge <- decipher[cons$edge[, 2]]
+  nOnEdge <- decipher[cons[["edge"]][, 2]]
 
 
-  nAtNode <- c(nAtTip[length(nAtTip)], double(cons$Nnode - 2L))
+  nAtNode <- c(nAtTip[length(nAtTip)], double(cons[["Nnode"]] - 2L))
   unmatchedTrees[unmatchedTrees] <- is.na(edgeMatches)
   if (any(unmatchedTrees)) {
     nodeDescs <- .NodeDescendants(cons, nTip, pole)
@@ -150,10 +147,10 @@ RoguePlot <- function (trees, tip, p = 1, plot = TRUE,
     unmatchedGroup <- aboveRogue[, unmatchedTrees, drop = FALSE]
     nUnmatched <- sum(unmatchedTrees)
 
-    # nodeOverlapsGroup <- apply(unmatchedGroup, 2, function (gp) {
+    # nodeOverlapsGroup <- apply(unmatchedGroup, 2, function(gp) {
     #   apply(nodeDescs[gp, , drop = FALSE], 2, any)
     # })
-    floors <- .apply(unmatchedGroup, 2, function (gp) {
+    floors <- .apply(unmatchedGroup, 2, function(gp) {
        nodeContainsAllGroup <- apply(nodeDescs[, gp, drop = FALSE], 1, all)
        nodeContainsNonGroup <- apply(nodeDescs[, !gp, drop = FALSE], 1, any)
        nodeContainsAllGroup & nodeContainsNonGroup
@@ -161,14 +158,14 @@ RoguePlot <- function (trees, tip, p = 1, plot = TRUE,
 
     # active[i, ] != within[i, ], or we'd be on an edge
     atNode <- table(apply(cbind(floors), 2,
-                          function (x) 1 + length(x) - which.max(rev(x))))
+                          function(x) 1 + length(x) - which.max(rev(x))))
     nAtNode[as.integer(names(atNode))] <- atNode
 
   }
 
   cons <- DropTip(cons, dummyRoot)
   if (!is.null(edgeLength)) {
-    cons$edge.length <- rep_len(edgeLength, dim(cons$edge)[1])
+    cons[["edge.length"]] <- rep_len(edgeLength, dim(cons[["edge"]])[1])
   }
   nOnEdge <- nOnEdge[2:(length(nOnEdge) - 1L)]
 
@@ -190,9 +187,10 @@ RoguePlot <- function (trees, tip, p = 1, plot = TRUE,
 }
 
 # `tree` must be in preorder
-.NodeDescendants <- function (tree, nTip, pole) {
-  parent <- tree$edge[, 1]
-  child <- tree$edge[, 2]
+.NodeDescendants <- function(tree, nTip, pole) {
+  edge <- tree[["edge"]]
+  parent <- edge[, 1]
+  child <- edge[, 2]
   descs <- matrix(FALSE, max(parent), nTip)
   diag(descs[seq_len(nTip), ]) <- TRUE
   
@@ -214,7 +212,7 @@ RoguePlot <- function (trees, tip, p = 1, plot = TRUE,
 }
 
 # TODO in r4.1.0 use apply(simplify = false)?
-.vapply <- function (...) {
+.vapply <- function(...) {
   x <- vapply(...)
   if (is.null(dim(x))) {
     x <- matrix(x, 1L)
@@ -224,7 +222,7 @@ RoguePlot <- function (trees, tip, p = 1, plot = TRUE,
   x
 }
 
-.apply <- function (...) {
+.apply <- function(...) {
   x <- apply(...)
   if (is.null(dim(x))) {
     x <- matrix(x, 1L)

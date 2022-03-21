@@ -1,6 +1,7 @@
-#include <Rcpp.h>
+#include <Rcpp/Lightest>
 using namespace Rcpp;
 
+#include "../inst/include/TreeTools/assert.h"
 #include "../inst/include/TreeTools/SplitList.h"
 #include "../inst/include/TreeTools/renumber_tree.h"
 using namespace TreeTools;
@@ -8,8 +9,8 @@ using namespace TreeTools;
 TREETOOLS_SPLITLIST_INIT
 
 inline void insertion_sort_by_largest(int16* arr, const int16 arr_len,
-                                       const int16* sort_by) {
-  assert(arr_len > 0);
+                                      const int16* sort_by) {
+  ASSERT(arr_len > 0);
   switch (arr_len) {
   // case 0: return;
   case 1: return;
@@ -49,8 +50,16 @@ inline void insert_ancestor(const int16 tip, const int16 *next_node,
 
 // [[Rcpp::export]]
 IntegerMatrix splits_to_edge(const RawMatrix splits, const IntegerVector nTip) {
-  const SplitList x(splits);
   const int16 n_tip = nTip[0];
+  if (splits.nrow() == 0) {
+    IntegerMatrix ret(n_tip, 2);
+    for (int i = n_tip; i--; ) {
+      ret(i, 0) = n_tip + 1;
+      ret(i, 1) = i + 1;
+    }
+    return ret;
+  }
+  const SplitList x(splits);
   int16 parent[SL_MAX_TIPS + SL_MAX_SPLITS]{};
   int16 patriarch[SL_MAX_TIPS]{};
 

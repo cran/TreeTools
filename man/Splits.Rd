@@ -16,7 +16,7 @@ as.Splits(x, tipLabels = NULL, ...)
 
 \method{as.Splits}{phylo}(x, tipLabels = NULL, asSplits = TRUE, ...)
 
-\method{as.Splits}{multiPhylo}(x, tipLabels = x[[1]]$tip.label, asSplits = TRUE, ...)
+\method{as.Splits}{multiPhylo}(x, tipLabels = x[[1]][["tip.label"]], asSplits = TRUE, ...)
 
 \method{as.Splits}{Splits}(x, tipLabels = NULL, ...)
 
@@ -26,7 +26,7 @@ as.Splits(x, tipLabels = NULL, ...)
 
 \method{as.Splits}{logical}(x, tipLabels = NULL, ...)
 
-\method{as.logical}{Splits}(x, tipLabels = NULL, ...)
+\method{as.logical}{Splits}(x, tipLabels = attr(x, "tip.label"), ...)
 }
 \arguments{
 \item{x}{Object to convert into splits: perhaps a tree of class
@@ -85,7 +85,8 @@ Other Splits operations:
 \code{\link{SplitsInBinaryTree}()},
 \code{\link{TipLabels}()},
 \code{\link{TipsInSplits}()},
-\code{\link{match}()}
+\code{\link{match.Splits}},
+\code{\link{xor}()}
 }
 \author{
 Martin R. Smith (\href{mailto:martin.smith@durham.ac.uk}{martin.smith@durham.ac.uk})

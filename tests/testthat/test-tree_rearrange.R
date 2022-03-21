@@ -83,13 +83,13 @@ test_that("RootOnNode() works", {
   expect_true(all.equal(UnrootTree(PectinateTree(6L)),
                         RootOnNode(PectinateTree(6L), 1)))
 
-  TestTip <- function (tr, node, rr) {
+  TestTip <- function(tr, node, rr) {
     expect_true(all.equal(
       Preorder(ape::root(tr, outgroup = node, resolve.root = rr)),
       RootOnNode(tr, node, rr))
     )
   }
-  TestInternal <- function (tr, node, rr) {
+  TestInternal <- function(tr, node, rr) {
     expect_true(all.equal(
       Preorder(ape::root(tr, node = node, resolve.root = rr)),
       RootOnNode(tr, node, rr)))
@@ -117,22 +117,21 @@ test_that("RootOnNode() works", {
   expect_true(all.equal(UnrootTree(PectinateTree(8)),
                         RootOnNode(PectinateTree(8), 9L, FALSE)))
   expect_true(all.equal(urt, RootOnNode(urt, 9L, FALSE)))
-  expect_true(all.equal(Preorder(EnforceOutgroup(urt, letters[1:2])),
+  expect_true(all.equal(Preorder(RootTree(urt, letters[1:2])),
                         RootOnNode(urt, 9L, TRUE)))
 
 })
 
-
 test_that("root_on_node() works", {
   tree <- Preorder(BalancedTree(15))
   edge <- tree$edge
-  TipTest <- function (i) {
+  TipTest <- function(i) {
     tr.rooted <- root_on_node(tree, i)
     expect_equal(SortTree(root(tree, i, resolve.root = TRUE)),
                  SortTree(tr.rooted))
   }
-  StaticTest <- function (i) expect_equal(tree, root_on_node(tree, i))
-  NodeTest <- function (i) {
+  StaticTest <- function(i) expect_equal(tree, root_on_node(tree, i))
+  NodeTest <- function(i) {
     tr.rooted <- root_on_node(tree, i)
     expect_equal(SortTree(root(tree, node = i, resolve.root = TRUE)),
                  SortTree(tr.rooted))
@@ -190,10 +189,12 @@ test_that("RootTree() handles null outgroups", {
 
 test_that("RootTree() works", {
   bal8 <- BalancedTree(8)
+  bal15 <- BalancedTree(15)
   expect_error(RootTree(bal8, 1:8 %in% 0))
   expect_error(RootTree(bal8, 'tip_not_there'))
   expect_equal(RootTree(bal8, 5:6), RootTree(bal8, 1:8 %in% 5:6))
   expect_equal(RootTree(bal8$edge, 5:6), RootTree(bal8, 5:6)$edge)
+  expect_equal(RootTree(bal15$edge, 9:11), RootTree(bal15, 9:11)$edge)
   expect_equal(RootTree(bal8, 5:6), RootTree(bal8, c('t5', 't6')))
   expect_true(all.equal(
                as.phylo(5518, 8, paste0('t', rev(c(7,8,3,4,1,2,6,5)))),
@@ -226,6 +227,19 @@ test_that("RootTree() works", {
   expect_equal(RootTree(tree, 1:5), RootTree(tree, 6))
   # non-contiguous outgroup
   expect_equal(RootTree(tree, 1:4), RootTree(tree, 5:6))
+})
+
+test_that("RootTree() & UnrootTree() retain edge lengths", {
+  bal7 <- BalancedTree(7)
+  bal7$edge.length <- 1:12 * 10
+  attr(bal7, 'order') <- NULL
+  expect_equal(RootTree(bal7, 1:4),
+               structure(bal7, order = "preorder"))
+  expect_equal(RootTree(RootTree(bal7, 1), 1:4),
+               structure(bal7, order = "preorder"))
+  exp <- structure(bal7, order = "preorder")
+  exp$edge.length = 10 * c(1 + 8, 2:7, 0, 9:12)
+  expect_equal(RootTree(UnrootTree(bal7), 1:4), exp)
 })
 
 test_that("UnrootTree() works", {
@@ -281,55 +295,9 @@ test_that("CollapseNode() works", {
   expect_error(CollapseEdge(tree, 9))
 })
 
-test_that("DropTip() works", {
-  bal8 <- BalancedTree(8)
-  expect_equal(NTip(DropTip(bal8, 1:8)), 0)
-  expect_warning(expect_true(all.equal(bal8, DropTip(bal8, -1))))
-  expect_warning(expect_true(all.equal(bal8, DropTip(bal8, 99))))
-  expect_warning(expect_true(all.equal(bal8, DropTip(bal8, 'MissingTip'))))
-  expect_error(DropTip(bal8, list('Invalid format')))
-
-  expect_equal(DropTip(bal8, 7:8), DropTip(bal8, 15L))
-  expect_true(all.equal(ape::drop.tip(bal8, 6:8), DropTip(bal8, 6:8)))
-  expect_true(all.equal(ape::drop.tip(bal8, c(3, 5, 7)), DropTip(bal8, c(3, 5, 7))))
-
-  expect_equal(DropTip(Preorder(nasty), c(1, 3)),
-               Preorder(DropTip(nasty, c(1, 3))))
-
-
-  bigTree <- RandomTree(1284)
-  set.seed(1284)
-  bigTip <- sample(1:1284, 608)
-  expect_true(all.equal(drop.tip(bigTree, bigTip), DropTip(bigTree, bigTip)))
-  #microbenchmark(ape::drop.tip(bigTree, bigTip), DropTip(bigTree, bigTip), times = 25)
-  #profvis(replicate(25, DropTip(bigTree, bigTip)), interval = 0.005)
-})
-
-test_that("DropTip.multiPhylo() with attributes", {
-  multi <- c(bal8 = BalancedTree(8), pec8 = PectinateTree(8))
-  attr(multi, 'TipLabel') <- paste0('t', 1:8)
-
-  expect_equal(attr(DropTip(multi, 't8'), 'TipLabel'),
-               paste0('t', 1:7))
-  expect_equal(names(DropTip(multi, 't8')), names(multi))
-  expect_equal(DropTip(multi[1], 't1')[[1]], DropTip(multi[[1]], 't1'))
-})
-
-test_that("KeepTip() works", {
-  expect_warning(expect_true(all.equal(
-    BalancedTree(paste0('t', 5:8)),
-    KeepTip(BalancedTree(8), paste0('t', 5:9))
-  )))
-
-  expect_warning(expect_true(all.equal(
-    BalancedTree(paste0('t', 5:8)),
-    KeepTip(BalancedTree(8), 5:9)
-  )))
-})
-
 test_that("Binarification is uniform", {
   set.seed(0)
-  Test <- function (tree, nTree, nSamples = 200L, ape = FALSE) {
+  Test <- function(tree, nTree, nSamples = 200L, ape = FALSE) {
     counts <- table(replicate64(nSamples, as.TreeNumber(MakeTreeBinary(tree))))
     expect_equal(nTree, length(counts))
     expect_gt(chisq.test(counts)$p.value, 0.001)
@@ -351,17 +319,21 @@ test_that("Binarification is uniform", {
 
 })
 
+test_that("LeafLabelInterchange() fails", {
+  skip_if(Sys.getenv("USING_ASAN") != "")
+  expect_error(LeafLabelInterchange(BalancedTree(4), 5)) # n too many
+})
+
 test_that("LeafLabelInterchange() works", {
   expect_equal(PectinateTree(40), LeafLabelInterchange(PectinateTree(40), 1))
-  expect_error(LeafLabelInterchange(BalancedTree(4), 5)) # n too many
   expect_true(all.equal(BalancedTree(2),
                         LeafLabelInterchange(BalancedTree(2), 2)))
   expect_equal(rev(BalancedTree(2)$tip),
                    LeafLabelInterchange(BalancedTree(2), 2)$tip)
 
   abcd <- letters[1:4]
-  sapply(1 + seq_len(100), function (i) {
-    # Check all pertubations
+  sapply(1 + seq_len(100), function(i) {
+    # Check all perturbations
     set.seed(i)
     expect_false(any(abcd == LeafLabelInterchange(BalancedTree(abcd), 4)$tip))
 

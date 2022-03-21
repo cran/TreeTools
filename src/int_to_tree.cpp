@@ -1,12 +1,13 @@
-#include <Rcpp.h>
+#include <Rcpp/Lightest>
 #include <random>
+#include <stdexcept> /* for errors */
 #include "../inst/include/TreeTools.h"
 using namespace Rcpp;
 
 const intx MAX_TIP = 44, MAX_NODE = MAX_TIP + MAX_TIP - 1;
 
 // [[Rcpp::export]]
-IntegerVector num_to_parent(const NumericVector n, const IntegerVector nTip) {
+IntegerVector num_to_parent(const IntegerVector n, const IntegerVector nTip) {
   if (nTip[0] < 2) {
     throw std::range_error("nTip must be > 1");
   }
@@ -49,11 +50,10 @@ IntegerVector num_to_parent(const NumericVector n, const IntegerVector nTip) {
   return edge;
 }
 
+// Checking that nTip > 2 is caller's responsibility.
 // [[Rcpp::export]]
 IntegerVector random_parent(const IntegerVector nTip, const IntegerVector seed) {
-  if (nTip[0] < 2) {
-    throw std::range_error("nTip must be > 1");
-  }
+
   const intx
     n_tip = nTip[0],
     root_node = n_tip + n_tip - 1,
@@ -67,14 +67,20 @@ IntegerVector random_parent(const IntegerVector nTip, const IntegerVector seed) 
   IntegerVector edge(n_tip + n_tip - 2);
   edge(0) = root_node;
   edge(1) = root_node;
+  
+  const intx i2 = 2;
+  const intx where2 = 1;
+  edge(i2 + prime) = edge(where2);
+  edge(i2) = i2 + prime + c_to_r;
+  edge(where2) = i2 + prime + c_to_r;
 
-  for (intx i = 2; i != n_tip; i++) {
+  for (intx i = 3; i != n_tip; i++) {
     base = (i + i - 3);
     const intx
       i_prime = i + prime,
       i_prime_r = i_prime + c_to_r
     ;
-
+    
     std::uniform_int_distribution<std::mt19937::result_type> place(1, base);
     intx where = place(rng);
     if (where >= i) {
@@ -166,4 +172,107 @@ IntegerVector edge_to_num(IntegerVector parent, IntegerVector child,
   } else {
     return IntegerVector{int(num)};
   }
+}
+
+// Parent and child must be in postorder, with tree rooted on tip 1.
+// [[Rcpp::export]]
+IntegerVector edge_to_mixed_base(IntegerVector parent, IntegerVector child,
+                                 IntegerVector nTip) {
+  if (parent.size() != child.size()) {
+    throw std::length_error("Parent and child must be the same length");
+  }
+  const intx
+    n_tip = nTip[0],
+    n_internal = n_tip - 1,
+    n_edge = parent.size(),
+    all_node = n_internal + n_tip,
+    r_to_c = 1
+  ;
+  if (n_tip < 4) {
+    return IntegerVector(0);
+  }
+  if (n_edge != n_tip + n_tip - 2) {
+    throw std::length_error("nEdge must == nTip + nTip - 2");
+  }
+  intx
+    smallest_below[MAX_NODE],
+    parent_of[MAX_NODE],
+    prime_id[MAX_NODE],
+    index[MAX_TIP]
+  ;
+  for (intx i = 0; i != all_node; i++) {
+    smallest_below[i] = i;
+    prime_id[i] = i;
+  }
+  
+  for (intx i = 0; i != n_edge - 2; i += 2) {
+    const intx
+      this_node = parent[i] - r_to_c,
+      left_child = child[i] - r_to_c,
+      right_child = child[i + 1] - r_to_c
+    ;
+    smallest_below[this_node] = minimum(smallest_below[right_child],
+                                        smallest_below[left_child]);
+    prime_id[this_node] = maximum(smallest_below[left_child],
+                                  smallest_below[right_child]);
+    parent_of[left_child] = parent_of[right_child] = this_node;
+    
+    for (intx at = smallest_below[this_node];
+         at != this_node;
+         at = parent_of[at]) {
+      const intx prime_candidate = prime_id[at];
+      if (prime_candidate < prime_id[this_node]) {
+        index[prime_id[this_node]] = prime_id[at] + (at < n_tip ? 0 : n_tip);
+      }
+    }
+  }
+  IntegerVector ret(n_tip - 3);
+  for (intx i = 3; i != n_tip; i++) {
+    intx insertion_edge = index[i];
+    if (insertion_edge < n_tip) {
+      --insertion_edge;
+    } else {
+      insertion_edge += i - (n_tip + 3);
+    }
+    ret[n_tip - i - 1] = insertion_edge;
+  }
+  return ret;
+}
+
+// [[Rcpp::export]]
+IntegerVector mixed_base_to_parent(
+    const IntegerVector n,
+    const IntegerVector nTip
+  ) {
+  if (nTip[0] < 2) {
+    throw std::range_error("nTip must be > 1");
+  }
+  const intx
+    n_tip = nTip[0],
+    root_node = n_tip + n_tip - 1,
+    c_to_r = 1,
+    prime = n_tip - 2
+  ;
+  
+  IntegerVector edge(n_tip + n_tip - 2);
+  edge(0) = root_node;
+  edge(1) = root_node;
+  
+  for (intx i = 2; i != n_tip; i++) {
+    const intx
+      i_prime = i + prime,
+      i_prime_r = i_prime + c_to_r
+    ;
+    
+    intx where = i == 2 ? 1 : n[n_tip - i - 1] + 1;
+    if (where >= i) {
+      where += prime + 2 - i;
+    }
+    
+    edge(i_prime) = edge(where);
+    edge(i) = i_prime_r;
+    edge(where) = i_prime_r;
+  }
+  
+  return edge;
 }

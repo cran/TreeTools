@@ -1,7 +1,7 @@
 #' Total Cophenetic Index
 #'
 #' `TotalCopheneticIndex()` calculates the total cophenetic index
-#' (Mir _et al_. 2013) for any tree, a measure of its balance;
+#' \insertCite{Mir2013}{TreeTools} for any tree, a measure of its balance;
 #' `TCIContext()` lists its possible values.
 #'
 #' The Total Cophenetic Index is a measure of tree balance -- i.e. whether
@@ -17,7 +17,7 @@
 #' Formulae to calculate the expected values under the Yule and Uniform models
 #' of evolution are given in Theorems 17 and 23.
 #'
-#' Full details are provided by Mir _et al._ (2013).
+#' Full details are provided by \insertCite{Mir2013;textual}{TreeTools}.
 #'
 #' @template xPhylo
 #'
@@ -36,7 +36,7 @@
 #' '[CollessLike](https://github.com/LuciaRotger/CollessLike)'
 #' provides an alternative implementation of this index and its predecessors.
 #'
-#' @references \insertRef{Mir2013}{TreeTools}
+#' @references \insertAllCited{}
 #'
 #' @examples
 #' # Balanced trees have the minimum index for a binary tree;
@@ -57,26 +57,26 @@
 #'
 #' @family tree characterization functions
 #'
+#' @encoding UTF-8
 #' @template MRS
 #' @export
-TotalCopheneticIndex <- function (x) UseMethod('TotalCopheneticIndex')
+TotalCopheneticIndex <- function(x) UseMethod('TotalCopheneticIndex')
 
 .Depth <- function(parent, child) {
-  root   <- min(parent)
   depth  <- integer(max(parent))
   for (i in seq_along(parent)) {
     depth[child[i]] <- depth[parent[i]] + 1L
   }
 
   # Return:
-  as.integer(depth)
+  depth
 }
 
 #' @importFrom fastmatch %fin%
 #' @export
-TotalCopheneticIndex.phylo <- function (x) {
+TotalCopheneticIndex.phylo <- function(x) {
   nTip   <- NTip(x)
-  edge   <- Preorder(x)$edge
+  edge   <- Preorder(x)[["edge"]]
   parent <- edge[, 1]
   child  <- edge[, 2]
   depth  <- .Depth(parent, child)
@@ -85,7 +85,7 @@ TotalCopheneticIndex.phylo <- function (x) {
                       function(node) ListAncestors(parent, child, node))
 
   lca.depth <- vapply(seq_len(nTip), function(i) {
-    vapply(seq_len(nTip), function (j) {
+    vapply(seq_len(nTip), function(j) {
       anc.i <- ancestors[[i]]
       anc.j <- ancestors[[j]]
       lca <- max(anc.i[anc.i %fin% anc.j])
@@ -100,22 +100,24 @@ TotalCopheneticIndex.phylo <- function (x) {
 }
 
 #' @export
-TotalCopheneticIndex.list <- function(x) vapply(x, TotalCopheneticIndex, integer(1))
+TotalCopheneticIndex.list <- function(x) {
+  vapply(x, TotalCopheneticIndex, integer(1))
+}
 
 #' @export
 TotalCopheneticIndex.multiPhylo <- TotalCopheneticIndex.list
 
 #' @rdname TotalCopheneticIndex
 #' @export
-TCIContext <- function (x) UseMethod('TCIContext')
+TCIContext <- function(x) UseMethod('TCIContext')
 
 #' @export
-TCIContext.phylo <- function (x) {
+TCIContext.phylo <- function(x) {
   TCIContext.numeric(NTip(x))
 }
 
-.MCI <- function (n) { # Lemma 14 in Mir er al 2013
-  if (n < 3L) return (0L)
+.MCI <- function(n) { # Lemma 14 in Mir er al 2013
+  if (n < 3L) return(0L)
   halfN <- n / 2L
   topHalf <- ceiling(halfN)
   btmHalf <- floor(halfN)
@@ -126,8 +128,8 @@ TCIContext.phylo <- function (x) {
 #' @rdname TotalCopheneticIndex
 #' @export
 TCIContext.numeric <- function(x) {
-  H  <- function (n) sum(1 / (seq_len(n)))
-  H2 <- function (n) sum(1 / (seq_len(n) ^ 2))
+  H  <- function(n) sum(1 / (seq_len(n)))
+  H2 <- function(n) sum(1 / (seq_len(n) ^ 2))
 
   maximum <- choose(x, 3L)
   minimum <- .MCI(x)

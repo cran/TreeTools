@@ -7,12 +7,12 @@
 \usage{
 AddTip(
   tree,
-  where = sample.int(tree$Nnode * 2 + 2L, size = 1) - 1L,
+  where = sample.int(tree[["Nnode"]] * 2 + 2L, size = 1) - 1L,
   label = "New tip",
   edgeLength = 0,
   lengthBelow = NULL,
   nTip = NTip(tree),
-  nNode = tree$Nnode,
+  nNode = tree[["Nnode"]],
   rootNode = RootNode(tree)
 )
 
@@ -91,6 +91,8 @@ Other tree manipulation:
 \code{\link{DropTip}()},
 \code{\link{EnforceOutgroup}()},
 \code{\link{ImposeConstraint}()},
+\code{\link{KeptPaths}()},
+\code{\link{KeptVerts}()},
 \code{\link{LeafLabelInterchange}()},
 \code{\link{MakeTreeBinary}()},
 \code{\link{RenumberTips}()},

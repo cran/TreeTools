@@ -21,20 +21,20 @@
 #' @template MRS
 #' @family tree manipulation
 #' @export
-ImposeConstraint <- function (tree, constraint) {
+ImposeConstraint <- function(tree, constraint) {
   # This function is as efficient as it is elegant: i.e. not.
   # But it just about does the job.
   tree <- Preorder(tree)
   const <- AddUnconstrained(constraint,
-                            setdiff(tree$tip.label, names(constraint)),
+                            setdiff(tree[["tip.label"]], names(constraint)),
                             asPhyDat = FALSE)
 
   info <- apply(const, 2,
-                function (x) SplitInformation(sum(x == '0'), sum(x == '1')))
-  smallest <- ifelse(apply(const, 2, function (x) sum(x == '0') < sum(x == '1')),
+                function(x) SplitInformation(sum(x == '0'), sum(x == '1')))
+  smallest <- ifelse(apply(const, 2, function(x) sum(x == '0') < sum(x == '1')),
                      '0', '1')
 
-  tips <- tree$tip.label
+  tips <- tree[["tip.label"]]
   nTip <- length(tips)
   for (i in order(info)) {
     constI <- const[, i]
@@ -46,7 +46,7 @@ ImposeConstraint <- function (tree, constraint) {
       next
     }
     collapsing <- apply(const[collapsers, , drop = FALSE], 2,
-                        function (x) setdiff(x, '?')[1])
+                        function(x) setdiff(x, '?')[1])
 
     const <- const[setdiff(rownames(const), collapseNames[-1]), , drop = FALSE]
     const[collapseNames[1], ] <- collapsing
@@ -59,16 +59,17 @@ ImposeConstraint <- function (tree, constraint) {
     .TextToTree('(', paste0(rownames(const), collapse = ','), ');'),
     tips))
 
-  .ChildAtEnd <- function (x) {
+  .ChildAtEnd <- function(x) {
     if (x <= nTip) x else .ChildAtEnd(edge[match(x, edge[, 1]), 2])
   }
-  edge <- backbone$edge
-  tomies <- table(edge[, 1], dnn = NULL)
-  polytomies <- as.integer(names(tomies[tomies > 2]))
+
+  edge <- backbone[["edge"]]
+  polytomies <- which(tabulate(edge[, 1]) > 2)
+  
   for (node in polytomies) {
     nodeKids <- edge[edge[, 1] == node, 2]
     standIns <- vapply(nodeKids, .ChildAtEnd, 1)
-    kept <- KeepTip(tree, standIns)$edge
+    kept <- KeepTip(tree, standIns)[["edge"]]
     newNodes <- kept > length(standIns)
     kept[newNodes] <- kept[newNodes] - kept[1] + max(edge[, 1])
     kept[kept == kept[1]] <- node
@@ -80,8 +81,8 @@ ImposeConstraint <- function (tree, constraint) {
     edge <- rbind(edge[edge[, 1] != node, ], kept)
   }
   edge <- edge[order(edge[, 1]), ]
-  backbone$edge <- RenumberTree(edge[, 1], edge[, 2])
-  backbone$Nnode <- max(backbone$edge[, 1]) - nTip
+  backbone[["edge"]] <- RenumberTree(edge[, 1], edge[, 2])
+  backbone[["Nnode"]] <- max(backbone[["edge"]][, 1]) - nTip
 
 
   # Return:
@@ -89,11 +90,11 @@ ImposeConstraint <- function (tree, constraint) {
 }
 
 #' @importFrom ape read.tree
-.TextToTree <- function (...) {
+.TextToTree <- function(...) {
   space <- 'XXTREETOOLSSPACEXX'
   text <- gsub(' ', space, paste0(...), fixed = TRUE)
   tree <- read.tree(text = text)
-  tree$tip.label <- gsub(space, ' ', tree$tip.label, fixed = TRUE)
+  tree[["tip.label"]] <- gsub(space, " ", tree[["tip.label"]], fixed = TRUE)
 
   # Return:
   tree
@@ -105,7 +106,7 @@ ImposeConstraint <- function (tree, constraint) {
 #' @param asPhyDat Logical: if `TRUE`, return a `phyDat` object; if `FALSE`, return
 #' a matrix.
 #' @export
-AddUnconstrained <- function (constraint, toAdd, asPhyDat = TRUE) {
+AddUnconstrained <- function(constraint, toAdd, asPhyDat = TRUE) {
   ret <- if (inherits(constraint, 'phyDat')) {
     PhyDatToMatrix(constraint)
   } else {

@@ -17,13 +17,13 @@
 #' @examples
 #' nTip <- 8L
 #' tree <- BalancedTree(nTip)
-#' edge <- tree$edge
+#' edge <- tree[["edge"]]
 #' pruningwise <- NeworderPruningwise(nTip, tree$Nnode, edge[, 1], edge[, 2],
 #'                                    dim(edge)[1])
 #' cladewise <- NeworderPhylo(nTip, edge[, 1], edge[, 2], dim(edge)[1], 1L)
 #' postorder <- NeworderPhylo(nTip, edge[, 1], edge[, 2], dim(edge)[1], 2L)
 #'
-#' tree$edge <- tree$edge[pruningwise, ]
+#' tree[["edge"]] <- tree[["edge"]][pruningwise, ]
 #'
 #' @author
 #'  - C algorithm: Emmanuel Paradis
@@ -33,7 +33,7 @@
 #' @useDynLib TreeTools, .registration = TRUE
 #' @name Neworder
 #' @export
-NeworderPruningwise <- function (nTip, nNode, parent, child, nEdge) {
+NeworderPruningwise <- function(nTip, nNode, parent, child, nEdge) {
   .C('ape_neworder_pruningwise', as.integer(nTip), as.integer(nNode),
      as.integer(parent), as.integer(child), as.integer(nEdge),
      integer(nEdge))[[6]]
@@ -46,9 +46,9 @@ NeworderPruningwise <- function (nTip, nNode, parent, child, nEdge) {
 #' of edges under the ordering sequence specified by `whichwise`.
 #' @keywords internal
 #' @export
-NeworderPhylo <- function (nTip, parent, child, nb.edge, whichwise) {
+NeworderPhylo <- function(nTip, parent, child, nEdge, whichwise) {
   .C('ape_neworder_phylo', as.integer(nTip), as.integer(parent),
-     as.integer(child), as.integer(nb.edge), integer(nb.edge),
+     as.integer(child), as.integer(nEdge), integer(nEdge),
      as.integer(whichwise), NAOK = TRUE)[[5]]
 }
 
@@ -56,6 +56,8 @@ NeworderPhylo <- function (nTip, parent, child, nb.edge, whichwise) {
 #'
 #' @template treeParent
 #' @template treeChild
+#' @param weight Optional vector specifying the weight of each edge,
+#' corresponding to the `edge.length` property of a `phylo` object.
 #'
 #' @return `RenumberTree()` returns an edge matrix for a tree of class `phylo`
 #' following the preorder convention for edge and node numbering.
@@ -63,8 +65,12 @@ NeworderPhylo <- function (nTip, parent, child, nb.edge, whichwise) {
 #' @family tree manipulation
 #' @family C wrappers
 #' @export
-RenumberTree <- function (parent, child) {
-  .Call(`_TreeTools_preorder_edges_and_nodes`, parent, child)
+RenumberTree <- function(parent, child, weight) {
+  if (missing(weight)) {
+    .Call(`_TreeTools_preorder_edges_and_nodes`, parent, child)
+  } else {
+    .Call(`_TreeTools_preorder_weighted`, parent, child, weight)
+  }
 }
 
 #' @rdname Reorder
@@ -73,7 +79,7 @@ RenumberTree <- function (parent, child) {
 #' @return `RenumberEdges()` formats the output of `RenumberTree()` into a list
 #' whose two entries correspond to the new parent and child vectors.
 #' @export
-RenumberEdges <- function (parent, child, ...) {
+RenumberEdges <- function(parent, child, ...) {
   oenn <- .Call(`_TreeTools_preorder_edges_and_nodes`, parent, child)
 
   # Return:
@@ -95,13 +101,14 @@ RenumberEdges <- function (parent, child, ...) {
 #' can cause crashes if nodes are numbered unconventionally -- sometimes
 #' encountered after using tree rearrangement functions, e.g. `phangorn::SPR()`.
 #'
-#' `Preorder()` is more robust: it supports polytomies, nodes can be numbered
-#' in any sequence, and edges can be listed in any order in the input tree.
+#' `Preorder()` is more robust: it supports polytomies, nodes may be numbered
+#' in any sequence, and edges may be listed in any order in the input tree.
 #' Its output is guaranteed to be identical for any tree of an equivalent
 #' topology, allowing unique trees to be detected by comparing sorted edge
 #' matrices alone.
 #'
-#' A tree in preorder is numbered starting from the root node.
+#' Nodes and edges in a preorder tree are numbered starting from the deepest
+#' node.
 #' Each node is numbered in the sequence in which it is encountered, and
 #' each edge is listed in the sequence in which it is visited.
 #'
@@ -120,12 +127,10 @@ RenumberEdges <- function (parent, child, ...) {
 #' as `Preorder()` and are intended for use where performance is at a premium.
 #'
 #'
-#' `Postorder()` is an optimized implementation that if `sizeSort = TRUE`
-#' return a specific order:
-#' edges are listed from the node that subtends the smallest
-#' subtree to the one that subtends the largest (i.e. the root node), with
-#' all of a node's descendant edges listed adjacently.  If a tree is already
-#' in postorder, it will not be rearranged unless `force = TRUE`.
+#' `Postorder()` numbers nodes as in `Preorder()`, and lists edges in
+#' descending order of parent node number, breaking ties by listing child
+#' nodes in increasing order.  If a tree is already in postorder, it will not
+#' be rearranged unless `force = TRUE`.
 #'
 #' Methods applied to numeric inputs do not check input for sanity, so should
 #' be used with caution: malformed input may cause undefined results, including
@@ -139,7 +144,7 @@ RenumberEdges <- function (parent, child, ...) {
 #' @template treeParam
 #' @template nTipParam
 #' @param edge Two-column matrix listing the parent and child of each edge in a
-#' tree, corresponding to `tree$edge`. Optional in `Cladewise()`.
+#' tree, corresponding to `tree[["edge"]]`. Optional in `Cladewise()`.
 #' @param renumber Logical specifying whether to renumber nodes such that they
 #' increase in number away from the root.
 #'
@@ -162,26 +167,31 @@ NULL
 
 #' @describeIn Reorder Reorder tree cladewise.
 #' @export
-Cladewise <- function (tree, nTip, edge) UseMethod('Cladewise')
+Cladewise <- function(tree, nTip, edge) UseMethod('Cladewise')
 
 #' @rdname Reorder
 #' @export
-Cladewise.phylo <- function (tree,
-                             nTip = length(tree$tip.label),
-                             edge = tree$edge) {
+Cladewise.phylo <- function(tree, nTip = NTip(tree), edge = tree[["edge"]]) {
   if (!is.null(attr(tree, "order")) && attr(tree, "order") == "cladewise") {
     return(tree)
   }
   nEdge <- dim(edge)[1]
-  nNode <- tree$Nnode
-  if (nNode == 1) return(tree)
-  if (nNode >= nTip) stop("`tree` apparently badly conformed")
+  nNode <- tree[["Nnode"]]
+  if (nNode == 1) {
+    return(tree)
+  }
+  if (nNode >= nTip) {
+    stop("`tree` apparently badly conformed")
+  }
 
   newOrder <- NeworderPhylo(nTip, edge[, 1], edge[, 2], nEdge, 1)
 
-  tree$edge <- edge[newOrder, ]
-  if (!is.null(tree$edge.length)) tree$edge.length <- tree$edge.length[newOrder]
+  tree[["edge"]] <- edge[newOrder, ]
+  if (!is.null(tree[["edge.length"]])) {
+    tree[["edge.length"]] <- tree[["edge.length"]][newOrder]
+  }
   attr(tree, "order") <- "cladewise"
+  attr(tree, "suborder") <- NULL
 
   # Return:
   tree
@@ -189,21 +199,22 @@ Cladewise.phylo <- function (tree,
 
 #' @rdname Reorder
 #' @export
-Cladewise.list <- function (tree, nTip, edge) {
+Cladewise.list <- function(tree, nTip, edge) {
   lapply(tree, Cladewise)
 }
 
 #' @rdname Reorder
 #' @export
-Cladewise.multiPhylo <- function (tree, nTip, edge) {
+Cladewise.multiPhylo <- function(tree, nTip, edge) {
   tree[] <- lapply(tree, Cladewise)
   attr(tree, 'order') <- 'cladewise'
+  attr(tree, "suborder") <- NULL
   tree
 }
 
 #' @rdname Reorder
 #' @export
-Cladewise.matrix <- function (tree, nTip = min(tree[, 1]) - 1L, edge) {
+Cladewise.matrix <- function(tree, nTip = min(tree[, 1]) - 1L, edge) {
   if (is.numeric(tree)) {
     newOrder <- NeworderPhylo(nTip, tree[, 1], tree[, 2], dim(tree)[1], 1L)
 
@@ -216,70 +227,88 @@ Cladewise.matrix <- function (tree, nTip = min(tree[, 1]) - 1L, edge) {
 
 #' @rdname Reorder
 #' @export
-Cladewise.NULL <- function (tree, nTip = min(tree[, 1]) - 1L, edge) NULL
+Cladewise.NULL <- function(tree, nTip = min(tree[, 1]) - 1L, edge) NULL
 
 #' @describeIn Reorder Reorder tree in Postorder using ape's `postorder`
 #' function, which is robust to unconventional node numbering.
 #' @export
-ApePostorder <- function (tree, nTip, edge) UseMethod('ApePostorder')
+ApePostorder <- function(tree, nTip, edge) UseMethod('ApePostorder')
 
 #' @rdname Reorder
 #' @export
-ApePostorder.phylo <- function (tree, nTip = length(tree$tip.label),
-                                edge = tree$edge) {
+ApePostorder.phylo <- function(tree, nTip = NTip(tree), edge = tree[["edge"]]) {
   if (!is.null(attr(tree, "order")) && attr(tree, "order") == "postorder") {
     return(tree)
   }
-  nb.edge <- dim(edge)[1]
-  nb.node <- tree$Nnode
-  if (nb.node == 1) return(tree)
-  if (nb.node >= nTip) stop("`tree` apparently badly conformed")
-  neworder <- NeworderPhylo(nTip, edge[, 1], edge[, 2], nb.edge, 2L)
-  tree$edge <- edge[neworder, ]
-  if (!is.null(tree$edge.length)) tree$edge.length <- tree$edge.length[neworder]
+  nEdge <- dim(edge)[1]
+  nNode <- tree[["Nnode"]]
+  if (nNode == 1) {
+    return(tree)
+  }
+  if (nNode >= nTip) {
+    stop("`tree` apparently badly conformed")
+  }
+  neworder <- NeworderPhylo(nTip, edge[, 1], edge[, 2], nEdge, 2L)
+  tree[["edge"]] <- edge[neworder, ]
+  if (!is.null(tree[["edge.length"]])) {
+    tree[["edge.length"]] <- tree[["edge.length"]][neworder]
+  }
   attr(tree, "order") <- "postorder"
+  attr(tree, "suborder") <- "ape"
   tree
 }
 
 #' @rdname Reorder
 #' @export
-ApePostorder.list <- function (tree, nTip, edge) {
+ApePostorder.list <- function(tree, nTip, edge) {
   lapply(tree, ApePostorder)
 }
 
 #' @rdname Reorder
 #' @export
-ApePostorder.NULL <- function (tree, nTip, edge) NULL
+ApePostorder.NULL <- function(tree, nTip, edge) NULL
 
 #' @rdname Reorder
 #' @export
-ApePostorder.multiPhylo <- function (tree, nTip, edge) {
+ApePostorder.multiPhylo <- function(tree, nTip, edge) {
   tree[] <- lapply(tree, ApePostorder)
   attr(tree, 'order') <- 'postorder'
+  attr(tree, "suborder") <- "ape"
   tree
 }
 
-#' @describeIn Reorder Reorder tree in Postorder. Edge lengths are not retained.
+#' @rdname Reorder
 #' @param force Logical specifying whether to rearrange trees already in
 #' postorder, in order to ensure edges are ordered in the 'TreeTools' fashion.
 #' @export
-Postorder <- function (tree, force = FALSE, renumber = FALSE,
-                       sizeSort = TRUE) {
+Postorder <- function(tree, force = FALSE) {
   UseMethod('Postorder')
 }
 
 #' @rdname Reorder
 #' @export
-Postorder.phylo <- function (tree, force = FALSE, renumber = FALSE,
-                             sizeSort = TRUE) {
+Postorder.phylo <- function(tree, force = FALSE) {
   if (is.null(attr(tree, "order"))
       || attr(tree, "order") != "postorder"
       || (force &&
           (is.null(attr(tree, 'suborder')) ||
            attr(tree, 'suborder') != 'TreeTools'))) {
-    tree$edge <- Postorder(tree$edge, renumber = renumber,
-                           sizeSort = sizeSort)
-    tree$edge.length <- NULL
+    weight <- tree[["edge.length"]]
+    edge <- tree[["edge"]]
+    parent <- edge[, 1]
+    child <- edge[, 2]
+    if (!is.null(weight)) {
+      rnt <- RenumberTree(parent, child, weight)
+      edge <- rnt[[1]]
+      newOrder <- order(edge[, 1], edge[, 2], decreasing = TRUE,
+                        method = "radix")
+      tree[["edge.length"]] <- rnt[[2]][newOrder]
+    } else {
+      edge <- RenumberTree(parent, child)
+      newOrder <- order(edge[, 1], edge[, 2], decreasing = TRUE,
+                        method = "radix")
+    }
+    tree[["edge"]] <- edge[newOrder, , drop = FALSE]
     attr(tree, "order") <- "postorder"
     attr(tree, "suborder") <- "TreeTools"
   }
@@ -288,24 +317,19 @@ Postorder.phylo <- function (tree, force = FALSE, renumber = FALSE,
 
 #' @rdname Reorder
 #' @export
-Postorder.NULL <- function (tree, force = FALSE, renumber = FALSE,
-                            sizeSort = TRUE) NULL
+Postorder.NULL <- function(tree, force = FALSE) NULL
 
 #' @rdname Reorder
 #' @export
-Postorder.list <- function (tree, force = FALSE, renumber = FALSE,
-                            sizeSort = TRUE) {
-  lapply(tree, Postorder, force = force, renumber = renumber,
-         sizeSort = sizeSort)
+Postorder.list <- function(tree, force = FALSE) {
+  lapply(tree, Postorder, force = force)
 }
 
 
 #' @rdname Reorder
 #' @export
-Postorder.multiPhylo <- function (tree, force = FALSE, renumber = FALSE,
-                                  sizeSort = TRUE) {
-  tree[] <- lapply(tree, Postorder, force = force, renumber = renumber,
-                   sizeSort = sizeSort)
+Postorder.multiPhylo <- function(tree, force = FALSE) {
+  tree[] <- lapply(tree, Postorder, force = force)
   attr(tree, 'order') <- 'postorder'
   tree
 }
@@ -315,88 +339,121 @@ Postorder.multiPhylo <- function (tree, force = FALSE, renumber = FALSE,
 #' `edge` entry of a tree of class `phylo`, and returns a two-column array
 #' corresponding to `tree`, with edges listed in postorder
 #' @export
-Postorder.numeric <- function (tree, force = FALSE, renumber = FALSE,
-                               sizeSort = TRUE) {
-  ret <- postorder_edges(tree - 1L, sizeSort[1])
-  if (renumber) {
-    internals <- unique(tree[, 1])
-    nTip <- min(internals) - 1L
-    newNumbers <- c(seq_len(nTip), nTip + rank(-unique(internals)))
-
-    # Return:
-    matrix(newNumbers[ret], ncol = 2L)
-  } else {
-    ret
-  }
+Postorder.numeric <- function(tree, force = FALSE) {
+  edge <- RenumberTree(tree[, 1], tree[, 2])
+  ordr <- order(edge[, 1], edge[, 2],
+                decreasing = c(TRUE, FALSE), method = "radix")
+  edge[ordr, , drop = FALSE]
 }
 
-# nocov start
+#' @rdname Reorder
+#' @return `PostorderOrder()` returns an integer vector. Visiting edges in this
+#' order will traverse the tree in postorder.
+#' @export
+PostorderOrder <- function(tree) UseMethod("PostorderOrder")
+
 #' @rdname Reorder
 #' @export
-PostorderEdges <- function (edge, renumber = FALSE) {
-#  .Deprecated('Postorder') #TODO (#35)
-  Postorder(edge, renumber = renumber)
-} # nocov end
+PostorderOrder.phylo <- function(tree) {
+  order <- attr(tree, "order")
+  if (is.null(order)) {
+    order <- character(1)
+  }
+  edge <- tree[["edge"]]
+  
+  # Return:
+  switch(order,
+         "preorder" = dim(edge)[1]:1,
+         "postorder" = seq_len(dim(edge)[1]),
+         postorder_order(edge))
+}
+
+#' @rdname Reorder
+#' @export
+PostorderOrder.numeric <- function(tree) {
+  dims <- dim(tree)
+  if (is.null(dims) || dims[2] != 2) {
+    stop("`tree` must be the edge matrix of a `phylo` object.")
+  }
+  postorder_order(tree)
+}
 
 #' @describeIn Reorder Reorder tree Pruningwise.
 #' @export
-Pruningwise <- function (tree, nTip, edge) UseMethod('Pruningwise')
+Pruningwise <- function(tree, nTip, edge) UseMethod('Pruningwise')
 
 #' @rdname Reorder
 #' @export
-Pruningwise.phylo <- function (tree, nTip = length(tree$tip.label),
-                         edge = tree$edge) {
+Pruningwise.phylo <- function(tree, nTip = NTip(tree),
+                              edge = tree[["edge"]]) {
   if (!is.null(attr(tree, "order")) && attr(tree, "order") == 'pruningwise') {
     return(tree)
   }
-  nb.edge <- dim(edge)[1]
-  nb.node <- tree$Nnode
-  if (nb.node == 1) return(tree)
-  if (nb.node >= nTip) stop("`tree` apparently badly conformed")
+  nEdge <- dim(edge)[1]
+  nNode <- tree[["Nnode"]]
+  if (nNode == 1) {
+    return(tree)
+  }
+  if (nNode >= nTip) {
+    stop("`tree` apparently badly conformed")
+  }
   tree <- Cladewise(tree, nTip, edge)
-  neworder <- NeworderPruningwise(nTip, nb.node, tree$edge[, 1],
-                                  tree$edge[, 2], nb.edge)
-  tree$edge <- tree$edge[neworder, ]
-  if (!is.null(tree$edge.length)) tree$edge.length <- tree$edge.length[neworder]
-  attr(tree, "order") <- 'pruningwise'
+  edge <- tree[["edge"]]
+  neworder <- NeworderPruningwise(nTip, nNode, edge[, 1], edge[, 2], nEdge)
+  tree[["edge"]] <- tree[["edge"]][neworder, ]
+  if (!is.null(tree[["edge.length"]])) {
+    tree[["edge.length"]] <- tree[["edge.length"]][neworder]
+  }
+  attr(tree, "order") <- "pruningwise"
+  attr(tree, "suborder") <- NULL
   tree
 }
 
 #' @rdname Reorder
 #' @export
-Pruningwise.list <- function (tree, nTip, edge) {
+Pruningwise.list <- function(tree, nTip, edge) {
   lapply(tree, Pruningwise)
 }
 
 #' @rdname Reorder
 #' @export
-Pruningwise.multiPhylo <- function (tree, nTip, edge) {
+Pruningwise.multiPhylo <- function(tree, nTip, edge) {
   tree[] <- lapply(tree, Pruningwise)
   attr(tree, 'order') <- 'pruningwise'
+  attr(tree, "suborder") <- NULL
   tree
 }
 
 #' @rdname Reorder
 #' @export
-Pruningwise.NULL <- function (tree, nTip, edge) NULL
+Pruningwise.NULL <- function(tree, nTip, edge) NULL
 
 
 #' @describeIn Reorder Reorder tree in Preorder (special case of cladewise).
 #' @export
-Preorder <- function (tree) UseMethod('Preorder')
+Preorder <- function(tree) UseMethod('Preorder')
 
 #' @rdname Reorder
 #' @export
-Preorder.phylo <- function (tree) {
-  startOrder <- attr(tree, 'order')
-  if (length(startOrder) && startOrder == 'preorder') {
+Preorder.phylo <- function(tree) {
+  startOrder <- attr(tree, "order")
+  if (length(startOrder) && startOrder == "preorder") {
+    # length(x) is twice as fast as !is.null(x)
     tree
   } else {
-    edge <- tree$edge
+    edge <- tree[["edge"]]
     parent <- edge[, 1]
     child <- edge[, 2]
-    tree$edge <- RenumberTree(parent, child)
+    lengths <- tree[["edge.length"]]
+    if (is.null(lengths)) {
+      tree[["edge"]] <- RenumberTree(parent, child)
+    } else {
+      edge <- RenumberTree(parent, child, lengths)
+      tree[["edge"]] <- edge[[1]]
+      tree[["edge.length"]] <- edge[[2]]
+    }
     attr(tree, 'order') <- 'preorder'
+    attr(tree, "suborder") <- NULL
 
     # Return:
     tree
@@ -405,38 +462,39 @@ Preorder.phylo <- function (tree) {
 
 #' @rdname Reorder
 #' @export
-Preorder.numeric <- function (tree) {
+Preorder.numeric <- function(tree) {
   RenumberTree(tree[, 1], tree[, 2])
 }
 
 #' @rdname Reorder
 #' @export
-Preorder.multiPhylo <- function (tree) {
+Preorder.multiPhylo <- function(tree) {
   tree[] <- lapply(tree, Preorder)
   attr(tree, 'order') <- 'preorder'
+  attr(tree, "suborder") <- NULL
   tree
 }
 
 #' @rdname Reorder
 #' @export
-Preorder.list <- function (tree) {
+Preorder.list <- function(tree) {
   lapply(tree, Preorder)
 }
 
 #' @rdname Reorder
 #' @export
-Preorder.NULL <- function (tree) NULL
+Preorder.NULL <- function(tree) NULL
 
 
 #' Renumber a tree's tips
 #'
 #' `RenumberTips(tree, tipOrder)` sorts the tips of a phylogenetic tree `tree`
-#' such that the indices in `tree$edge[, 2]` correspond to the order of
+#' such that the indices in `tree[["edge"]][, 2]` correspond to the order of
 #' leaves given in `tipOrder`.
 #'
 #' @template treeParam
 #' @param tipOrder A character vector containing the values of
-#'        \code{tree$tip.label} in the desired sort order, or an object
+#'        `tree[["tip.label"]]` in the desired sort order, or an object
 #'        (perhaps of class `phylo` or `Splits`) with tip labels.
 #'
 #' @return `RenumberTips()` returns `tree`, with the tips' internal
@@ -455,23 +513,28 @@ RenumberTips <- function(tree, tipOrder) UseMethod('RenumberTips')
 
 #' @rdname RenumberTips
 #' @export
-RenumberTips.phylo <- function (tree, tipOrder) {
-  startOrder <- tree$tip.label
+RenumberTips.phylo <- function(tree, tipOrder) {
+  startOrder <- tree[["tip.label"]]
   newOrder <- TipLabels(tipOrder, single = TRUE)
-  if (identical(startOrder, newOrder)) return (tree)
+  if (identical(startOrder, newOrder)) {
+    return(tree)
+  }
   if (length(startOrder) != length(newOrder)) {
     startOnly <- setdiff(startOrder, newOrder)
     newOnly <- setdiff(newOrder, startOrder)
-    stop("Tree labels and tipOrder must match.",
-         if (length(newOnly)) "\n  Missing in `tree`: ",
-         paste0(newOnly, collapse = ', '),
-         if (length(startOnly)) "\n  Missing in `tipOrder`: ",
-         paste0(startOnly, collapse = ', ')
-         )
+    if (length(startOnly)) {
+      stop("Tree labels and tipOrder must match.",
+           if (length(newOnly)) "\n  Missing in `tree`: ",
+           paste0(newOnly, collapse = ', '),
+           if (length(startOnly)) "\n  Missing in `tipOrder`: ",
+           paste0(startOnly, collapse = ', ')
+           )
+    }
+    newOrder <- intersect(newOrder, startOrder)
   }
 
   nTip <- length(startOrder)
-  child <- tree$edge[, 2]
+  child <- tree[["edge"]][, 2]
   tips <- child <= nTip
 
   matchOrder <- match(startOrder, newOrder)
@@ -479,27 +542,30 @@ RenumberTips.phylo <- function (tree, tipOrder) {
     stop("Tree labels ", paste0(startOrder[is.na(matchOrder)], collapse = ', '),
          " missing from `tipOrder`")
   }
-  tree$edge[tips, 2] <- matchOrder[tree$edge[tips, 2]]
-  tree$tip.label <- newOrder
+  tree[["edge"]][tips, 2] <- matchOrder[tree[["edge"]][tips, 2]]
+  tree[["tip.label"]] <- newOrder
   tree
 }
 
 #' @rdname RenumberTips
 #' @export
-RenumberTips.multiPhylo <- function (tree, tipOrder) {
-  tree[] <- lapply(tree, RenumberTips.phylo, tipOrder)
-  if (!is.null(attr(tree, 'TipLabel'))) {
-    attr(tree, 'TipLabel') <- TipLabels(tipOrder)
+RenumberTips.multiPhylo <- function(tree, tipOrder) {
+  at <- attributes(tree)
+  labelled <- !is.null(at[['TipLabel']])
+  tree <- lapply(tree, RenumberTips.phylo, tipOrder)
+  if (labelled) {
+    at[["TipLabel"]] <- TipLabels(tipOrder)
   }
+  attributes(tree) <- at
   tree
 }
 
 #' @rdname RenumberTips
 #' @export
-RenumberTips.list <- function (tree, tipOrder) {
+RenumberTips.list <- function(tree, tipOrder) {
   lapply(tree, RenumberTips, tipOrder)
 }
 
 #' @rdname RenumberTips
 #' @export
-RenumberTips.NULL <- function (tree, tipOrder) NULL
+RenumberTips.NULL <- function(tree, tipOrder) NULL

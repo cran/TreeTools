@@ -16,6 +16,9 @@
 #' @name GenerateTree
 NULL
 
+# Until require R >= 3.5.0
+.isFALSE <- function(x) is.logical(x) && length(x) == 1L && !is.na(x) && !x
+
 #' @rdname GenerateTree
 #'
 #' @param root Character or integer specifying tip to use as root, if desired;
@@ -39,7 +42,7 @@ NULL
 #' RandomTree(Lobo.phy)
 #'
 #' @export
-RandomTree <- function (tips, root = FALSE, nodes) {
+RandomTree <- function(tips, root = FALSE, nodes) {
   tips <- TipLabels(tips)
   nTips <- length(tips)
   if (any(is.na(root))) {
@@ -57,14 +60,21 @@ RandomTree <- function (tips, root = FALSE, nodes) {
   if (nodes < 1L) {
     stop("A tree must contain one or more `nodes`")
   }
+  
   edge <- do.call(cbind,
                   RenumberEdges(.RandomParent(nTips),
                                 seq_len(nTips + nTips - 2L)))
-  if (!is.logical(root) && !(length(root) == 1L && root == 1L)) {
-    if (isTRUE(root)) root <- 1L
-    if (is.character(root)) root <- which(tips == root)
-    if (length(root) == 0L) stop ("No match found for `root`")
-    if (!is.integer(root)) root <- as.integer(root)
+  if (!is.logical(root) 
+      && !(length(root) == 1L && root == 1L)) {
+    if (is.character(root)) {
+      root <- which(tips == root)
+    }
+    if (length(root) == 0L) {
+      stop("No match found for `root`")
+    }
+    if (!is.integer(root)) {
+      root <- as.integer(root)
+    }
     if (length(root) > 1L) {
       root <- root[1]
       warning("More than one entry in `root`; using ", root)
@@ -77,16 +87,14 @@ RandomTree <- function (tips, root = FALSE, nodes) {
                          br = NULL),
                     class = 'phylo')
 
-  # Until require R >= 3.5.0
-  isFALSE <- function (x) is.logical(x) && length(x) == 1L && !is.na(x) && !x
-  if (isFALSE(root)) {
+  if (.isFALSE(root)) {
     tree <- UnrootTree(tree)
   }
 
   if (nodes < nodesInBinary) {
     tree <- CollapseNode(tree,
                          nTips + 1L + sample.int(nodesInBinary - 1L,
-                                                 tree$Nnode - nodes))
+                                                 tree[["Nnode"]] - nodes))
   }
   # Return:
   tree
@@ -98,14 +106,18 @@ RandomTree <- function (tips, root = FALSE, nodes) {
 #' @param seed (Optional) Integer with which to seed Mersenne Twister random
 #' number generator in C++.
 #'
-#' @return Integer vector corresponding to the 'parent' entry of `tree$edge`,
-#' where the 'child' entry, i.e. column 2, is numbered sequentially from `1:n`.
+#' @return Integer vector corresponding to the 'parent' entry of
+#' `tree[["edge"]]`, where the 'child' entry, i.e. column 2, is numbered
+#' sequentially from `1:n`.
 #' @template MRS
 #' @keywords internal
 #' @importFrom stats runif
 #' @export
-.RandomParent <- function (n, seed = sample.int(2147483647L, 1L)) {
-  random_parent(n, seed)
+.RandomParent <- function(n, seed = sample.int(2147483647L, 1L)) {
+  if (!is.numeric(n) || is.na(n) || n[1] < 3) {
+    stop("nTip must be > 2");
+  }
+  random_parent(as.integer(n), as.integer(seed))
 }
 
 #' @rdname GenerateTree
@@ -114,7 +126,7 @@ RandomTree <- function (tips, root = FALSE, nodes) {
 #' plot(PectinateTree(LETTERS[1:10]))
 #'
 #' @export
-PectinateTree <- function (tips) {
+PectinateTree <- function(tips) {
   tips <- TipLabels(tips)
   nTips <- length(tips)
 
@@ -138,12 +150,12 @@ PectinateTree <- function (tips) {
 
 #' @rdname GenerateTree
 #'
-#' @return `BalancedTree()` returns a balanced (symmetrical) tree.
+#' @return `BalancedTree()` returns a balanced (symmetrical) tree, in preorder.
 #'
 #' @examples
 #' plot(BalancedTree(LETTERS[1:10]))
 #' @export
-BalancedTree <- function (tips) {
+BalancedTree <- function(tips) {
   tips <- TipLabels(tips)
   nTip <- length(tips)
   if (nTip < 2L) {
@@ -153,11 +165,11 @@ BalancedTree <- function (tips) {
   # Return:
   structure(list(edge = .BalancedBit(seq_len(nTip)), Nnode = nTip - 1L,
                        tip.label = as.character(tips)),
-            order = 'cladewise', class = 'phylo') # Actually in preorder
+            order = 'preorder', class = 'phylo')
 }
 
 #' @keywords internal
-.BalancedBit <- function (tips, nTips = length(tips), rootNode = nTips + 1L) {
+.BalancedBit <- function(tips, nTips = length(tips), rootNode = nTips + 1L) {
   if (nTips < 4L) {
     if (nTips == 2L) {
       matrix(c(rootNode, rootNode, tips), 2L, 2L)
@@ -184,7 +196,7 @@ BalancedTree <- function (tips) {
 #' plot(StarTree(LETTERS[1:10]))
 #'
 #' @export
-StarTree <- function (tips) {
+StarTree <- function(tips) {
   tips <- TipLabels(tips)
   nTips <- length(tips)
 
@@ -195,7 +207,7 @@ StarTree <- function (tips) {
     edge = matrix(c(parent, child), ncol = 2L),
     Nnode = 1L,
     tip.label = tips
-  ), order = 'cladewise', class = 'phylo')
+  ), order = 'cladewise', class = "phylo")
 }
 
 #' Generate a neighbour joining tree
@@ -215,14 +227,16 @@ StarTree <- function (tips) {
 #' NJTree(Lobo.phy)
 #'
 #' @template MRS
-#' @importFrom ape nj root
+#' @importFrom ape nj
 #' @family tree generation functions
 #' @export
-NJTree <- function (dataset, edgeLengths = FALSE,
+NJTree <- function(dataset, edgeLengths = FALSE,
                     ratio = TRUE, ambig = "mean") {
   tree <- nj(Hamming(dataset, ratio = ratio, ambig = ambig))
-  tree <- root(tree, names(dataset)[1], resolve.root = TRUE)
-  if (!edgeLengths) tree$edge.length <- NULL
+  tree <- RootTree(tree, names(dataset)[1])
+  if (!edgeLengths) {
+    tree[["edge.length"]] <- NULL
+  }
   tree
 }
 
@@ -274,7 +288,7 @@ NJTree <- function (dataset, edgeLengths = FALSE,
 #' @importFrom stats median
 #' @importFrom utils combn
 #' @export
-Hamming <- function (dataset, ratio = TRUE,
+Hamming <- function(dataset, ratio = TRUE,
                      ambig = c("median", "mean", "zero", "one", "na", "nan")) {
   at <- attributes(dataset)
   if (!inherits(dataset, 'phyDat') || is.null(at[["contrast"]])) {
@@ -287,18 +301,18 @@ Hamming <- function (dataset, ratio = TRUE,
     contrast[contrast[, '-'], ] <- TRUE
   }
   weight <- at[["weight"]]
-  tokens <- vapply(dataset, function (codings) contrast[codings, ],
+  tokens <- vapply(dataset, function(codings) contrast[codings, ],
                    matrix(NA, at[['nr']], dim(contrast)[2]))
-  hamming <- apply(combn(length(dataset), 2L), 2L, function (ij) {
+  hamming <- apply(combn(length(dataset), 2L), 2L, function(ij) {
     sum(weight[!apply(tokens[, , ij[1], drop = FALSE] & 
                       tokens[, , ij[2], drop = FALSE], 1, any)])
   })
   
   if (ratio) {
     informative <- apply(!contrast, 1, any)
-    nonAmbig <- .vapply(dataset, function (codings) informative[codings],
+    nonAmbig <- .vapply(dataset, function(codings) informative[codings],
                        logical(at[['nr']]))
-    bothInformative <- apply(combn(length(dataset), 2L), 2L, function (ij) {
+    bothInformative <- apply(combn(length(dataset), 2L), 2L, function(ij) {
       sum(weight[nonAmbig[, ij[1]] & nonAmbig[, ij[2]]])
     })
     hamming <- hamming / bothInformative
@@ -310,7 +324,7 @@ Hamming <- function (dataset, ratio = TRUE,
     nanMethod <- pmatch(tolower(ambig[1]),
                         c("median", "mean", "zero", "one", "na", "nan"))
     if (is.na(nanMethod)) {
-      stop("Invalid setting for `ambig`")
+      stop("Invalid `ambig` value specified")
     }
     hamming[is.nan(hamming)] <- switch(nanMethod,
       median(hamming[!is.na(hamming)]),
@@ -358,7 +372,7 @@ Hamming <- function (dataset, ratio = TRUE,
 #' @importFrom ape nj multi2di
 #' @family tree generation functions
 #' @export
-ConstrainedNJ <- function (dataset, constraint, weight = 1L,
+ConstrainedNJ <- function(dataset, constraint, weight = 1L,
                            ratio = TRUE, ambig = "mean") {
   missing <- setdiff(names(dataset), names(constraint))
   if (length(missing)) {
@@ -368,7 +382,7 @@ ConstrainedNJ <- function (dataset, constraint, weight = 1L,
   tree <- multi2di(nj((Hamming(constraint, ratio = ratio, ambig = ambig) 
                        * weight) +
                         Hamming(dataset, ratio = ratio, ambig = ambig)))
-  tree$edge.length <- NULL
+  tree[["edge.length"]] <- NULL
   tree <- ImposeConstraint(tree, constraint)
   tree <- RootTree(tree, names(dataset)[1])
 
@@ -376,7 +390,7 @@ ConstrainedNJ <- function (dataset, constraint, weight = 1L,
   tree
 }
 
-#' Generate a tree with a specific outgroup
+#' Generate a tree with a specified outgroup
 #'
 #' Given a tree or a list of taxa, `EnforceOutgroup()` rearranges the ingroup
 #' and outgroup taxa such that the two are sister taxa across the root, without
@@ -385,12 +399,12 @@ ConstrainedNJ <- function (dataset, constraint, weight = 1L,
 #' @param tree Either a tree of class \code{phylo}; or (for `EnforceOutgroup()`)
 #' a character vector listing the names of all the taxa in the tree, from which
 #' a random tree will be generated.
-#' @param outgroup Character vector containing the names of taxa to include in the
-#' outgroup.
+#' @param outgroup Character vector containing the names of taxa to include in
+#' the outgroup.
 #'
-#' @return `EnforceOutgroup()` returns a tree of class `phylo` where all outgroup
-#' taxa are sister to all remaining taxa, without modifying the ingroup
-#' topology.
+#' @return `EnforceOutgroup()` returns a tree of class `phylo` where all
+#' outgroup taxa are sister to all remaining taxa, without modifying the 
+#' ingroup topology.
 #'
 #' @examples
 #' tree <- EnforceOutgroup(letters[1:9], letters[1:3])
@@ -403,36 +417,37 @@ ConstrainedNJ <- function (dataset, constraint, weight = 1L,
 #' @template MRS
 #' @family tree manipulation
 #' @export
-EnforceOutgroup <- function (tree, outgroup) UseMethod('EnforceOutgroup')
+EnforceOutgroup <- function(tree, outgroup) UseMethod('EnforceOutgroup')
 
-#' @importFrom ape root bind.tree
-.EnforceOutgroup <- function (tree, outgroup, taxa) {
-  if (length(outgroup) == 1L) return (root(tree, outgroup, resolve.root = TRUE))
+#' @importFrom ape bind.tree
+.EnforceOutgroup <- function(tree, outgroup, taxa) {
+  if (length(outgroup) == 1L) {
+    return(RootTree(tree, outgroup))
+  }
 
   ingroup <- taxa[!(taxa %fin% outgroup)]
   if (!all(outgroup %fin% taxa) ||
       length(ingroup) + length(outgroup) != length(taxa)) {
-    stop ("All outgroup taxa must occur in tree")
+    stop("All outgroup taxa must occur in tree")
   }
 
   ingroup.branch <- DropTip(tree, outgroup)
   outgroup.branch <- DropTip(tree, ingroup)
 
-  result <- root(bind.tree(outgroup.branch, ingroup.branch, 0, 1),
-                 outgroup, resolve.root = TRUE)
+  result <- RootTree(bind.tree(outgroup.branch, ingroup.branch, 0, 1),
+                     outgroup)
   RenumberTips(Renumber(result), taxa)
 }
 
 #' @rdname EnforceOutgroup
 #' @export
-EnforceOutgroup.phylo <- function (tree, outgroup) {
-  .EnforceOutgroup(tree, outgroup, tree$tip.label)
+EnforceOutgroup.phylo <- function(tree, outgroup) {
+  .EnforceOutgroup(tree, outgroup, tree[["tip.label"]])
 }
 
 #' @rdname EnforceOutgroup
-#' @importFrom ape root
 #' @export
-EnforceOutgroup.character <- function (tree, outgroup) {
+EnforceOutgroup.character <- function(tree, outgroup) {
   taxa <- tree
   .EnforceOutgroup(RandomTree(taxa, taxa[1]), outgroup, taxa)
 }

@@ -1,9 +1,11 @@
-#include <Rcpp.h>
+#include <Rcpp/Lightest>
 using namespace Rcpp;
 
+#include "../inst/include/TreeTools/assert.h" /* for ASSERT */
 #include "../inst/include/TreeTools/ClusterTable.h" /* for ClusterTable */
 using namespace TreeTools;
 
+#include <algorithm> /* for fill */
 #include <array> /* for array */
 #include <vector> /* for vector */
 
@@ -82,11 +84,11 @@ LogicalMatrix consensus_tree(const List trees, const NumericVector p) {
             if (N == R - L + 1) { // L..R is contiguous, and must be tested
               if (tables[i].CLUSTONL(&L, &R)) {
                 tables[j].SETSWX(&j_pos);
-                assert(L > 0);
+                ASSERT(L > 0);
                 ++split_count[L - 1];
               } else if (tables[i].CLUSTONR(&L, &R)) {
                 tables[j].SETSWX(&j_pos);
-                assert(R > 0);
+                ASSERT(R > 0);
                 ++split_count[R - 1];
               }
             }
@@ -116,5 +118,7 @@ LogicalMatrix consensus_tree(const List trees, const NumericVector p) {
     }
   } while (i++ != n_trees - thresh); // All clades in p% consensus must occur in first q% of trees.
 
-  return ret(Range(0, splits_found - 1), _);
+  return splits_found ? 
+    ret(Range(0, splits_found - 1), _) :
+    LogicalMatrix(0, n_tip);
 }

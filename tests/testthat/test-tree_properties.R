@@ -83,19 +83,20 @@ test_that('Rooting and partition counting', {
   expect_equal(c(5L, 5L), NPartitions(c(8, 8)))
   expect_equal(2L, NSplits('((a, b), (c, (d, e)));'))
   expect_equal(0L, NSplits('a'))
+  expect_null(NSplits(NULL))
   expect_equal(0L, NSplits(letters[1:2]))
   expect_equal(3L, NSplits(letters[1:6]))
   expect_error(NPartitions(raw(1)))
 })
 
 test_that("NTip() works", {
-  Test <- function (n) {
+  Test <- function(n) {
     tr <- BalancedTree(n)
     pec <- PectinateTree(n)
-    expect_identical(n, NTip(tr))
-    expect_identical(n, NTip(tr$edge))
-    expect_identical(n, NTip(Postorder(tr$edge)))
-    expect_identical(n, NTip(list(tr)))
+    expect_identical(NTip(tr), n)
+    expect_identical(NTip(tr$edge), n)
+    expect_identical(NTip(Postorder(tr$edge)), n)
+    expect_identical(NTip(list(tr)), n)
     expect_identical(rep(n, 2L), NTip(list(tr, tr)))
     expect_identical(rep(n, 3L),
                      NTip(structure(list(tr, tr, pec), class = 'multiPhylo')))
@@ -195,4 +196,5 @@ test_that('SplitsInBinaryTree() works', {
   expect_identical(5L, SplitsInBinaryTree(8))
   expect_identical(5L, SplitsInBinaryTree(as.phylo(0, 8)))
   expect_identical(rep(5L, 4), SplitsInBinaryTree(as.phylo(0:3, 8)))
+  expect_null(SplitsInBinaryTree(NULL))
 })

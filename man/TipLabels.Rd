@@ -6,6 +6,7 @@
 \alias{TipLabels.phylo}
 \alias{TipLabels.default}
 \alias{TipLabels.phyDat}
+\alias{TipLabels.MixedBase}
 \alias{TipLabels.TreeNumber}
 \alias{TipLabels.Splits}
 \alias{TipLabels.list}
@@ -30,6 +31,8 @@ TipLabels(x, single = TRUE)
 \method{TipLabels}{default}(x, single = TRUE)
 
 \method{TipLabels}{phyDat}(x, single = TRUE)
+
+\method{TipLabels}{MixedBase}(x, single = TRUE)
 
 \method{TipLabels}{TreeNumber}(x, single = TRUE)
 
@@ -92,6 +95,7 @@ Other tree properties:
 \code{\link{ConsensusWithout}()},
 \code{\link{NSplits}()},
 \code{\link{NTip}()},
+\code{\link{PathLengths}()},
 \code{\link{SplitsInBinaryTree}()},
 \code{\link{TreeIsRooted}()}
 
@@ -104,7 +108,8 @@ Other Splits operations:
 \code{\link{SplitsInBinaryTree}()},
 \code{\link{Splits}},
 \code{\link{TipsInSplits}()},
-\code{\link{match}()}
+\code{\link{match.Splits}},
+\code{\link{xor}()}
 }
 \author{
 Martin R. Smith (\href{mailto:martin.smith@durham.ac.uk}{martin.smith@durham.ac.uk})

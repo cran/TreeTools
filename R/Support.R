@@ -34,7 +34,7 @@ SplitFrequency <- function(reference, forest) {
   forestSplits <- as.Splits(forest, tipLabels = refLabels)
 
   logicals <- vapply(forestSplits,
-                     function (cf) referenceSplits %in% cf,
+                     function(cf) referenceSplits %in% cf,
                      logical(length(referenceSplits)))
   ret <- if (is.null(dim(logicals))) {
     sum(logicals)
@@ -85,7 +85,7 @@ SplitFrequency <- function(reference, forest) {
 #' @importFrom stats setNames
 #' @family Splits operations
 #' @export
-LabelSplits <- function (tree, labels = NULL, unit = '', ...) {
+LabelSplits <- function(tree, labels = NULL, unit = '', ...) {
   splits <- as.Splits(tree)
   if (is.null(labels)) {
     splitNames <- names(splits)
@@ -97,14 +97,12 @@ LabelSplits <- function (tree, labels = NULL, unit = '', ...) {
       stop("`labels` must bear the same names as `as.Splits(tree)`")
     }
   }
+  
   if (length(setdiff(names(labels), names(splits)))) {
     warning("Label names do not correspond to splits in tree",
             immediate. = TRUE)
   }
-  whichEdge <- match(as.integer(names(labels)), tree$edge[, 2])
-  if (any(is.na(whichEdge))) {
-    warning("Label names do not correspond to splits in tree")
-  }
+  whichEdge <- match(as.integer(names(labels)), tree[["edge"]][, 2])
   edgelabels(paste0(labels, unit), edge = whichEdge, ...)
   # Return:
   invisible()
@@ -118,23 +116,23 @@ LabelSplits <- function (tree, labels = NULL, unit = '', ...) {
 #' @param powersOf2 Integer vector of same length as `tipIndex`, specifying a
 #' power of 2 to be associated with each tip in turn.
 #' @export
-SplitNumber <- function (tips, tree, tipIndex, powersOf2) { # nocov start
+SplitNumber <- function(tips, tree, tipIndex, powersOf2) { # nocov start
   .Deprecated("SplitFrequency")
-  included <- tipIndex %in% tree$tip.label[tips]
+  included <- tipIndex %in% tree[["tip.label"]][tips]
   as.character(min(c(sum(powersOf2[included]), sum(powersOf2[!included]))))
 }
 
 #' @describeIn SplitFrequency Frequency of splits in a given forest of trees
 #' @export
-ForestSplits <- function (forest, powersOf2) {
+ForestSplits <- function(forest, powersOf2) {
   .Deprecated("SplitFrequency")
   if (inherits(forest, 'phylo')) forest <- c(forest)
-  tipIndex <- sort(forest[[1]]$tip.label)
+  tipIndex <- sort(forest[[1]][["tip.label"]])
   nTip <- length(tipIndex)
 
   # Return:
-  table(vapply(forest, function (tr) {
-    edge <- tr$edge
+  table(vapply(forest, function(tr) {
+    edge <- tr[["edge"]]
     parent <- edge[, 1]
     child <- edge[, 2]
     # +2: Don't consider root node (not a node) or first node (duplicated)
@@ -148,7 +146,7 @@ ForestSplits <- function (forest, powersOf2) {
 #' Use as.Splits instead.
 #' @importFrom lifecycle deprecate_warn
 #' @export
-TreeSplits <- function (tree) {
+TreeSplits <- function(tree) {
   deprecate_warn("1.0.0", "TreeSplits()", "as.Splits()")
 } # nocov end
 
@@ -174,7 +172,7 @@ TreeSplits <- function (tree) {
 #'
 #' @importFrom colorspace diverge_hcl
 #' @export
-SupportColour <- function (support,
+SupportColour <- function(support,
                            show1 = TRUE,
                            scale = rev(diverge_hcl(101, h = c(260, 0), c = 100,
                                                    l = c(50, 90),

@@ -1,4 +1,67 @@
-# TreeTools 1.6.0
+# TreeTools 1.7.0 #
+
+## New methods and functions
+
+- `rev.Splits()` reverses order in which splits are listed.
+
+- `KeepTip.Splits()` is a faster alternative to `SubSplit()`.
+
+- `%in%.Splits()` retains names when comparing small splits
+  ([#40](https://github.com/ms609/TreeTools/issues/40)).
+
+- `sort.multiPhylo()` sorts lists of trees according to their mixed base
+  representation ([#84](https://github.com/ms609/TreeTools/issues/84)).
+  
+- Bitwise manipulation of splits with `|`, `&`, `xor`.
+
+- `as.MixedBase()` uniquely represents binary trees as a mixed-base vector.
+
+- `PathLengths()` describes all paths within a tree.
+
+- `KeptVerts()` and `KeptPaths()` identify elements in reduced trees.
+
+- `PostorderOrder()` describes a sequence of edges corresponding to a
+  postorder traversal of a tree.
+
+- `SpectrumLegend()` adds gradients to plot legends.
+
+
+## Improvements
+
+- Improve handling of zero-split trees.
+
+- `DropTip()` no longer adds a root to unrooted trees, and retains edge lengths.
+
+- Improve speed of `DropTip()`, by an order of magnitude in some cases.
+
+- Support edge lengths in `Preorder()`, `RootTree()`, `UnrootTree()` and
+  `Postorder()` ([#49](https://github.com/ms609/TreeTools/issues/49),
+  [#89](https://github.com/ms609/TreeTools/issues/89)).
+
+- Fix bug when tree is rooted on a discontinuous outgroup.
+
+- `SortTree()` handles weighted and non-binary trees
+  ([#25](https://github.com/ms609/TreeTools/issues/25),
+  [#25](https://github.com/ms609/TreeTools/issues/49)),
+  and gains option to sort by tip labels.
+
+- `TipsInSplits(smallest = TRUE)` counts tips in smaller bipartition.
+
+- Fix a bug with `phyDat` objects in `ArtificialExtinction()`.
+
+- `RenumberTips()` allows `tipOrder` to contain elements not present in `tree`.
+
+- Use lighter Rcpp headers.
+
+- Small improvements to computational efficiency.
+
+## Deprecations
+
+- Remove deprecated function `PostorderEdges()`
+  ([#35](https://github.com/ms609/TreeTools/issues/35)).
+
+
+# TreeTools 1.6.0 #
 
 ## New functions
 
@@ -24,6 +87,8 @@
 # TreeTools 1.5.1
 
 - `PhyDatToMatrix()` optionally encodes ambiguous / inapplicable tokens as `NA`.
+
+- Implement `sort.multiPhylo()`.
 
 - Update test suite for compatibility with "testthat" > 3.0.4 (@hadley, #83).
 
