@@ -29,8 +29,8 @@ taxa, in the sequence that they appear in the TNT file.  If not specified,
 taxon names will be loaded from the data file linked in the first line of the
 \code{.tre} file specified in \code{filepath}.}
 
-\item{treeText}{Character string describing a tree, in the parenthetical
-format output by TNT.}
+\item{treeText}{Character string describing one or more trees,
+in the parenthetical format output by TNT.}
 }
 \value{
 \code{ReadTntTree()} returns a tree of class \code{phylo}, corresponding
@@ -79,17 +79,17 @@ object of class \code{phylo}.
 
 # On the original machine (but not elsewhere), it would be possible to read
 # this hard-coded reference from results.tnt:
-# ReadTntTree('output/results1.tnt')
+# ReadTntTree("output/results1.tnt")
 
-# These datasets are provided with the 'TreeTools' package, which will
+# These datasets are provided with the "TreeTools" package, which will
 # probably not be located at c:/TreeTools on your machine:
 
 oldWD <- getwd() # Remember the current working directory
-setwd(system.file(package = 'TreeTools'))
+setwd(system.file(package = "TreeTools"))
 
 # If taxon names were saved within the file (using `taxname=` in TNT),
 # then our job is easy:
-ReadTntTree('extdata/output/named.tre')
+ReadTntTree("extdata/output/named.tre")
 
 # But if taxa were compressed to numbers (using `taxname-`), we need to
 # look up the original matrix in order to dereference the tip names.
@@ -101,14 +101,14 @@ ReadTntTree('extdata/output/named.tre')
 # c:/TreeTools/input/dataset.nex
 #                2      1
 #
-# '.' means "relative to the current directory"
-ReadTntTree('extdata/output/numbered.tre', './extdata', 2)
+# "." means "relative to the current directory"
+ReadTntTree("extdata/output/numbered.tre", "./extdata", 2)
 
 # If working in a lower subdirectory
-setwd('./extdata/otherfolder')
+setwd("./extdata/otherfolder")
 
-# then it will be necessary to navigate up the directory path with '..':
-ReadTntTree('../output/numbered.tre', '..', 2)
+# then it will be necessary to navigate up the directory path with "..":
+ReadTntTree("../output/numbered.tre", "..", 2)
 
 
 setwd(oldWD) # Restore original working directory

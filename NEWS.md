@@ -1,3 +1,12 @@
+# TreeTools 1.7.3 #
+
+- `ReadTntTree()` supports multi-line trees.
+
+- `as.MixedBase()` supports larger trees (44-32767 tips).
+
+- Add deprecation warning to `in.Splits()`.
+
+
 # TreeTools 1.7.2 #
 
 - `RenumberTips()` drops "preorder" attribute, as reordering tip labels may

@@ -9,18 +9,12 @@
 \alias{PhyDat}
 \title{Read phylogenetic characters from file}
 \usage{
-ReadCharacters(
-  filepath,
-  character_num = NULL,
-  encoding = "UTF8",
-  session = NULL
-)
+ReadCharacters(filepath, character_num = NULL, encoding = "UTF8")
 
 ReadTntCharacters(
   filepath,
   character_num = NULL,
   type = NULL,
-  session = NULL,
   encoding = "UTF8"
 )
 
@@ -41,11 +35,8 @@ PhyDat(dataset)
 
 \item{encoding}{Character encoding of input file.}
 
-\item{session}{(Optional) A Shiny session with a \code{numericInput} named
-\code{character_num} whose maximum should be updated.}
-
 \item{type}{Character vector specifying categories of data to extract from
-file. Setting \code{type = c('num', 'dna')} will return only characters
+file. Setting \code{type = c("num", "dna")} will return only characters
 following a \verb{&[num]} or \verb{&[dna]} tag in a TNT input file, listing \code{num}
 character blocks before \code{dna} characters.
 Leave as \code{NULL} (the default) to return all characters in their original
@@ -88,7 +79,7 @@ incompletely or incorrectly parsed files.
 
 Matrices must contain only continuous or only discrete characters;
 maximum one matrix per file.  Continuous characters will be read as strings
-(i.e. base type 'character').
+(i.e. base type "character").
 
 The encoding of an input file will be automatically determined by R.
 Errors pertaining to an \verb{invalid multibyte string} or
@@ -102,23 +93,23 @@ the highlighted option in the "Encoding" menu) following the example below.
 }
 \section{Functions}{
 \itemize{
-\item \code{PhyDat}: A convenient wrapper for \pkg{phangorn}'s
+\item \code{PhyDat()}: A convenient wrapper for \pkg{phangorn}'s
 \code{phyDat()}, which converts a \strong{list} of morphological characters into a
 \code{phyDat} object.
 If your morphological characters are in the form of a \strong{matrix}, perhaps
 because they have been read using \code{\link[=read.table]{read.table()}}, try \code{\link[=MatrixToPhyDat]{MatrixToPhyDat()}}
 instead.
-}}
 
+}}
 \examples{
-fileName <- paste0(system.file(package = 'TreeTools'),
-                   '/extdata/input/dataset.nex')
+fileName <- paste0(system.file(package = "TreeTools"),
+                   "/extdata/input/dataset.nex")
 ReadCharacters(fileName)
 
-fileName <- paste0(system.file(package = 'TreeTools'),
-                   '/extdata/tests/continuous.nex')
+fileName <- paste0(system.file(package = "TreeTools"),
+                   "/extdata/tests/continuous.nex")
 
-continuous <- ReadCharacters(fileName, encoding = 'UTF8')
+continuous <- ReadCharacters(fileName, encoding = "UTF8")
 
 # To convert from strings to numbers:
 at <- attributes(continuous)
