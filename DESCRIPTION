@@ -1,6 +1,6 @@
 Package: TreeTools
 Title: Create, Modify and Analyse Phylogenetic Trees
-Version: 1.7.3
+Version: 1.8.0
 Authors@R: c(
   person("Martin R.", 'Smith', role = c("aut", "cre", "cph"), 
          email = "martin.smith@durham.ac.uk",
@@ -27,7 +27,7 @@ Description: Efficient implementations of functions for the creation,
   artificial extinction (Asher & Smith, 2022) <doi:10.1093/sysbio/syab072>;
   import and export of trees from Newick, Nexus (Maddison et al. 1997)
   <doi:10.1093/sysbio/46.4.590>,
-  and TNT <http://www.lillo.org.ar/phylogeny/tnt/> formats;
+  and TNT <https://www.lillo.org.ar/phylogeny/tnt/> formats;
   and analysis of splits and cladistic information.
 URL: https://ms609.github.io/TreeTools/,
         https://github.com/ms609/TreeTools/
@@ -53,12 +53,12 @@ ByteCompile: true
 Encoding: UTF-8
 Language: en-GB
 VignetteBuilder: knitr
-RoxygenNote: 7.2.0.9000
+RoxygenNote: 7.2.1
 NeedsCompilation: yes
-Packaged: 2022-07-20 10:43:41 UTC; pjjg18
+Packaged: 2022-09-14 08:37:16 UTC; pjjg18
 Author: Martin R. Smith [aut, cre, cph]
     (<https://orcid.org/0000-0001-5660-1727>),
   Emmanuel Paradis [cph] (<https://orcid.org/0000-0003-3092-2199>)
 Maintainer: Martin R. Smith <martin.smith@durham.ac.uk>
 Repository: CRAN
-Date/Publication: 2022-07-20 14:30:15 UTC
+Date/Publication: 2022-09-15 09:40:02 UTC

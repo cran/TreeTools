@@ -12,7 +12,7 @@
 
 <meta name="author" content="Martin R. Smith martin.smith@durham.ac.uk" />
 
-<meta name="date" content="2022-07-20" />
+<meta name="date" content="2022-09-14" />
 
 <title>Loading phylogenetic data into R</title>
 
@@ -356,7 +356,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Loading phylogenetic data into R</h1>
 <h4 class="author">Martin R. Smith <a href="mailto:martin.smith@durham.ac.uk" class="email">martin.smith@durham.ac.uk</a></h4>
-<h4 class="date">2022-07-20</h4>
+<h4 class="date">2022-09-14</h4>
 
 
 
@@ -369,30 +369,31 @@ file</a>.</p>
 <div id="from-an-excel-spreadsheet" class="section level2">
 <h2>From an Excel spreadsheet</h2>
 <p>If your data is in an Excel spreadsheet, one way to load it into R is
-using the <code>xlsx</code> package. First you’ll have to install
-it:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">&#39;xlsx&#39;</span>) <span class="co"># You only need to do this once</span></span></code></pre></div>
+using the ‘<a href="https://readxl.tidyverse.org/">readxl</a>’ package.
+First you’ll have to install it:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">&quot;readxl&quot;</span>) <span class="co"># You only need to do this once</span></span></code></pre></div>
 <p>Then you should prepare your Excel spreadsheet such that each row
 corresponds to a taxon, and each column to a character.</p>
 <p>Then you can read the data from the Excel file by telling R which
 sheet, rows and columns contain your data:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&#39;xlsx&#39;</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>raw_data <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">read.xlsx</span>(filename, </span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>                      <span class="at">sheetIndex =</span> <span class="dv">1</span>, <span class="co"># Loads sheet number 1 from the excel file</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>                      <span class="at">rowIndex =</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">21</span>, <span class="co"># Extracts rows 2 to 21</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>                      <span class="at">colIndex =</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">26</span>, <span class="co"># Extracts columns B to Z</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>                      <span class="at">header =</span> <span class="cn">FALSE</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>                      ))</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># In this example, the names of taxa are in column 1</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>taxon_names <span class="ot">&lt;-</span> <span class="fu">read.xlsx</span>(filename, <span class="at">sheetIndex =</span> <span class="dv">1</span>, <span class="at">rowIndex =</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">21</span>, </span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>                         <span class="at">colIndex =</span> <span class="dv">1</span>, <span class="at">as.data.frame=</span><span class="cn">FALSE</span>)</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>                         </span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(raw_data) <span class="ot">&lt;-</span> taxon_names</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;readxl&quot;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>raw_data <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">read_excel</span>(</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  filename,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">sheet =</span> <span class="dv">1</span>,           <span class="co"># Loads sheet number 1 from the excel file</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">range =</span> <span class="st">&quot;B1:AA21&quot;</span>,   <span class="co"># Extracts columns B to AA, rows 1 to 21</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Note that the first row is interpreted as column (character) names</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">col_types =</span> <span class="st">&quot;text&quot;</span>   <span class="co"># Read all columns as character strings</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Read row (taxon) names from column A</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Again, the first cell will be interpreted as a column name</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>taxon_names <span class="ot">&lt;-</span> <span class="fu">unlist</span>(<span class="fu">read_excel</span>(filename, <span class="at">sheet =</span> <span class="dv">1</span>, <span class="at">range =</span> <span class="st">&quot;A1:A21&quot;</span>))</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(raw_data) <span class="ot">&lt;-</span> taxon_names</span></code></pre></div>
 </div>
 <div id="from-a-nexus-file" class="section level2">
 <h2>From a Nexus file</h2>
-<p><code>TreeTools</code> contains an inbuilt Nexus parser:</p>
+<p>TreeTools contains an inbuilt Nexus parser:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>raw_data <span class="ot">&lt;-</span> <span class="fu">ReadCharacters</span>(filename)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Or, to go straight to PhyDat format:</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>as_phydat <span class="ot">&lt;-</span> <span class="fu">ReadAsPhyDat</span>(filename)</span></code></pre></div>
@@ -441,8 +442,8 @@ me know</a>.</p>
 <p>Failing that, you can enlist the help of the ‘phangorn’ package:</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">&#39;phangorn&#39;</span>)</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&#39;phangorn&#39;</span>)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>my_data <span class="ot">&lt;-</span> <span class="fu">phyDat</span>(raw_data, <span class="at">type=</span><span class="st">&#39;USER&#39;</span>, <span class="at">levels=</span><span class="fu">c</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">9</span>, <span class="st">&#39;-&#39;</span>))</span></code></pre></div>
-<p><code>type=&#39;USER&#39;</code> tells the parser to expect morphological
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>my_data <span class="ot">&lt;-</span> <span class="fu">phyDat</span>(raw_data, <span class="at">type =</span> <span class="st">&quot;USER&quot;</span>, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">9</span>, <span class="st">&quot;-&quot;</span>))</span></code></pre></div>
+<p><code>type=&quot;USER&quot;</code> tells the parser to expect morphological
 data.</p>
 <p>The <code>levels</code> parameter simply lists all the states that
 any character might take. <code>0:9</code> includes all the integer
@@ -483,7 +484,7 @@ navigating to index &gt; package vignettes.</p>
 ## + 1 1 0
 ## ? 1 1 1</code></pre>
 <p>If you need to use a contrast matrix, convert the data using</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>my.phyDat <span class="ot">&lt;-</span> <span class="fu">phyDat</span>(my.data, <span class="at">type=</span><span class="st">&#39;USER&#39;</span>, <span class="at">contrast=</span>contrast.matrix)</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>my.phyDat <span class="ot">&lt;-</span> <span class="fu">phyDat</span>(my.data, <span class="at">type =</span> <span class="st">&quot;USER&quot;</span>, <span class="at">contrast =</span> contrast.matrix)</span></code></pre></div>
 </div>
 <div id="what-next" class="section level1">
 <h1>What next?</h1>

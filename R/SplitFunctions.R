@@ -69,7 +69,7 @@ Subsplit <- function(splits, tips, keepAll = FALSE, unique = TRUE) {
 #'
 #' TrivialSplits(efgh)
 #' @export
-TrivialSplits <- function(splits, nTip = attr(splits, 'nTip')) {
+TrivialSplits <- function(splits, nTip = attr(splits, "nTip")) {
   inSplit <- TipsInSplits(splits)
   inSplit < 2L | inSplit > nTip - 2L
 }
@@ -105,7 +105,7 @@ WithoutTrivialSplits <- function(splits, nTip = attr(splits, "nTip")) {
 #' @export
 CompatibleSplits <- function(splits, splits2) {
   splits <- as.Splits(splits)
-  nTip <- attr(splits, 'nTip')
+  nTip <- attr(splits, "nTip")
   splits2 <- as.Splits(splits2, splits)
   apply(splits2, 1, function(split)
     apply(splits, 1, .CompatibleSplit, split, nTip))
@@ -168,7 +168,7 @@ SplitMatchProbability <- function(split1, split2) {
   split2 <- as.logical(as.Splits(split2, split1))
   partitions <- c(sum(split1 & split2), sum(split1 & !split2),
                   sum(!split1 & split2), sum(!split1 & !split2))
-  #, dimnames=list(c('A1', 'B1'), c('A2', 'B2')))
+  #, dimnames=list(c("A1", "B1"), c("A2", "B2")))
 
   split1Size <- .rowSums(partitions, 2, 2)
   split2Size <- .colSums(partitions, 2, 2)
@@ -243,7 +243,7 @@ LnSplitMatchProbability <- function(split1, split2) {
 #' TipLabels(BalancedTree(letters[5:1]))
 #' TipLabels(5)
 #'
-#' data('Lobo')
+#' data("Lobo")
 #' head(TipLabels(Lobo.phy))
 #'
 #' AllTipLabels(c(BalancedTree(4), PectinateTree(8)))
@@ -251,7 +251,7 @@ LnSplitMatchProbability <- function(split1, split2) {
 #' @family tree properties
 #' @template MRS
 #' @export
-TipLabels <- function(x, single = TRUE) UseMethod('TipLabels')
+TipLabels <- function(x, single = TRUE) UseMethod("TipLabels")
 
 #' @rdname TipLabels
 #' @export
@@ -299,7 +299,7 @@ TipLabels.list <- function(x, single = FALSE) {
 
 #' @rdname TipLabels
 #' @export
-AllTipLabels <- function(x) UseMethod('AllTipLabels')
+AllTipLabels <- function(x) UseMethod("AllTipLabels")
 
 #' @rdname TipLabels
 #' @export
@@ -366,15 +366,21 @@ TipLabels.multiPhylo <- function(x, single = FALSE) {
 
 #' @rdname TipLabels
 #' @export
-TipLabels.character <- function(x, single = TRUE) x
+TipLabels.character <- function(x, single = TRUE) {
+  if (is.null(attr(x, "tip.label"))) {
+    x
+  } else {
+    attr(x, "tip.label")
+  }
+}
 
 #' @rdname TipLabels
 #' @export
 TipLabels.numeric <- function(x, single = TRUE) {
   if (length(x) == 1L) {
-    paste0('t', seq_len(x))}
+    paste0("t", seq_len(x))}
   else {
-    NextMethod('TipLabels', as.character(x))
+    NextMethod("TipLabels", as.character(x))
   }
 }
 
