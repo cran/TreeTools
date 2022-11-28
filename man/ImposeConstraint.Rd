@@ -12,8 +12,10 @@ AddUnconstrained(constraint, toAdd, asPhyDat = TRUE)
 \arguments{
 \item{tree}{A tree of class \code{\link[ape:read.tree]{phylo}}.}
 
-\item{constraint}{An object of class \code{phyDat}; returned trees will be
-perfectly compatible with each character in \code{constraint}.
+\item{constraint}{Either an object of class \code{phyDat}, in which case returned
+trees will be perfectly compatible with each character in \code{constraint};
+or a tree of class \code{phylo}, in which each node in \code{constraint} will occur in
+the returned tree.
 See \href{https://ms609.github.io/TreeSearch/articles/tree-search.html}{vignette}
 for further examples.}
 
@@ -61,9 +63,9 @@ Other tree manipulation:
 \code{\link{RenumberTree}()},
 \code{\link{Renumber}()},
 \code{\link{RootTree}()},
-\code{\link{SingleTaxonTree}()},
 \code{\link{SortTree}()},
-\code{\link{Subtree}()}
+\code{\link{Subtree}()},
+\code{\link{TrivialTree}}
 }
 \author{
 Martin R. Smith (\href{mailto:martin.smith@durham.ac.uk}{martin.smith@durham.ac.uk})

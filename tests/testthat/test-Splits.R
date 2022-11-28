@@ -6,6 +6,8 @@ expect_splits_equal <- function(s1, s2, ...) {
 test_that("as.Splits()", {
   A <- FALSE
   B <- TRUE
+  expect_equal(as.Splits(BalancedTree(0)), as.Splits(logical(0)))
+  expect_equal(TipsInSplits(as.Splits(logical(0))), integer(0))
   expect_equal(strsplit(capture_output(summary(as.Splits(c(A, A, B, B)))),
                         "\n")[[1]],
                c("1 bipartition split dividing 4 tips, t1 .. t4",
@@ -62,6 +64,16 @@ test_that("as.Splits()", {
   expect_equal(c("7" = packBits(c(A, B, B, A, A, rep(FALSE, 3))),
                  "8" = packBits(c(A, B, B, A, B, rep(FALSE, 3)))),
                as.Splits(notPreorder)[, 1])
+  
+  expect_equal(as.Splits(list(BalancedTree(3:9), BalancedTree(7:1))),
+               list(as.Splits(BalancedTree(3:9)),
+                    as.Splits(BalancedTree(7:1),
+                              tipLabels = as.character(c(3:7, 2:1)))))
+  
+  expect_equal(as.Splits(c(BalancedTree(3:9), BalancedTree(7:1))),
+               list(as.Splits(BalancedTree(3:9)),
+                    as.Splits(BalancedTree(7:1),
+                              tipLabels = as.character(c(3:7, 2:1)))))
 })
 
 test_that("as.Splits.phylo()", {
@@ -177,9 +189,34 @@ test_that("as.Splits.matrix()", {
 })
 
 test_that("as.Splits.edge()", {
+    
+  # From https://stackoverflow.com/questions/71082379
+  expect_one_of <- function(object, options) {
+    
+    # 1. Capture object and label
+    act <- quasi_label(rlang::enquo(object), arg = "object")
+    
+    # 2. Call expect()
+    compResults <- purrr::map_lgl(options, ~identical(act$val, .x))
+    expect(
+      any(compResults),
+      sprintf(
+        "Input (%s) is not one of the accepted options: %s",
+        toString(act$val),
+        paste(purrr::map_chr(options, toString), collapse = ", ")
+      )
+    )
+    
+    # 3. Invisibly return the value
+    invisible(act$val)
+    
+  }
+  # Test expect_one_of
+  expect_success(expect_one_of(1, list(1, 2)))
+  expect_failure(expect_one_of(0, list(1, 2)), "not one of")
+  
   test <- unname(as.Splits(BalancedTree(4), asSplits = FALSE))
-  expect_true(identical(test, matrix(as.raw(0x0c))) ||
-              identical(test, matrix(as.raw(0x03))))
+  expect_one_of(test, list(matrix(as.raw(0x0c)), matrix(as.raw(0x03))))
 })
 
 test_that("Logical splits don't get caught by as.matrix", {
