@@ -1,3 +1,15 @@
+# TreeTools 1.9.1
+
+## Improvements
+
+- `AddUnconstrained()` and `ImposeConstraint()` handle wider range of inputs.
+
+- `PhyDatToMatrix()` can (and by default does) override levels to write
+  ambiguous tokens in custom formats such as `{01}`.
+
+- Call C functions using symbols, not strings.
+
+
 # TreeTools 1.9.0 #
 
 ## New methods and functions
