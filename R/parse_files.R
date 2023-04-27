@@ -250,7 +250,9 @@ ReadCharacters <- function(filepath, character_num = NULL, encoding = "UTF8") {
       labelEnd <- semicolons[semicolons > labelStart][1]
       if (lines[labelEnd] == ";") labelEnd <- labelEnd - 1
       #attr(dat, "char.labels")
-      colnames(tokens) <- Unquote(lines[labelStart + character_num])
+      colnames(tokens) <- Unquote(
+        .UnescapeQuotes(lines[labelStart + character_num])
+      )
     } else {
       if (length(labelStart) > 1)
         return(list("Multiple CharLabels blocks in Nexus file."))
@@ -281,7 +283,11 @@ ReadCharacters <- function(filepath, character_num = NULL, encoding = "UTF8") {
 
         attr(tokens, "state.labels") <-
           lapply(character_num[seq_along(stateStarts)], function(i)
-            Unquote(stateLines[(stateStarts[i] + 1):(stateEnds[i] - 1)])
+            Unquote(
+              .UnescapeQuotes(
+                stateLines[(stateStarts[i] + 1):(stateEnds[i] - 1)]
+              )
+            )
           )
       }
     } else {
@@ -544,7 +550,11 @@ ReadNotes <- function(filepath, encoding = "UTF8") {
 
     notesEnd <- endBlocks[endBlocks > notesStart][1] - 1L
     notesLines <- lines[(notesStart + 1):notesEnd]
-    notes <- strsplit(paste0(notesLines, collapse = "\r\n"),
+    collapsedLines <- paste0(notesLines, collapse = "\r\n")
+    # Remove [comments]
+    collapsedLines <- gsub("(;\\s*)\\[[^\\]]*\\]", "\\1", collapsedLines,
+                           perl = TRUE)
+    notes <- strsplit(collapsedLines,
                       # (?i) makes perl regexp case insensitive
                       "(?i)\\r\\n\\s*TEXT\\s+", perl = TRUE)[[1]]
 
@@ -615,6 +625,11 @@ Unquote <- function(string) {
   vapply(noSingle, gsub, character(1),
          pattern = "^\\s*\"\\s*(.*?)\\s*\"\\s*$", replacement = "\\1",
          USE.NAMES = FALSE)
+}
+
+# Unescape quotes in Nexus format
+.UnescapeQuotes <- function(string) {
+  gsub("(?=.)''(?=.)", "'", string, perl = TRUE)
 }
 
 #' Decode MorphoBank text

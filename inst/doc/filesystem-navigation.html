@@ -12,7 +12,7 @@
 
 <meta name="author" content="Martin R. Smith martin.smith@durham.ac.uk" />
 
-<meta name="date" content="2023-03-20" />
+<meta name="date" content="2023-04-26" />
 
 <title>File system navigation in R</title>
 
@@ -340,7 +340,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">File system navigation in R</h1>
 <h4 class="author">Martin R. Smith <a href="mailto:martin.smith@durham.ac.uk" class="email">martin.smith@durham.ac.uk</a></h4>
-<h4 class="date">2023-03-20</h4>
+<h4 class="date">2023-04-26</h4>
 
 
 
@@ -348,7 +348,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 can do this by providing the full path to the file on your system. Be
 careful to use forward slashes (<code>/</code>, not <code>\</code>,
 which you’ll get if you copy file paths in Windows).</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>filename <span class="ot">&lt;-</span> <span class="st">&quot;C:/nexus/matrix.nex&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>filename <span class="ot">&lt;-</span> <span class="st">&quot;C:/nexus/matrix.nex&quot;</span></span></code></pre></div>
 <p>You can save typing by giving R a working directory. You can think of
 R as having a file explorer window open invisibly in the background.</p>
 <p>You can see the folder that’s open at the moment by typing
@@ -359,14 +359,14 @@ R as having a file explorer window open invisibly in the background.</p>
 this using the Graphical User Interface</a> in RStudio).</p>
 <p>By setting the directory that your files are in as the working
 directory, you only need to specify the filename:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setwd</span>(<span class="st">&quot;C:/nexus/&quot;</span>) <span class="co"># You only need to do this once</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>filename <span class="ot">&lt;-</span> <span class="st">&quot;matrix.nex&quot;</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Do something with this file</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>filename <span class="ot">&lt;-</span> <span class="st">&quot;tree.nex&quot;</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Do something with this file</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">setwd</span>(<span class="st">&quot;C:/nexus/&quot;</span>) <span class="co"># You only need to do this once</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>filename <span class="ot">&lt;-</span> <span class="st">&quot;matrix.nex&quot;</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co"># Do something with this file</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>filename <span class="ot">&lt;-</span> <span class="st">&quot;tree.nex&quot;</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co"># Do something with this file</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#</span></span></code></pre></div>
 <div id="what-next" class="section level2">
 <h2>What next?</h2>
 <p>Now you know how to locate files, you might want to load a <a href="load-data.html">dataset</a> or <a href="load-trees.html">phylogenetic tree</a> into R.</p>
