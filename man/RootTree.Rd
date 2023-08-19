@@ -58,7 +58,6 @@ plot(RootOnNode(tree, 2))
 \seealso{
 \itemize{
 \item \code{\link[ape:root]{ape::root()}}
-\item \code{\link[=EnforceOutgroup]{EnforceOutgroup()}}
 }
 
 Other tree manipulation: 
@@ -77,6 +76,7 @@ Other tree manipulation:
 \code{\link{Renumber}()},
 \code{\link{SortTree}()},
 \code{\link{Subtree}()},
+\code{\link{TipTimedTree}()},
 \code{\link{TrivialTree}}
 }
 \author{

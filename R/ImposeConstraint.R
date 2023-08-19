@@ -105,8 +105,8 @@ ImposeConstraint <- function(tree, constraint) {
 #' @describeIn ImposeConstraint Expand a constraint to include unconstrained
 #' taxa.
 #' @param toAdd Character vector specifying taxa to add to constraint.
-#' @param asPhyDat Logical: if `TRUE`, return a `phyDat` object; if `FALSE`, return
-#' a matrix.
+#' @param asPhyDat Logical: if `TRUE`, return a `phyDat` object; if `FALSE`,
+#' return a matrix.
 #' @export
 AddUnconstrained <- function(constraint, toAdd, asPhyDat = TRUE) {
   ret <- if (inherits(constraint, "phyDat")) {
@@ -120,8 +120,12 @@ AddUnconstrained <- function(constraint, toAdd, asPhyDat = TRUE) {
   }
   
   toAdd <- setdiff(toAdd, rownames(ret))
-  ret <- rbind(ret, matrix("?", length(toAdd), dim(ret)[2],
-                           dimnames = list(toAdd, NULL)))
+  ret <- if (is.null(ret)) {
+    matrix("?", length(toAdd), 0, dimnames = list(toAdd, NULL))
+  } else {
+    rbind(ret, matrix("?", length(toAdd), dim(ret)[2],
+                      dimnames = list(toAdd, NULL)))
+  }
 
   # Return:
   if (asPhyDat) {

@@ -12,7 +12,7 @@
 
 <meta name="author" content="Martin R. Smith martin.smith@durham.ac.uk" />
 
-<meta name="date" content="2023-04-26" />
+<meta name="date" content="2023-08-18" />
 
 <title>Loading phylogenetic data into R</title>
 
@@ -362,7 +362,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Loading phylogenetic data into R</h1>
 <h4 class="author">Martin R. Smith <a href="mailto:martin.smith@durham.ac.uk" class="email">martin.smith@durham.ac.uk</a></h4>
-<h4 class="date">2023-04-26</h4>
+<h4 class="date">2023-08-18</h4>
 
 
 
@@ -465,19 +465,19 @@ phangorn package, accessible by typing ‘?phangorn’ in the R prompt and
 navigating to index &gt; package vignettes.</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>contrast.matrix <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="at">data =</span> <span class="fu">c</span>(</span>
 <span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="co"># 0 1 -  # Each column corresponds to a character-state</span></span>
-<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  <span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>, <span class="co"># Each row corresponds to a token, here 0, denoting the </span></span>
-<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>         <span class="co"># character-state set {0} </span></span>
-<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  <span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">0</span>, <span class="co"># 1 | {1}</span></span>
-<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>  <span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>, <span class="co"># - | {-}</span></span>
-<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>  <span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">0</span>, <span class="co"># A | {01}</span></span>
-<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>  <span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">0</span>, <span class="co"># + | {01}</span></span>
-<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>  <span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>  <span class="co"># ? | {01-}</span></span>
-<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>), <span class="at">ncol =</span> <span class="dv">3</span>, <span class="co"># ncol should correspond to the number of columns in the matrix</span></span>
-<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="at">byrow =</span> <span class="cn">TRUE</span>); </span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="co"># Each row corresponds to a token, here 0, denoting the </span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>           <span class="co"># character-state set {0} </span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="co"># 1 | {1}</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>  <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="co"># - | {-}</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>  <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="co"># A | {01}</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>  <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="co"># + | {01}</span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>  <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>  <span class="co"># ? | {01-}</span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>), <span class="at">ncol =</span> <span class="dv">3</span>, <span class="co"># ncol corresponds to the number of columns in the matrix</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="fu">dimnames</span>(contrast.matrix) <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>  <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="st">&#39;-&#39;</span>, <span class="st">&#39;A&#39;</span>, <span class="st">&#39;+&#39;</span>, <span class="st">&#39;?&#39;</span>), <span class="co"># A list of the tokens corresponding to each row</span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>  <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="st">&quot;-&quot;</span>, <span class="st">&quot;A&quot;</span>, <span class="st">&quot;+&quot;</span>, <span class="st">&quot;?&quot;</span>), <span class="co"># A list of the tokens corresponding to each row</span></span>
 <span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a>                               <span class="co"># in the contrast matrix</span></span>
-<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a>  <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="st">&#39;-&#39;</span>) <span class="co"># A list of the character-states corresponding to the columns </span></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a>  <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="st">&quot;-&quot;</span>) <span class="co"># A list of the character-states corresponding to the columns </span></span>
 <span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>               <span class="co"># in the contrast matrix</span></span>
 <span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a>)</span>
 <span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a></span>

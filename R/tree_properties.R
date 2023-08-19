@@ -2,58 +2,60 @@
 #'
 #' Quickly identify edges that are "descended" from edges in a tree.
 #'
-#' The order of parameters in `DescendantEdges()` will change in the future,
-#' to allow `AllDescendantEdges()` to be merged into this function
-#' ([#31](https://github.com/ms609/TreeTools/issues/31)).
-#' Please explicitly name the `edge` parameter in `DescendantEdges()`, and
-#' replace `AllDesdendantEdges()` with `DescendantEdges(edge = NULL)`,
-#' to future-proof your code.
-#'
-#' @param edge Integer specifying the number of the edge whose child edges are
-#' required (see \code{\link[ape:nodelabels]{edgelabels}()}).
 #' @template treeParent
 #' @template treeChild
+#' @param edge Integer specifying the number of the edge whose child edges are
+#' required (see \code{\link[ape:nodelabels]{edgelabels}()}).
 #' @param nEdge number of edges (calculated from `length(parent)` if not
 #' supplied).
 #' @return `DescendantEdges()` returns a logical vector stating whether each
 #' edge in turn is a descendant of the specified edge (or the edge itself).
 #' @family tree navigation
 #' @export
-DescendantEdges <- function(edge = NULL, parent, child,
-                             nEdge = length(parent)) {
-  if (is.null(edge)) return(AllDescendantEdges(parent, child, nEdge))
-  ret <- logical(nEdge)
-  edgeSister <- match(parent[edge], parent[-edge])
-  if (edgeSister >= edge) {
-    # edgeSister is really 1 higher than you think, because we knocked out
-    # edge "edge" in the match
-    ret[edge:edgeSister] <- TRUE
-
-    # Return:
-    ret
+DescendantEdges <- function(parent, child, edge = NULL,
+                            nEdge = length(parent)) {
+  if (is.null(edge)) {
+    .AllDescendantEdges(parent, child, nEdge)
   } else {
-    nextEdge <- edge
-    revParent <- rev(parent)
-    repeat {
-      if (revDescendant <- match(child[nextEdge], revParent, nomatch=FALSE)) {
-        nextEdge <- 1 + nEdge - revDescendant
-      } else break;
+    ret <- logical(nEdge)
+    edgeSister <- match(parent[edge], parent[-edge])
+    if (edgeSister >= edge) {
+      # edgeSister is really 1 higher than you think, because we knocked out
+      # edge "edge" in the match
+      ret[edge:edgeSister] <- TRUE
+  
+      # Return:
+      ret
+    } else {
+      nextEdge <- edge
+      revParent <- rev(parent)
+      repeat {
+        if (revDescendant <- match(child[nextEdge], revParent, nomatch=FALSE)) {
+          nextEdge <- 1 + nEdge - revDescendant
+        } else break;
+      }
+      ret[edge:nextEdge] <- TRUE
+  
+      # Return:
+      ret
     }
-    ret[edge:nextEdge] <- TRUE
-
-    # Return:
-    ret
   }
 }
 
 #' @rdname DescendantEdges
 #'
-#' @return `AllDescendantEdges()` returns a matrix of class logical, with row
-#' _N_ specifying whether each edge is a descendant of edge _N_
-#' (or the edge itself).
+#' @return `AllDescendantEdges()` is deprecated; use `DescendantEdges()`
+#' instead.
+#' It returns a matrix of class logical, with row _N_ specifying whether each
+#' edge is a descendant of edge _N_ (or the edge itself).
 #'
 #' @export
 AllDescendantEdges <- function(parent, child, nEdge = length(parent)) {
+  .Deprecated("DescendantEdges")
+  .AllDescendantEdges(parent, child, nEdge)
+}
+
+.AllDescendantEdges <- function(parent, child, nEdge = length(parent)) {
   ret <- diag(nEdge) == 1
   blankLogical <- logical(nEdge)
   allEdges <- seq_len(nEdge)
@@ -251,10 +253,11 @@ NodeDepth.matrix <- function(x, shortest = FALSE, includeTips = TRUE) {
 
 }
 
-#' Order of each node in a tree
+#' Number of edges incident to each node in a tree
 #'
-#' `NodeOrder()` calculates the number of edges incident to each node in a tree.
-#' Includes the root edge in rooted trees.
+#' `NodeOrder()` calculates the order of each node: the number of edges
+#' incident to it in a tree.
+#' This value includes the root edge in rooted trees.
 #'
 #' @template xPhylo
 #' @param includeAncestor Logical specifying whether to count edge leading to
@@ -481,53 +484,6 @@ EdgeDistances <- function(tree) {
   ret[origOrder, origOrder]
 }
 
-# Used by TreeSearch::SPR
-# Deprecate once SPR replaced with a function in C.
-#' Non-duplicate root
-#'
-#' Identify, for each edge, whether it denotes a different partition from
-#' the root edge.
-#' The first edge of the input tree must be a root edge; this can be
-#' accomplished using `Preorder()`.
-#'
-#' This function is deprecated; if you use it, please
-#' [comment (#32)](https://github.com/ms609/TreeTools/issues/32)
-#' so that a suitable replacement can be guaranteed.
-#'
-#' @template treeParent
-#' @template treeChild
-#' @template treeNEdgeOptional
-#'
-#' @return `NonDuplicateRoot()` returns a logical vector of length `nEdge`,
-#' specifying `TRUE` unless an edge identifies the same partition as
-#' the root edge.
-#'
-#' @examples
-#' tree <- Preorder(BalancedTree(8))
-#' edge <- tree$edge
-#' parent <- edge[, 1]
-#' child <- edge[, 2]
-#'
-#' which(!NonDuplicateRoot(parent, child))
-#'
-#' @keywords internal
-#' @template MRS
-#' @family tree navigation
-#' @export
-NonDuplicateRoot <- function(parent, child, nEdge = length(parent)) {
-  notDuplicateRoot <- !logical(nEdge)
-  rightSide <- DescendantEdges(1, parent, child, nEdge)
-  nEdgeRight <- sum(rightSide)
-  if (nEdgeRight == 1) {
-    notDuplicateRoot[2] <- FALSE
-  } else if (nEdgeRight == 3) {
-    notDuplicateRoot[4] <- FALSE
-  } else {
-    notDuplicateRoot[1] <- FALSE
-  }
-  notDuplicateRoot
-}
-
 #' Number of leaves in a phylogenetic tree
 #'
 #' `NTip()` extends [`ape::Ntip()`][ape::summary.phylo] to handle
@@ -621,7 +577,11 @@ NPartitions <- NSplits
 #' @rdname NSplits
 #' @export
 NSplits.phylo <- function(x) {
-  collapse.singles(x)[["Nnode"]] - 1L - TreeIsRooted(x)
+  if (length(x[["tip.label"]]) < 4L) {
+    0L
+  } else {
+    collapse.singles(x)[["Nnode"]] - 1L - TreeIsRooted(x)
+  }
 }
 
 #' @rdname NSplits
