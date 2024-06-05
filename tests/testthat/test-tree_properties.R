@@ -5,32 +5,11 @@ nasty <- structure(list(edge = structure(
   Nnode = 5L,
   tip.label = letters[1:8]),
   class = "phylo") # Danger: Do not plot!
-
-test_that("AllDescendantEdges() works", {
-  pec5 <- UnrootTree(PectinateTree(5))
-  V <- TRUE; x <- FALSE
-  expect_equal(
-    DescendantEdges(edge = NULL, pec5$edge[, 1], pec5$edge[, 2]),
-    matrix(c(V, x, x, x, x, x, x,
-             x, V, x, x, x, x, x,
-             x, x, V, V, V, V, V,
-             x, x, x, V, x, x, x,
-             x, x, x, x, V, V, V,
-             x, x, x, x, x, V, x,
-             x, x, x, x, x, x, V), 7, 7, byrow = T))
-  expect_warning(AllDescendantEdges(pec5$edge[, 1], pec5$edge[, 2]),
-                 "deprecated")
-})
-
-test_that("EdgeAncestry() works", {
-  tree <- BalancedTree(10)
-  edge <- tree$edge
-  parent <- edge[, 1]
-  child <- edge[, 2]
-  expect_equal(which(EdgeAncestry(4L, parent, child)), 1:3)
-  expect_equal(which(EdgeAncestry(2, parent, child)), 1)
-  expect_equal(which(EdgeAncestry(1, parent, child)), integer(0))
-  expect_equal(EdgeAncestry(10, parent, child), logical(18))
+test_that("NodeNumbers() works", {
+  expect_equal(NodeNumbers(BalancedTree(5)), 6:9)
+  expect_equal(NodeNumbers(StarTree(5)), 6L)
+  expect_equal(NodeNumbers(BalancedTree(5), TRUE), 1:9)
+  expect_equal(NodeNumbers(StarTree(5), TRUE), 1:6)
 })
 
 test_that("Root node can be found", {
@@ -123,16 +102,6 @@ test_that("NSplits() works", {
   expect_equal(NSplits(5L), NSplits(LETTERS[1:5]))
   expect_equal(NSplits(as.ClusterTable(BalancedTree(6))),
                NSplits(BalancedTree(6)))
-})
-
-test_that("MRCA() works", {
-  bal7 <- BalancedTree(7)
-  allAnc <- AllAncestors(bal7$edge[, 1], bal7$edge[, 2])
-  expect_equal(9, MRCA(1, 4, allAnc))
-  expect_equal(8, MRCA(1, 6, allAnc))
-  expect_equal(8, MRCA(1, 7, allAnc))
-  expect_equal(1, MRCA(1, 1, allAnc))
-  expect_equal(9, MRCA(1, 11, allAnc))
 })
 
 test_that("Edge distances are calculated correctly", {

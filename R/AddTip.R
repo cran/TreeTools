@@ -10,16 +10,22 @@
 #' node.  To add a new tip at the root, use `where = 0`.  By default, the
 #' new tip is added to a random edge.
 #' @param label Character string providing the label to apply to the new tip.
-#' @param edgeLength Numeric specifying length of new edge
+#' @param nodeLabel Character string providing a label to apply to the newly
+#' created node, if `tree$node.label` is specified.
+#' @param edgeLength Numeric specifying length of new edge. If `NULL`,
+#' defaults to `lengthBelow`.
+# Notice added in v1.10.0.9001, 2024-02-20:
+#' This will become the default behaviour in a
+#' future release; please manually specify the desired behaviour in your code.
 #' @param lengthBelow Numeric specifying length below neighbour at which to
 #' graft new edge. Values greater than the length of the edge will result
 #' in negative edge lengths. If `NULL`, the default, the new tip will be added
 #' at the midpoint of the broken edge. If inserting at the root (`where = 0`),
 #' a new edge of length `lengthBelow` will be inserted.
-#' @param nTip,nNode,rootNode Optional integer vectors specifying number of tips and
-#' nodes in `tree`, and index of root node.
-#' Not checked for correctness: specifying values here trades code safety for a
-#' nominal speed increase.
+#' @param nTip,nNode,rootNode Optional integer vectors specifying number of tips
+#' and nodes in `tree`, and index of root node.
+#' Not checked for correctness: specifying values here yields a marginal speed
+#' increase at the cost of code safety.
 #'
 #' @return `AddTip()` returns a tree of class `phylo` with an additional tip
 #' at the desired location.
@@ -29,19 +35,33 @@
 #' @seealso Add one tree to another: \code{\link{bind.tree}()}
 #'
 #' @examples
-#' plot(tree <- BalancedTree(10))
+#' tree <- BalancedTree(10)
+#' 
+#' # Add a leaf below an internal node
+#' plot(tree)
 #' ape::nodelabels()
-#' ape::nodelabels(15, 15, bg="green")
+#' node <- 15
+#' ape::nodelabels(bg = ifelse(NodeNumbers(tree) == node, "green", "grey"))
 #'
 #' plot(AddTip(tree, 15, "NEW_TIP"))
-#'
+#' 
+#' # Add edge lengths for an ultrametric tree
+#' tree$edge.length <- rep(c(rep(1, 5), 2, 1, 2, 2), 2)
+#' 
+#' # Add a leaf to an external edge
+#' leaf <- 5
+#' plot(tree)
+#' ape::tiplabels(bg = ifelse(seq_len(NTip(tree)) == leaf, "green", "grey"))
+#' 
+#' plot(AddTip(tree, 5, "NEW_TIP", edgeLength = NULL))
+#' 
 #' @keywords tree
 #' @family tree manipulation
-#'
 #' @export
 AddTip <- function(tree,
                    where = sample.int(tree[["Nnode"]] * 2 + 2L, size = 1) - 1L,
                    label = "New tip",
+                   nodeLabel = "",
                    edgeLength = 0,
                    lengthBelow = NULL,
                    nTip = NTip(tree),
@@ -55,7 +75,9 @@ AddTip <- function(tree,
   
   if (is.character(where)) {
     tmp <- match(where, TipLabels(tree))
-    if (is.na(tmp)) stop("No tip labelled '", where, "'")
+    if (is.na(tmp)) {
+      stop("No tip labelled '", where, "'")
+    }
     where <- tmp
   }
   ## find the row of "where" before renumbering
@@ -83,7 +105,8 @@ AddTip <- function(tree,
       if (is.null(lengthBelow)) {
         lengthBelow <- 0
       }
-      edgeLengths <- c(lengthBelow, edgeLengths, edgeLength)
+      edgeLengths <- c(lengthBelow, edgeLengths, 
+                       if(is.null(edgeLength)) lengthBelow else edgeLength)
     }
     rootNode <- nextNode
   }, { # case = 2 -> y is bound on a tip of x
@@ -100,7 +123,7 @@ AddTip <- function(tree,
       edgeLengths <- c(edgeLengths[beforeInsertion[-insertionEdge]],
                        edgeLengths[insertionEdge] - lengthBelow,
                        lengthBelow,
-                       edgeLength,
+                       if(is.null(edgeLength)) lengthBelow else edgeLength,
                        edgeLengths[-beforeInsertion])
     }
   }, { # case = 3 -> y is bound on a node of x
@@ -118,7 +141,7 @@ AddTip <- function(tree,
       }
       edgeLengths <- c(edgeLengths[beforeInsertion[-insertionEdge]],
                        edgeLengths[insertionEdge] - lengthBelow,
-                       edgeLength,
+                       if(is.null(edgeLength)) lengthBelow else edgeLength,
                        lengthBelow,
                        edgeLengths[-beforeInsertion])
     }
@@ -146,6 +169,13 @@ AddTip <- function(tree,
     tree[["edge.length"]] <- edgeLengths
   }
   
+  nodeLabels <- tree[["node.label"]]
+  if (!is.null(nodeLabels)) {
+    newLabels <- character(nNode)
+    newLabels[newNumbering - newTipNumber] <- c(nodeLabels, "")
+    tree[["node.label"]] <- newLabels
+  }
+  
   # Return:
   tree
 }
@@ -161,18 +191,21 @@ AddTip <- function(tree,
 #' the trees produced by adding `label` to each edge of `tree` in turn.
 #'
 #' @examples
+#' # Set up multi-panel plot
 #' oldPar <- par(mfrow = c(2, 4), mar = rep(0.3, 4), cex = 0.9)
 #'
+#' # Add leaf to each edge on a tree in turn
 #' backbone <- BalancedTree(4)
 #' # Treating the position of the root as instructive:
 #' additions <- AddTipEverywhere(backbone, includeRoot = TRUE)
 #' xx <- lapply(additions, plot)
 #'
-#' par(mfrow=c(2, 3))
+#' par(mfrow = c(2, 3))
 #' # Don't treat root edges as distinct:
 #' additions <- AddTipEverywhere(backbone, includeRoot = FALSE)
 #' xx <- lapply(additions, plot)
 #'
+#' # Restore original plotting parameters
 #' par(oldPar)
 #'
 #' @importFrom ape is.rooted

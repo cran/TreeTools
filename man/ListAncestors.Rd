@@ -79,8 +79,10 @@ Other tree navigation:
 \code{\link{EdgeAncestry}()},
 \code{\link{EdgeDistances}()},
 \code{\link{MRCA}()},
+\code{\link{MatchEdges}()},
 \code{\link{NDescendants}()},
 \code{\link{NodeDepth}()},
+\code{\link{NodeNumbers}()},
 \code{\link{NodeOrder}()},
 \code{\link{RootNode}()}
 
@@ -91,8 +93,10 @@ Other tree navigation:
 \code{\link{EdgeAncestry}()},
 \code{\link{EdgeDistances}()},
 \code{\link{MRCA}()},
+\code{\link{MatchEdges}()},
 \code{\link{NDescendants}()},
 \code{\link{NodeDepth}()},
+\code{\link{NodeNumbers}()},
 \code{\link{NodeOrder}()},
 \code{\link{RootNode}()}
 }

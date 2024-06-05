@@ -71,9 +71,9 @@ Other tree manipulation:
 \code{\link{KeptVerts}()},
 \code{\link{LeafLabelInterchange}()},
 \code{\link{MakeTreeBinary}()},
+\code{\link{Renumber}()},
 \code{\link{RenumberTips}()},
 \code{\link{RenumberTree}()},
-\code{\link{Renumber}()},
 \code{\link{RootTree}()},
 \code{\link{SortTree}()},
 \code{\link{Subtree}()},
@@ -81,8 +81,10 @@ Other tree manipulation:
 \code{\link{TrivialTree}}
 
 Other tree properties: 
+\code{\link{MatchEdges}()},
 \code{\link{NSplits}()},
 \code{\link{NTip}()},
+\code{\link{NodeNumbers}()},
 \code{\link{PathLengths}()},
 \code{\link{SplitsInBinaryTree}()},
 \code{\link{TipLabels}()},

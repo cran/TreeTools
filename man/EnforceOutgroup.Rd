@@ -21,15 +21,17 @@ a random tree will be generated.}
 the outgroup.}
 }
 \value{
-\code{EnforceOutgroup()} returns a tree of class \code{phylo} where all
+\code{EnforceOutgroup()} returned a tree of class \code{phylo} where all
 outgroup taxa are sister to all remaining taxa, without modifying the
 ingroup topology.
 }
 \description{
-Deprecated. Use \code{RootTree()} instead.
+\strong{Deprecated.} This function will be removed in a future version of
+\pkg{TreeTools}.
+Use \code{RootTree()} instead.
 }
 \details{
-Given a tree or a list of taxa, \code{EnforceOutgroup()} rearranges the ingroup
+Given a tree or a list of taxa, \code{EnforceOutgroup()} rearranged the ingroup
 and outgroup taxa such that the two are sister taxa across the root, without
 changing the relationships within the ingroup or within the outgroup.
 }
@@ -48,9 +50,9 @@ Other tree manipulation:
 \code{\link{KeptVerts}()},
 \code{\link{LeafLabelInterchange}()},
 \code{\link{MakeTreeBinary}()},
+\code{\link{Renumber}()},
 \code{\link{RenumberTips}()},
 \code{\link{RenumberTree}()},
-\code{\link{Renumber}()},
 \code{\link{RootTree}()},
 \code{\link{SortTree}()},
 \code{\link{Subtree}()},

@@ -34,23 +34,26 @@ Renumber <- function(tree) {
   NODES  <- child > nTip
   TIPS   <- !NODES
   nNode  <- sum(NODES) + 1 # Root node has no edge leading to it, so add 1
+  nodeLb <- tree[["node.label"]]
 
   tip <- child[TIPS]
-  name <- vector("character", length(tip))
-  name[1:nTip] <- tree[["tip.label"]][tip]
-  tree[["tip.label"]] <- name
-  child[TIPS] <- 1:nTip
+  tree[["tip.label"]] <- tree[["tip.label"]][tip]
+  child[TIPS] <- seq_len(nTip)
 
   old.node.number <- unique(parent)
   new.node.number <- rev(nTip + seq_along(old.node.number))
   renumbering.schema <- integer(nNode)
   renumbering.schema[old.node.number - nTip] <- new.node.number
   child[NODES] <- renumbering.schema[child[NODES] - nTip]
-  nodeseq <- (1L:nNode) * 2L
+  nodeseq <- seq_len(nNode) * 2L
   parent <- renumbering.schema[parent - nTip]
+  if (!is.null(nodeLb)) {
+    tree[["node.label"]][new.node.number - nTip] <- 
+      nodeLb[old.node.number - nTip]
+  }
 
-  tree[["edge"]][,1] <- parent
-  tree[["edge"]][,2] <- child
+  tree[["edge"]][, 1] <- parent
+  tree[["edge"]][, 2] <- child
   Cladewise(tree)
 }
 
@@ -123,14 +126,18 @@ Subtree <- function(tree, node) {
   }
   tipLabel <- tree[["tip.label"]]
   nTip <- length(tipLabel)
-  if (node <= nTip) return(SingleTaxonTree(tipLabel[node]))
-  if (node == nTip + 1L) return(tree)
+  if (node <= nTip) {
+    return(SingleTaxonTree(tipLabel[node]))
+  }
+  if (node == nTip + 1L) {
+    return(tree)
+  }
 
   edge <- tree[["edge"]]
   parent <- edge[, 1]
   child <- edge[, 2]
   subtreeParentEdge <- match(node, child)
-  keepEdge <- DescendantEdges(parent, child, subtreeParentEdge)
+  keepEdge <- DescendantEdges(parent, child, edge = subtreeParentEdge)
   keepEdge[subtreeParentEdge] <- FALSE
 
   edge <- edge[keepEdge, ]
@@ -148,16 +155,22 @@ Subtree <- function(tree, node) {
 
   ## renumber nodes:
   nodeAdjust <- new.nTip + 1 - node
+  keptLabels <- c(node, edge2[!isTip]) - nTip
   edge2[!isTip] <- edge2[!isTip] + nodeAdjust
   edge[, 1] <- edge1 + nodeAdjust
   edge[, 2] <- edge2
 
-  # Return:
-  structure(list(
+  ret <- structure(list(
     tip.label = name,
-    Nnode = dim(edge)[1] - new.nTip + 1L,
+    Nnode = dim(edge)[[1]] - new.nTip + 1L,
     edge = edge
   ), class = "phylo", order = "preorder")
+  if (!is.null(tree[["node.label"]])) {
+    ret[["node.label"]] <- tree[["node.label"]][keptLabels]
+  }
+  
+  # Return:
+  ret
 }
 
 #' List ancestors

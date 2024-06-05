@@ -1,95 +1,22 @@
-#' Identify descendant edges
-#'
-#' Quickly identify edges that are "descended" from edges in a tree.
-#'
-#' @template treeParent
-#' @template treeChild
-#' @param edge Integer specifying the number of the edge whose child edges are
-#' required (see \code{\link[ape:nodelabels]{edgelabels}()}).
-#' @param nEdge number of edges (calculated from `length(parent)` if not
-#' supplied).
-#' @return `DescendantEdges()` returns a logical vector stating whether each
-#' edge in turn is a descendant of the specified edge (or the edge itself).
-#' @family tree navigation
-#' @export
-DescendantEdges <- function(parent, child, edge = NULL,
-                            nEdge = length(parent)) {
-  if (is.null(edge)) {
-    .AllDescendantEdges(parent, child, nEdge)
-  } else {
-    ret <- logical(nEdge)
-    edgeSister <- match(parent[edge], parent[-edge])
-    if (edgeSister >= edge) {
-      # edgeSister is really 1 higher than you think, because we knocked out
-      # edge "edge" in the match
-      ret[edge:edgeSister] <- TRUE
-  
-      # Return:
-      ret
-    } else {
-      nextEdge <- edge
-      revParent <- rev(parent)
-      repeat {
-        if (revDescendant <- match(child[nextEdge], revParent, nomatch=FALSE)) {
-          nextEdge <- 1 + nEdge - revDescendant
-        } else break;
-      }
-      ret[edge:nextEdge] <- TRUE
-  
-      # Return:
-      ret
-    }
-  }
-}
-
-#' @rdname DescendantEdges
-#'
-#' @return `AllDescendantEdges()` is deprecated; use `DescendantEdges()`
-#' instead.
-#' It returns a matrix of class logical, with row _N_ specifying whether each
-#' edge is a descendant of edge _N_ (or the edge itself).
-#'
-#' @export
-AllDescendantEdges <- function(parent, child, nEdge = length(parent)) {
-  .Deprecated("DescendantEdges")
-  .AllDescendantEdges(parent, child, nEdge)
-}
-
-.AllDescendantEdges <- function(parent, child, nEdge = length(parent)) {
-  ret <- diag(nEdge) == 1
-  blankLogical <- logical(nEdge)
-  allEdges <- seq_len(nEdge)
-  for (edge in rev(allEdges[child > parent[1]])) {
-    ret[edge, ] <- apply(ret[parent == child[edge], ], 2, any)
-    ret[edge, edge] <- TRUE
-  }
-
-  # Return:
-  ret
-}
-
-#' Count descendants for each node in a tree
-#'
-#' `NDescendants()` counts the number of nodes (including leaves) directly
-#' descended from each node in a tree.
-#'
+#' Numeric index of each node in a tree
+#' `NodeNumbers()` returns a sequence corresponding to the nodes in a tree
+#' 
 #' @template treeParam
-#'
-#' @return `NDescendants()` returns an integer listing the number of direct
-#' descendants (leaves or internal nodes) for each node in a tree.
-#'
-#' @examples
-#' tree <- CollapseNode(BalancedTree(8), 12:15)
-#' NDescendants(tree)
-#' plot(tree)
-#' nodelabels(NDescendants(tree))
-#'
+#' @param tips Logical specifying whether to also include the indices of leaves.
+#' @return `NodeNumbers()` returns an integer vector corresponding to the
+#' indices of nodes within a tree.
 #' @template MRS
+#' @family tree properties
 #' @family tree navigation
 #' @export
-NDescendants <- function(tree) {
-  NodeOrder(tree[["edge"]], includeAncestor = FALSE)
+NodeNumbers <- function(tree, tips = FALSE) {
+  if (tips) {
+    seq_len(NTip(tree) + tree[["Nnode"]])
+  } else {
+    NTip(tree) + seq_len(tree[["Nnode"]])
+  }
 }
+
 
 #' Distance of each node from tree exterior
 #'
@@ -306,116 +233,6 @@ NodeOrder.matrix <- function(x, includeAncestor = TRUE, internalOnly = FALSE) {
     }
   } else {
     tabulate(x[, 1])[-seq_len(min(x[, 1]) - 1L)]
-  }
-}
-
-#' Ancestral edge
-#'
-#' @param edge Number of an edge
-#' @template treeParent
-#' @template treeChild
-#' @return `AncestorEdge` returns a logical vector identifying whether each edge
-#' is the immediate ancestor of the given edge.
-#' @examples
-#' tree <- BalancedTree(6)
-#' parent <- tree$edge[, 1]
-#' child <- tree$edge[, 2]
-#' plot(tree)
-#' ape::edgelabels()
-#' AncestorEdge(5, parent, child)
-#' which(AncestorEdge(5, parent, child))
-#'
-#' @keywords internal
-#' @family tree navigation
-#' @export
-AncestorEdge <- function(edge, parent, child) child == parent[edge]
-
-#' Ancestors of an edge
-#'
-#' Quickly identify edges that are "ancestral" to a particular edge in a tree.
-#'
-#' @param edge Integer specifying the number of the edge whose child edges
-#' should be returned.
-#' @template treeParent
-#' @template treeChild
-#' @param stopAt Integer or logical vector specifying the edge(s) at which to
-#' terminate the search; defaults to the edges with the smallest parent,
-#' which will be the root edges if nodes are numbered [Cladewise] or in
-#' [Preorder].
-#'
-#' @return `EdgeAncestry()` returns a logical vector stating whether each edge
-#' in turn is a descendant of the specified edge.
-#'
-#' @examples
-#' tree <- PectinateTree(6)
-#' plot(tree)
-#' ape::edgelabels()
-#' parent <- tree$edge[, 1]
-#' child <- tree$edge[, 2]
-#' EdgeAncestry(7, parent, child)
-#' which(EdgeAncestry(7, parent, child, stopAt = 4))
-#'
-#' @template MRS
-#' @family tree navigation
-#' @export
-EdgeAncestry <- function(edge, parent, child,
-                          stopAt = (parent == min(parent))) {
-  ret <- edge <- AncestorEdge(edge, parent, child)
-  if (any(ret)) repeat {
-    if (any(ret[stopAt])) return(ret)
-    ret[edge <- AncestorEdge(edge, parent, child)] <- TRUE
-  }
-  # Return:
-  ret
-}
-
-#' Most recent common ancestor
-#'
-#' `MRCA()` calculates the last common ancestor of specified nodes.
-#'
-#' `MRCA()` requires that node values within a tree increase away from the root,
-#' which will be true of trees listed in `Preorder`.
-#' No warnings will be given if trees do not fulfil this requirement.
-#'
-#' @param x1,x2 Integer specifying index of leaves or nodes whose most
-#' recent common ancestor should be found.
-#' @param ancestors List of ancestors for each node in a tree. Perhaps
-#' produced by [`ListAncestors()`].
-#'
-#' @return `MRCA()` returns an integer specifying the node number of the last
-#' common ancestor of `x1` and `x2`.
-#'
-#' @family tree navigation
-#' @template MRS
-#'
-#' @examples
-#' tree <- BalancedTree(7)
-#'
-#' # Verify that node numbering increases away from root
-#' plot(tree)
-#' nodelabels()
-#'
-#' # ListAncestors expects a tree in Preorder
-#' tree <- Preorder(tree)
-#' edge <- tree$edge
-#' ancestors <- ListAncestors(edge[, 1], edge[, 2])
-#' MRCA(1, 4, ancestors)
-#'
-#' # If a tree must be in postorder, use:
-#' tree <- Postorder(tree)
-#' edge <- tree$edge
-#' ancestors <- lapply(seq_len(max(edge)), ListAncestors,
-#'                     parent = edge[, 1], child = edge[, 2])
-
-#'
-#' @export
-MRCA <- function(x1, x2, ancestors) {
-  if (x1 == x2) {
-    x1
-  } else {
-    anc1 <- ancestors[[x1]]
-    anc2 <- ancestors[[x2]]
-    max(intersect(anc1, anc2))
   }
 }
 

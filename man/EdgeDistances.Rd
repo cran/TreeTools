@@ -38,8 +38,10 @@ Other tree navigation:
 \code{\link{EdgeAncestry}()},
 \code{\link{ListAncestors}()},
 \code{\link{MRCA}()},
+\code{\link{MatchEdges}()},
 \code{\link{NDescendants}()},
 \code{\link{NodeDepth}()},
+\code{\link{NodeNumbers}()},
 \code{\link{NodeOrder}()},
 \code{\link{RootNode}()}
 }

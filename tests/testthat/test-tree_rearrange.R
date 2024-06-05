@@ -296,6 +296,42 @@ test_that("CollapseNode() works", {
   expect_error(CollapseEdge(tree, 9))
 })
 
+test_that("CollapseNode() handles node labels", {
+  bal6 <- BalancedTree(6)
+  startLabels <- paste("Node", 7:11)
+  bal6[["node.label"]] <- startLabels
+  if (interactive()) {
+    plot(bal6, show.node.label = TRUE)
+  }
+  
+  # Collapse a cherry
+  expect_equal(
+    CollapseNode(bal6, 9)[["node.label"]],
+    startLabels[-3]
+  )
+  
+  # Collapse an internal node
+  expect_equal(
+    CollapseNode(bal6, 8)[["node.label"]],
+    startLabels[-2]
+  )
+  
+  # Collapse an internal node
+  expect_equal(
+    CollapseEdge(bal6, 1)[["node.label"]],
+    startLabels[-2]
+  )
+  
+  # case = 3 -> y is bound on an internal edge
+  expect_equal(
+    CollapseNode(bal6, c(8, 11))[["node.label"]],
+    startLabels[-c(2, 5)]
+  )
+  
+  expect_equal(AddTipEverywhere(bal6)[[1]][["node.label"]],
+               AddTip(bal6, where = 1)[["node.label"]])
+})
+
 test_that("Binarification is uniform", {
   set.seed(0)
   Test <- function(tree, nTree, nSamples = 200L, ape = FALSE) {
@@ -312,12 +348,17 @@ test_that("Binarification is uniform", {
   Test(CollapseNode(BalancedTree(7), c(10, 13)), NRooted(3) * NRooted(3))
 
   bal7 <- BalancedTree(7)
+  bal7[["node.label"]] <- paste("Node", 8:13)
   expect_true(all.equal(bal7, MakeTreeBinary(bal7)))
   expect_true(all.equal(list(bal7, bal7), MakeTreeBinary(list(bal7, bal7))))
   expect_true(all.equal(
     structure(list(bal7, bal7), class = "multiPhylo"),
     MakeTreeBinary(structure(list(bal7, bal7), class = "multiPhylo"))))
 
+  set.seed(1)
+  binNodes <- MakeTreeBinary(CollapseNode(bal7, 9:10))[["node.label"]]
+  expect_equal(binNodes[!is.na(binNodes)], bal7[["node.label"]][-(2:3)])
+  
 })
 
 test_that("LeafLabelInterchange() fails", {

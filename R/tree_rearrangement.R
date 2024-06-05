@@ -9,13 +9,13 @@
 #'
 #' @template tree(s)Param
 #' @param outgroupTips Vector of type character, integer or logical, specifying
-#' the names or indices of the tips to include in the outgroup.  If
-#' `outgroupTips` is a of type character, and a tree contains multiple tips
+#' the names or indices of the tips to include in the outgroup.
+#' If `outgroupTips` is a of type character, and a tree contains multiple tips
 #' with a matching label, the first will be used.
 #'
 #' @return `RootTree()` returns a tree of class `phylo`, rooted on the smallest
 #' clade that contains the specified tips, with edges and nodes numbered in
-#' preorder.
+#' preorder. Node labels are not retained.
 #'
 #' @examples
 #' tree <- PectinateTree(8)
@@ -110,7 +110,7 @@ RootTree.phylo <- function(tree, outgroupTips) {
   parent <- edge[, 1]
   child <- edge[, 2]
   nVert <- max(parent)
-  parentOf <- rep_len(NA_integer_, nVert)
+  parentOf <- `length<-`(integer(), nVert)
   parentOf[child] <- parent
   
   counts <- integer(nVert)
@@ -403,6 +403,8 @@ CollapseNode.phylo <- function(tree, nodes) {
   edge <- tree[["edge"]]
   lengths <- tree[["edge.length"]]
   hasLengths <- !is.null(lengths)
+  nodeLabels <- tree[["node.label"]]
+  hasLabels <- !is.null(nodeLabels)
   parent <- edge[, 1]
   child <- edge[, 2]
   root <- RootNode(edge)
@@ -428,7 +430,9 @@ CollapseNode.phylo <- function(tree, nodes) {
 
   for (node in nodes[order(depths)]) {
     newParent <- parent[edgeBelow[node]]
-    if (hasLengths) lengths[parent == node] <- lengths[parent == node] + lengths[child == node]
+    if (hasLengths) {
+      lengths[parent == node] <- lengths[parent == node] + lengths[child == node]
+    }
     parent[parent == node] <- newParent
   }
 
@@ -438,6 +442,9 @@ CollapseNode.phylo <- function(tree, nodes) {
                           newNumber[child[keptEdges]])
   tree[["edge.length"]] <- lengths[keptEdges]
   tree[["Nnode"]] <- tree[["Nnode"]] - length(nodes)
+  if (hasLabels) {
+    tree[["node.label"]] <- nodeLabels[-(nodes - nTip)]
+  }
 
   # TODO Renumber nodes sequentially
   # TODO Re-write this in C++.
@@ -520,6 +527,11 @@ MakeTreeBinary.phylo <- function(tree) {
                  c(children, n + seq_len(nNewNodes))[newEdges2])
 
     edge <- rbind(keep, add)
+  }
+  nodeLabel <- tree[["node.label"]]
+  if (!is.null(nodeLabel)) {
+    # Inefficient but pragmatic
+    tree[["node.label"]] <- .UpdateNodeLabel.numeric(edge, tree,  nodeLabel)
   }
   tree[["edge"]] <- edge
   tree[["Nnode"]] <- nTip - 1L

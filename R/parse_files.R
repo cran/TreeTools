@@ -10,9 +10,8 @@
 #'
 #' @return `ApeTime()` returns the time that the specified file was created by
 #' ape, in the format specified by `format`.
-#' @export
 #' @template MRS
-#'
+#' @export
 ApeTime <- function(filepath, format = "double") {
   if (length(filepath) > 1L) {
     stop("`filepath` must be a character string of length 1")
@@ -155,7 +154,8 @@ NexusTokens <- function(tokens, character_num = NULL) {
 #' Errors pertaining to an `invalid multibyte string` or
 #' `string invalid at that locale` indicate that R has failed to detect
 #' the appropriate encoding.  Either
-#' [re-save the file](https://support.posit.co/hc/en-us/articles/200532197)
+#' [re-save the file](
+#' https://support.posit.co/hc/en-us/articles/200532197-Character-Encoding-in-the-RStudio-IDE)
 #' in a supported encoding (`UTF-8` is a good choice) or
 #' specify the file encoding (which you can find by, for example, opening in
 #' [Notepad++](https://notepad-plus-plus.org/downloads/) and identifying
@@ -460,7 +460,7 @@ ReadTntCharacters <- function(filepath, character_num = NULL,
     # Missing EOL might occur in user-generated file, so warning not helpful
     try1 <- enc2utf8(readLines(con, warn = FALSE)),
     warning = function(e) {
-      if (substr(e$message, 0, 39) == 
+      if (substr(e[["message"]], 0, 39) == 
           "invalid input found on input connection") {
         newEnc <- if (toupper(encoding) %in% c("UTF-8", "UTF8")) {
           "latin1"
@@ -718,6 +718,7 @@ MatrixToPhyDat <- function(tokens) {
 }
 
 
+#' @export
 `[.phyDat` <- .SubsetPhyDat <- function(x, i, j, ..., drop = FALSE) {
   mat <- PhyDatToMatrix(x)
   MatrixToPhyDat(mat[i, j, ..., drop = FALSE])
@@ -799,14 +800,14 @@ PhyDatToMatrix <- function(dataset, ambigNA = FALSE, inappNA = ambigNA,
   }
   
   at <- attributes(dataset)
-  allLevels <- as.character(at$allLevels)
+  allLevels <- as.character(at[["allLevels"]])
   if (inappNA) {
     allLevels[allLevels == "-"] <- NA_character_
   }
   if (ambigNA) {
-    allLevels[rowSums(at$contrast) != 1L] <- NA_character_
+    allLevels[rowSums(at[["contrast"]]) != 1L] <- NA_character_
   } else if (!is.null(parentheses)) {
-    cont <- at$contrast
+    cont <- at[["contrast"]]
     nTokens <- rowSums(cont)
     levels <- colnames(cont)
     partAmbig <- nTokens != 1L & nTokens < dim(cont)[2]
@@ -818,8 +819,8 @@ PhyDatToMatrix <- function(dataset, ambigNA = FALSE, inappNA = ambigNA,
       parentheses[2])
   }
   matrix(allLevels[unlist(dataset, recursive = FALSE, use.names = FALSE)],
-         ncol = at$nr, byrow = TRUE, dimnames = list(at$names, NULL)
-         )[, at$index, drop = FALSE]
+         ncol = at[["nr"]], byrow = TRUE, dimnames = list(at[["names"]], NULL)
+         )[, at[["index"]], drop = FALSE]
 }
 
 #' @rdname ReadCharacters
@@ -929,7 +930,7 @@ StringToPhydat <- StringToPhyDat
 PhyToString <- function(phy, parentheses = "{", collapse = "", ps = "",
                          useIndex = TRUE, byTaxon = TRUE, concatenate = TRUE) {
   at <- attributes(phy)
-  phyLevels <- at$allLevels
+  phyLevels <- at[["allLevels"]]
   if (sum(phyLevels == "-") > 1) {
     stop("More than one inapplicable level identified.  Is phy$levels malformed?")
   }

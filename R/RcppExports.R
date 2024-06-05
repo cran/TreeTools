@@ -13,12 +13,28 @@ ClusterTable_decode <- function(xp) {
     .Call(`_TreeTools_ClusterTable_decode`, xp)
 }
 
+ape_neworder_phylo <- function(n_tips, parent, child, n_edges, order) {
+    .Call(`_TreeTools_ape_neworder_phylo`, n_tips, parent, child, n_edges, order)
+}
+
+ape_neworder_pruningwise <- function(n_tips, n_node, parent, child, n_edges) {
+    .Call(`_TreeTools_ape_neworder_pruningwise`, n_tips, n_node, parent, child, n_edges)
+}
+
 as_newick <- function(edge) {
     .Call(`_TreeTools_as_newick`, edge)
 }
 
 consensus_tree <- function(trees, p) {
     .Call(`_TreeTools_consensus_tree`, trees, p)
+}
+
+descendant_edges <- function(parent, child, postorder) {
+    .Call(`_TreeTools_descendant_edges`, parent, child, postorder)
+}
+
+descendant_tips <- function(parent, child, postorder) {
+    .Call(`_TreeTools_descendant_tips`, parent, child, postorder)
 }
 
 num_to_parent <- function(n, nTip) {

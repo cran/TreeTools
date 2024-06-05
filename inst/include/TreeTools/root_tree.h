@@ -21,9 +21,10 @@ namespace TreeTools {
   // #TODO Write test cases
   // edge must be BINARY
   // edge must be in preorder
-  // #TODO establish the extent to which this really outperforms root_on_node.
-  // # Plan to replace with that to reduce future maintenance burden.
-  //  [[Rcpp::export]]
+  // Benchmarking at 2024-02-23 established that this is consistently twice
+  // as fast as root_on_node, so is worth retaining,
+  // despite some overlap in code.
+  // [[Rcpp::export]]
   inline Rcpp::IntegerMatrix root_binary(const Rcpp::IntegerMatrix edge,
                                          const int outgroup) {
 
@@ -109,8 +110,8 @@ namespace TreeTools {
         edge(Rcpp::_, 1),
         phy["edge.length"]
       );
-      Rcpp::IntegerMatrix edge = reweighted[0];
-      Rcpp::NumericVector weight = reweighted[1];
+      edge = Rcpp::IntegerMatrix(reweighted[0]);
+      weight = Rcpp::NumericVector(reweighted[1]);
     } else {
       edge = preorder_edges_and_nodes(edge(Rcpp::_, 0), edge(Rcpp::_, 1));
     }
@@ -121,11 +122,11 @@ namespace TreeTools {
       Rcpp::stop("`outgroup` exceeds number of nodes");
     }
     Rcpp::List ret = Rcpp::clone(phy);
-    ret.attr("order") = "preorder";
     if (outgroup == root_node) {
+      ret.attr("order") = "preorder"; /* by preorder_weighted or _edges_&_nodes */
       ret["edge"] = edge;
       if (weighted) {
-        ret["edge.weight"] = weight;
+        ret["edge.length"] = weight;
       }
       return ret;
     }
@@ -174,20 +175,20 @@ namespace TreeTools {
         Rcpp::List preorder_res;
         preorder_res = preorder_weighted(new_edge(Rcpp::_, 0),
                                          new_edge(Rcpp::_, 1),
-                                         phy["edge.length"]);
+                                         weight);
         ret["edge"] = preorder_res[0];
         ret["edge.length"] = preorder_res[1];
       } else {
         ret["edge"] = preorder_edges_and_nodes(new_edge(Rcpp::_, 0),
                                                new_edge(Rcpp::_, 1));
       }
+      ret.attr("order") = "preorder"; /* by preorder_weighted or _edges_&_nodes */
 
     } else { // Root node will be retained; we need a new root edge
 
       Rcpp::IntegerMatrix new_edge(n_edge + 1, 2);
       Rcpp::NumericVector new_wt(n_edge + 1);
       if (weighted) {
-        weight = phy["edge.length"];
         for (int i = n_edge; i--; ) {
           new_wt[i] = weight[i];
         }
@@ -224,6 +225,7 @@ namespace TreeTools {
                                                new_edge(Rcpp::_, 1));
       }
       
+      ret.attr("order") = "preorder"; /* by preorder_weighted or _edges_&_nodes */
     }
     // #TODO there is probably a clever way to avoid doing a full preorder rewriting.
     return ret;

@@ -177,7 +177,8 @@ as.Splits.list <- function(x, tipLabels = NULL, asSplits = TRUE, ...) {
     }
     lapply(x, as.Splits, tipLabels = tipLabels, asSplits = asSplits)
   } else {
-    stop("Unsupported list type.")
+    stop("Unsupported list type; first item has class '",
+         paste0(class(x[[1]]), collapse = ", "), "'")
   }
 }
 
@@ -412,7 +413,7 @@ as.character.Splits <- function(x, ...) {
 #' @family Splits operations
 #' @export
 as.phylo.Splits <- function(x, ...) {
-  ret <- .PreorderTree(
+  .PreorderTree(
     edge = splits_to_edge(x, NTip(x)),
     tip.label = TipLabels(x)
   )

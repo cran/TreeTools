@@ -71,13 +71,13 @@ and which can crash when trees' internal numbering follows unexpected schema.
 querying object's class.
 
 \item \code{KeepTipPreorder()}: Faster version with no checks.
-Does not retain tip labels or edge weights.
-edges must be listed in preorder.
+Does not retain labels or edge weights.
+Edges must be listed in preorder.
 May crash if improper input is specified.
 
 \item \code{KeepTipPostorder()}: Faster version with no checks.
-Does not retain tip labels or edge weights.
-edges must be listed in postorder.
+Does not retain labels or edge weights.
+Edges must be listed in postorder.
 May crash if improper input is specified.
 
 }}
@@ -103,9 +103,9 @@ Other tree manipulation:
 \code{\link{KeptVerts}()},
 \code{\link{LeafLabelInterchange}()},
 \code{\link{MakeTreeBinary}()},
+\code{\link{Renumber}()},
 \code{\link{RenumberTips}()},
 \code{\link{RenumberTree}()},
-\code{\link{Renumber}()},
 \code{\link{RootTree}()},
 \code{\link{SortTree}()},
 \code{\link{Subtree}()},

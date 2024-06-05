@@ -34,9 +34,9 @@
 #' @name Neworder
 #' @export
 NeworderPruningwise <- function(nTip, nNode, parent, child, nEdge) {
-  .C(`ape_neworder_pruningwise`, as.integer(nTip), as.integer(nNode),
-     as.integer(parent), as.integer(child), as.integer(nEdge),
-     integer(nEdge))[[6]]
+  .Call(`_TreeTools_ape_neworder_pruningwise`, as.integer(nTip),
+        as.integer(nNode), as.integer(parent), as.integer(child),
+        as.integer(nEdge))
 }
 
 #' @rdname Neworder
@@ -47,9 +47,8 @@ NeworderPruningwise <- function(nTip, nNode, parent, child, nEdge) {
 #' @keywords internal
 #' @export
 NeworderPhylo <- function(nTip, parent, child, nEdge, whichwise) {
-  .C(`ape_neworder_phylo`, as.integer(nTip), as.integer(parent),
-     as.integer(child), as.integer(nEdge), integer(nEdge),
-     as.integer(whichwise), NAOK = TRUE)[[5]]
+  .Call(`_TreeTools_ape_neworder_phylo`, as.integer(nTip), as.integer(parent),
+        as.integer(child), as.integer(nEdge), as.integer(whichwise))
 }
 
 #' @rdname Reorder
@@ -77,7 +76,8 @@ RenumberTree <- function(parent, child, weight) {
 #'
 #' @param \dots Deprecated; included for compatibility with previous versions.
 #' @return `RenumberEdges()` formats the output of `RenumberTree()` into a list
-#' whose two entries correspond to the new parent and child vectors.
+#' whose two entries correspond to the new parent and child vectors,
+#' in preorder.
 #' @export
 RenumberEdges <- function(parent, child, ...) {
   oenn <- .Call(`_TreeTools_preorder_edges_and_nodes`, parent, child)
@@ -458,9 +458,13 @@ Preorder.phylo <- function(tree) {
     if (is.null(lengths)) {
       tree[["edge"]] <- RenumberTree(parent, child)
     } else {
-      edge <- RenumberTree(parent, child, lengths)
-      tree[["edge"]] <- edge[[1]]
-      tree[["edge.length"]] <- edge[[2]]
+      newEdge <- RenumberTree(parent, child, lengths)
+      tree[["edge"]] <- newEdge[[1]]
+      tree[["edge.length"]] <- newEdge[[2]]
+    }
+    nodeLabels <- tree[["node.label"]]
+    if (!is.null(nodeLabels)) {
+      tree[["node.label"]] <- .UpdateNodeLabel.numeric(edge, tree, nodeLabels)
     }
     attr(tree, "order") <- "preorder"
     attr(tree, "suborder") <- NULL
@@ -538,7 +542,7 @@ TntOrder.phylo <- function(tree) {
       }
     }
     stopifnot(all(newNo > 0)) # TODO remove once fully tested
-    tree$edge[] <- newNo[edge]
+    tree[["edge"]][] <- newNo[edge]
     attr(tree, "order") <- "tnt"
     attr(tree, "suborder") <- NULL
     

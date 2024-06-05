@@ -9,8 +9,12 @@
 #define R_BIN_SIZE 8
 #define SL_BIN_SIZE 64
 #define SL_MAX_BINS 32
+/* 64*32 is about the largest size for which two SplitList objects reliably fit
+ * on the stack (as required in TreeDist; supporting more leaves would mean
+ * refactoring to run on the heap (and, trivially, converting int16 to int32
+ * for split*bin implicit calculation in state[split][bin]?) */
 #define SL_MAX_TIPS (SL_BIN_SIZE * SL_MAX_BINS)
-#define SL_MAX_SPLITS SL_MAX_TIPS /* -3, but quicker if a power of two? */
+#define SL_MAX_SPLITS (SL_MAX_TIPS - 3) /* no slower than a power of two */
 
 #define INLASTBIN(n, size) ((size) - ((size) - ((n) % (size))) % (size))
 #define INSUBBIN(bin, offset)                                  \
@@ -84,9 +88,9 @@ namespace TreeTools {
         Rcpp::stop("Negative number of splits!?");                 // # nocov
       }
       if (n_bins > SL_MAX_BINS) {
-        Rcpp::stop("This many leaves cannot be supported. "        // # nocov
-                   "Please contact the TreeTools maintainer if "   // # nocov
-                   "you need to use more!");                       // # nocov
+        Rcpp::stop("This many leaves cannot be supported. "
+                   "Please contact the TreeTools maintainer if "
+                   "you need to use more!");
       }
 
       for (int16 split = 0; split != n_splits; split++) {

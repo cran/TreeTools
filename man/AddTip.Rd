@@ -9,6 +9,7 @@ AddTip(
   tree,
   where = sample.int(tree[["Nnode"]] * 2 + 2L, size = 1) - 1L,
   label = "New tip",
+  nodeLabel = "",
   edgeLength = 0,
   lengthBelow = NULL,
   nTip = NTip(tree),
@@ -27,7 +28,13 @@ new tip is added to a random edge.}
 
 \item{label}{Character string providing the label to apply to the new tip.}
 
-\item{edgeLength}{Numeric specifying length of new edge}
+\item{nodeLabel}{Character string providing a label to apply to the newly
+created node, if \code{tree$node.label} is specified.}
+
+\item{edgeLength}{Numeric specifying length of new edge. If \code{NULL},
+defaults to \code{lengthBelow}.
+This will become the default behaviour in a
+future release; please manually specify the desired behaviour in your code.}
 
 \item{lengthBelow}{Numeric specifying length below neighbour at which to
 graft new edge. Values greater than the length of the edge will result
@@ -35,10 +42,10 @@ in negative edge lengths. If \code{NULL}, the default, the new tip will be added
 at the midpoint of the broken edge. If inserting at the root (\code{where = 0}),
 a new edge of length \code{lengthBelow} will be inserted.}
 
-\item{nTip, nNode, rootNode}{Optional integer vectors specifying number of tips and
-nodes in \code{tree}, and index of root node.
-Not checked for correctness: specifying values here trades code safety for a
-nominal speed increase.}
+\item{nTip, nNode, rootNode}{Optional integer vectors specifying number of tips
+and nodes in \code{tree}, and index of root node.
+Not checked for correctness: specifying values here yields a marginal speed
+increase at the cost of code safety.}
 
 \item{includeRoot}{Logical; if \code{TRUE}, each position adjacent
 to the root edge is considered to represent distinct edges; if \code{FALSE},
@@ -61,24 +68,41 @@ single-taxon trees.
 \code{AddTipEverywhere()} adds a tip to each edge in turn.
 }
 \examples{
-plot(tree <- BalancedTree(10))
+tree <- BalancedTree(10)
+
+# Add a leaf below an internal node
+plot(tree)
 ape::nodelabels()
-ape::nodelabels(15, 15, bg="green")
+node <- 15
+ape::nodelabels(bg = ifelse(NodeNumbers(tree) == node, "green", "grey"))
 
 plot(AddTip(tree, 15, "NEW_TIP"))
 
+# Add edge lengths for an ultrametric tree
+tree$edge.length <- rep(c(rep(1, 5), 2, 1, 2, 2), 2)
+
+# Add a leaf to an external edge
+leaf <- 5
+plot(tree)
+ape::tiplabels(bg = ifelse(seq_len(NTip(tree)) == leaf, "green", "grey"))
+
+plot(AddTip(tree, 5, "NEW_TIP", edgeLength = NULL))
+
+# Set up multi-panel plot
 oldPar <- par(mfrow = c(2, 4), mar = rep(0.3, 4), cex = 0.9)
 
+# Add leaf to each edge on a tree in turn
 backbone <- BalancedTree(4)
 # Treating the position of the root as instructive:
 additions <- AddTipEverywhere(backbone, includeRoot = TRUE)
 xx <- lapply(additions, plot)
 
-par(mfrow=c(2, 3))
+par(mfrow = c(2, 3))
 # Don't treat root edges as distinct:
 additions <- AddTipEverywhere(backbone, includeRoot = FALSE)
 xx <- lapply(additions, plot)
 
+# Restore original plotting parameters
 par(oldPar)
 
 }
@@ -95,9 +119,9 @@ Other tree manipulation:
 \code{\link{KeptVerts}()},
 \code{\link{LeafLabelInterchange}()},
 \code{\link{MakeTreeBinary}()},
+\code{\link{Renumber}()},
 \code{\link{RenumberTips}()},
 \code{\link{RenumberTree}()},
-\code{\link{Renumber}()},
 \code{\link{RootTree}()},
 \code{\link{SortTree}()},
 \code{\link{Subtree}()},
