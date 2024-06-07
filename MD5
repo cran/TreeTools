@@ -1,6 +1,6 @@
-1c8d18c18a8d6348e7f30567ee76b6f6 *DESCRIPTION
+c7745507878ab0f30eb1645e938adbf4 *DESCRIPTION
 ee3286f76fcd8b8e0caac319c53f3498 *NAMESPACE
-8f31629826be05c83f84ea0234cb93f8 *NEWS.md
+8d591f4416b773694fb47138269c340e *NEWS.md
 9f843f23884bc62d10be003c1432f58e *R/AddTip.R
 d1c7c5156b801d3bd297b064d9331a75 *R/ArtificialExtinction.R
 d41d8cd98f00b204e9800998ecf8427e *R/BigInteger.R
@@ -49,7 +49,7 @@ a8004c88b44c7aeb8dd6394328166a38 *R/tree_rearrangement.R
 1c756aef6ea7ee2ee3fb2458c8d28914 *R/tree_shape.R
 cf9629212eff19499f0ac89b90cc7468 *R/tree_write.R
 cabab83c282ffcf114cf36c7d2e72e78 *R/zzz.R
-aa7dd8e3a2bab19fc6e4f8dd1915794b *build/partial.rdb
+63b65916bd5c446a68130600eb0e6a2c *build/partial.rdb
 04c2ab2aa46c42f1bf8233278d3efcbd *build/vignette.rds
 4f7f08498760060495a1138f1e456d8f *data/Lobo.RData
 7a12bfe34746d63554ed9b3d31a0fb5c *data/brewer.R
@@ -61,13 +61,13 @@ a8cc88545e4cb8ee4d85ed12f64f4cc0 *inst/REFERENCES.bib
 f73c84e94e67a42856315555f0278033 *inst/WORDLIST
 2a33c016808841801938c7c7b2dcb1cb *inst/apa-old-doi-prefix.csl
 7be48fe3f97d4e5c515b8fb4b62f5a9c *inst/doc/filesystem-navigation.Rmd
-1161bafa6af67dca854f810e9614b5be *inst/doc/filesystem-navigation.html
+c452a3bb3f9d2fbe72b05abebdf2fbe9 *inst/doc/filesystem-navigation.html
 1c7829677c4f571369cdf1ff7bbc0b2e *inst/doc/load-data.R
 2b03d76e39bbb89e2167ffd3fa100481 *inst/doc/load-data.Rmd
-253596e888ea419be4ef0191ac0579cf *inst/doc/load-data.html
+b01a7b2ab02e5b35f61b2a9d447294bc *inst/doc/load-data.html
 fce8f3654195182108b222469b871af9 *inst/doc/load-trees.R
 b6e52b0d84790c5778681cc5424747fc *inst/doc/load-trees.Rmd
-3d3efa3c704cbbc264ed799ac5d03e58 *inst/doc/load-trees.html
+da1d76d2aa19ede28f5f746af17ef4da *inst/doc/load-trees.html
 38de4a03e1e8a5f07d46535ffc77277e *inst/extdata/input/dataset.nex
 19f1db8c0e63bd7586e92197482f2558 *inst/extdata/input/notes.nex
 d41d8cd98f00b204e9800998ecf8427e *inst/extdata/otherfolder/empty.file
@@ -189,7 +189,7 @@ b1547d2d555d0fe1d6af185d8bfbed23 *man/as.Newick.Rd
 ce2b569a06de7b9f20747e89d6a0b073 *man/dot-RandomParent.Rd
 c862dedc16085134d115c7693ef26919 *man/doubleFactorials.Rd
 70675e745ba0f07b75da8993f83f3b9f *man/edge_to_splits.Rd
-b43388c69a1d40377c7169ea9100f637 *man/figures/Stemwardness.png
+cfa5c6312d25abec24370b46a63bfe23 *man/figures/Stemwardness.png
 cb1e46f469cfbbbde29c8b5113e1d789 *man/figures/lifecycle-archived.svg
 c0d2e5a54f1fa4ff02bf9533079dd1f7 *man/figures/lifecycle-defunct.svg
 a1b8c987c676c16af790f563f96cbb1f *man/figures/lifecycle-deprecated.svg
@@ -255,7 +255,7 @@ fb1f90df9c2aa9986fcd9319467aea1a *tests/testthat/test-SplitFunctions.R
 82783fd90a1e52dfc9307cb4c121b766 *tests/testthat/test-Stemwardness.R
 3f669647edcecf46e376b9b7b97d7621 *tests/testthat/test-Support.R
 bb09c03bdc5da9d7108c20a208496641 *tests/testthat/test-TipTimedTree.R
-a88b350920b1eb487510987337d8ccb3 *tests/testthat/test-TotalCopheneticIndex.R
+054c3333243729870b8526caba706384 *tests/testthat/test-TotalCopheneticIndex.R
 2810b2a72c753a86da3f36fab9be4035 *tests/testthat/test-TreeNumber.R
 545daa54b7974efca10aafafe5d10aa3 *tests/testthat/test-as.matrix.R
 8f5eb4a1c592407f383866336dff13bc *tests/testthat/test-as.multiPhylo.R
