@@ -90,16 +90,19 @@ SingleTaxonTree <- function(label = "t1") {
 #' ZeroTaxonTree()
 #' @export
 ZeroTaxonTree <- function() {
-  structure(list(edge = structure(numeric(0), dim = c(0L, 2L)), 
-                 tip.label = character(0), Nnode = 0), class = "phylo")
+  structure(list(
+    # Order is consistent with ape::read.tree (but not ape::rtree...)
+    edge = structure(numeric(0), dim = c(0L, 2L)),
+    Nnode = 0, tip.label = character(0)
+  ), class = "phylo")
 }
 
 #' Extract a subtree
 #'
 #' `Subtree()` safely extracts a clade from a phylogenetic tree.
 #'
-#' Modified from the \pkg{ape} function \code{\link{extract.clade}}, which
-#' sometimes behaves erratically.
+#' Modified from the \pkg{ape} function \code{\link[ape]{extract.clade}}, which
+#' sometimes behaves unpredictably.
 #' Unlike extract.clade, this function supports the extraction of "clades"
 #' that constitute a single tip.
 #'

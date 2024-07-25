@@ -18,6 +18,12 @@
 #' of evolution are given in Theorems 17 and 23.
 #'
 #' Full details are provided by \insertCite{Mir2013;textual}{TreeTools}.
+#' 
+#' The \ifelse{html}{\out{J<sup>1</sup>}}{\eqn{J^1}} index
+#' \insertCite{Lemant2022}{TreeTools} has advantages over the Total Cophenetic
+#' Index, particularly when comparing trees with different numbers of leaves,
+#' or where the population size of nodes is meaningful; see [`J1Index()`].
+#'  
 #'
 #' @template xPhylo
 #'
@@ -32,7 +38,8 @@
 #' be obtained by calculation for the Uniform model.
 #'
 #' @seealso
-#' `cophen.index()` in the package
+#' - [`J1Index()`] provides a more robust, universal tree balance index.
+#' - `cophen.index()` in the package
 #' [\pkg{CollessLike}](https://github.com/LuciaRotger/CollessLike)
 #' provides an alternative implementation of this index and its predecessors.
 #'
@@ -128,15 +135,17 @@ TCIContext.phylo <- function(x) {
 #' @rdname TotalCopheneticIndex
 #' @export
 TCIContext.numeric <- function(x) {
-  H  <- function(n) sum(1 / (seq_len(n)))
+  H  <- function(n) sum(1 / seq_len(n))
   H2 <- function(n) sum(1 / (seq_len(n) ^ 2))
 
   maximum <- choose(x, 3L)
   minimum <- .MCI(x)
 
   # Theorem 17
-  uniform.expected <- choose(x, 2) / 2L *
-    ((DoubleFactorial((x + x) - 2L) / DoubleFactorial((x + x) - 3L)) - 2L)
+  uniform.expected <- exp(lchoose(x, 2) - log(2) + 
+                            LnDoubleFactorial((x + x) - 2L) - 
+                            LnDoubleFactorial((x + x) - 3L)
+                          ) - choose(x, 2)
   yule.expected    <- (x * (x + 1)) - (2 * x * H(x))
   yule.variance    <- ((1 / 12) * (x^4 - (10 * x^3) + (131 * x^2) - (2 * x))) -
     (4 * x^2 * H2(x)) - (6 * x * H(x))
