@@ -2,13 +2,15 @@
 #define _TREETOOLS_SPLITLIST_H
 
 #include <Rcpp/Lightest>
+
 #include <stdexcept> /* for errors */
 
+#include "assert.h" /* for ASSERT */
 #include "types.h" /* for int16 */
 
-#define R_BIN_SIZE 8
-#define SL_BIN_SIZE 64
-#define SL_MAX_BINS 32
+#define R_BIN_SIZE int16(8)
+#define SL_BIN_SIZE int16(64)
+#define SL_MAX_BINS int16(32)
 /* 64*32 is about the largest size for which two SplitList objects reliably fit
  * on the stack (as required in TreeDist; supporting more leaves would mean
  * refactoring to run on the heap (and, trivially, converting int16 to int32
@@ -16,7 +18,7 @@
 #define SL_MAX_TIPS (SL_BIN_SIZE * SL_MAX_BINS)
 #define SL_MAX_SPLITS (SL_MAX_TIPS - 3) /* no slower than a power of two */
 
-#define INLASTBIN(n, size) ((size) - ((size) - ((n) % (size))) % (size))
+#define INLASTBIN(n, size) int16((size) - int16((size) - int16((n) % (size))) % (size))
 #define INSUBBIN(bin, offset)                                  \
   splitbit(x(split, ((bin) * input_bins_per_bin) + (offset)))
 #define INBIN(r_bin, bin) ((INSUBBIN((bin), (r_bin))) << (R_BIN_SIZE * (r_bin)))
@@ -66,9 +68,9 @@ namespace TreeTools {
     /* return bitcounts[x & right16bits] + bitcounts[x >> 16]; */
 
     /* For 64-bit splitbits: */
-    return bitcounts[x & right16bits] + bitcounts[(x >> 16) & right16bits]
+    return int16(bitcounts[x & right16bits] + bitcounts[(x >> 16) & right16bits]
     + bitcounts[(x >> 32) & right16bits]
-    + bitcounts[(x >> 48)];
+    + bitcounts[(x >> 48)]);
   }
 
 
@@ -78,15 +80,25 @@ namespace TreeTools {
     int16 in_split[SL_MAX_SPLITS];
     splitbit state[SL_MAX_SPLITS][SL_MAX_BINS];
     SplitList(Rcpp::RawMatrix x) {
-      n_splits = x.rows();
-      const int16 n_input_bins = x.cols(),
+      if (double(x.rows()) > double(std::numeric_limits<int16>::max())) {
+        Rcpp::stop("This many splits cannot be supported. "
+                   "Please contact the TreeTools maintainer if "
+                   "you need to use more!");
+      }
+      if (double(x.cols()) > double(std::numeric_limits<int16>::max())) {
+        Rcpp::stop("This many leaves cannot be supported. "
+                     "Please contact the TreeTools maintainer if "
+                     "you need to use more!");
+      }
+      
+      n_splits = int16(x.rows());
+      ASSERT(n_splits >= 0);
+      
+      const int16 n_input_bins = int16(x.cols()),
         input_bins_per_bin = SL_BIN_SIZE / R_BIN_SIZE;
 
-      n_bins = (n_input_bins + R_BIN_SIZE - 1) / input_bins_per_bin;
+      n_bins = int16(n_input_bins + R_BIN_SIZE - 1) / input_bins_per_bin;
 
-      if (n_splits < 0) {
-        Rcpp::stop("Negative number of splits!?");                 // # nocov
-      }
       if (n_bins > SL_MAX_BINS) {
         Rcpp::stop("This many leaves cannot be supported. "
                    "Please contact the TreeTools maintainer if "

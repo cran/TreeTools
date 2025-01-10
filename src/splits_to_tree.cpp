@@ -1,7 +1,7 @@
 #include <Rcpp/Lightest>
 using namespace Rcpp;
 
-#include "../inst/include/TreeTools/assert.h"
+#include "../inst/include/TreeTools/assert.h" /* for ASSERT */
 #include "../inst/include/TreeTools/SplitList.h"
 #include "../inst/include/TreeTools/renumber_tree.h"
 using namespace TreeTools;
@@ -50,7 +50,10 @@ inline void insert_ancestor(const int16 tip, const int16 *next_node,
 
 // [[Rcpp::export]]
 IntegerMatrix splits_to_edge(const RawMatrix splits, const IntegerVector nTip) {
-  const int16 n_tip = nTip[0];
+  if (double(nTip[0]) > double(std::numeric_limits<int16>::max())) {
+    Rcpp::stop("This many tips are not (yet) supported.");
+  }
+  const int16 n_tip = int16(nTip[0]);
   if (splits.nrow() == 0) {
     IntegerMatrix ret(n_tip, 2);
     for (int i = n_tip; i--; ) {
@@ -75,7 +78,7 @@ IntegerMatrix splits_to_edge(const RawMatrix splits, const IntegerVector nTip) {
     for (int16 bin = x.n_bins; bin--; ) {
       const splitbit chunk = x.state[split_order[split]][bin];
       for (int16 bin_tip = SL_BIN_SIZE; bin_tip--; ) {
-        const int16 tip = bin_tip + (bin * SL_BIN_SIZE);
+        const int16 tip = bin_tip + int16(bin * SL_BIN_SIZE);
         if (chunk & powers_of_two[bin_tip]) {
           insert_ancestor(tip, &next_node, parent, patriarch);
         }

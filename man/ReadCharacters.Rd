@@ -3,9 +3,11 @@
 \name{ReadCharacters}
 \alias{ReadCharacters}
 \alias{ReadTntCharacters}
+\alias{ReadTNTCharacters}
 \alias{ReadNotes}
 \alias{ReadAsPhyDat}
 \alias{ReadTntAsPhyDat}
+\alias{ReadTNTAsPhyDat}
 \alias{PhyDat}
 \title{Read phylogenetic characters from file}
 \usage{
@@ -18,11 +20,20 @@ ReadTntCharacters(
   encoding = "UTF8"
 )
 
+ReadTNTCharacters(
+  filepath,
+  character_num = NULL,
+  type = NULL,
+  encoding = "UTF8"
+)
+
 ReadNotes(filepath, encoding = "UTF8")
 
 ReadAsPhyDat(...)
 
 ReadTntAsPhyDat(...)
+
+ReadTNTAsPhyDat(...)
 
 PhyDat(dataset)
 }

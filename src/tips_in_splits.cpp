@@ -1,4 +1,5 @@
 #include <Rcpp/Lightest>
+
 #include <stdexcept> /* for errors */
 #include "../inst/include/TreeTools.h"
 using namespace Rcpp;
@@ -43,7 +44,7 @@ IntegerVector tips_in_splits(RawMatrix splits) {
   IntegerVector ret(n_split);
   for (int32 i = n_split; i--; ) {
     for (int32 bin = n_bin; bin--; ) {
-      ret[i] += bitcounts[splits(i, bin)];
+      ret[i] += decltype(ret[0])(bitcounts[splits(i, bin)]);
     }
   }
 

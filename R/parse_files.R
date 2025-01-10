@@ -452,6 +452,10 @@ ReadTntCharacters <- function(filepath, character_num = NULL,
   tokens
 }
 
+#' @rdname ReadCharacters
+#' @export
+ReadTNTCharacters <- ReadTntCharacters
+
 .UTFLines <- function(filepath, encoding) {
   con <- file(filepath, encoding = encoding)
   on.exit(close(con))
@@ -467,7 +471,7 @@ ReadTntCharacters <- function(filepath, character_num = NULL,
         } else {
           "UTF8"
         }
-        message("Problem reading; trying ", newEnc, " file encoding")
+        message("Problem reading characters; trying ", newEnc, " file encoding")
         close(con)
         con <- file(filepath, encoding = newEnc)
         enc2utf8(readLines(con, warn = FALSE))
@@ -836,6 +840,10 @@ ReadAsPhyDat <- function(...) {
 ReadTntAsPhyDat <- function(...) {
   MatrixToPhyDat(ReadTntCharacters(...))
 }
+
+#' @rdname ReadCharacters
+#' @export
+ReadTNTAsPhyDat <- ReadTntAsPhyDat
 
 
 #' @describeIn ReadCharacters A convenient wrapper for \pkg{phangorn}'s
