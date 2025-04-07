@@ -1,3 +1,8 @@
+# TreeTools 1.13.1 (2025-04-07) #
+
+- Support non-unique labels in `DropTip()` checks.
+
+
 # TreeTools 1.13.0 (2025-01-09) #
 
 - `%in%` and `match` methods for phylo / multiPhylo objects.

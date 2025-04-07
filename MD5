@@ -1,6 +1,6 @@
-acc53279a1fcce81263502f282746aa4 *DESCRIPTION
+435f5bbb45a14669e08e0417ae4dd310 *DESCRIPTION
 ec88ff92d93bb283b1aab99f1b667d7f *NAMESPACE
-f8e56ef04e8d5ad25c63b15adcfab922 *NEWS.md
+281cbe0e002d1e8e7d98a0c9edb8370c *NEWS.md
 bffa07e871da30de28a27f46489bd6c5 *R/AddTip.R
 d1c7c5156b801d3bd297b064d9331a75 *R/ArtificialExtinction.R
 d41d8cd98f00b204e9800998ecf8427e *R/BigInteger.R
@@ -8,7 +8,7 @@ d41d8cd98f00b204e9800998ecf8427e *R/BigInteger.R
 7f2d8a7fffd81e76813aa02f0b5c0972 *R/Combinatorics.R
 bad65242c5966e6b821af0a3435834f5 *R/Consensus.R
 ffb6411001d62462f2ce8bcbe871505c *R/Decompose.R
-423f5b565aed5d703fc323559a2d72b1 *R/DropTip.R
+b4a94653ab53adcd97bc64ee2d2f7728 *R/DropTip.R
 51c7b2bccfaf1f19253cd90a1060352b *R/ImposeConstraint.R
 a1f2d5587f3e885a6f9ab3f96f68139c *R/Information.R
 5375e7794f341801c1b1fbde68b7f707 *R/KeptPaths.R
@@ -37,7 +37,7 @@ d54768da4a5633d35e2afbadcb11b3d2 *R/data.R
 d41d8cd98f00b204e9800998ecf8427e *R/in.R
 f7784222267896999ed01b2fa0fca1f7 *R/match.R
 b06c7606619a744aab95db5f70957aaf *R/mst.R
-c404e328bb9265ae2d86ecd203389a98 *R/parse_files.R
+8f34ba5a6127e275a4b197b114957ed6 *R/parse_files.R
 eccfb345583685ea72344b6662da8d2a *R/phylo.R
 7859618551446caa3a5c752b0779b153 *R/sort.R
 6d0990c549633a293af7aa01be801a5f *R/split_analysis.R
@@ -54,7 +54,7 @@ a8004c88b44c7aeb8dd6394328166a38 *R/tree_rearrangement.R
 5315ca916d55376ea7d110da6441f08a *R/tree_shape.R
 cf9629212eff19499f0ac89b90cc7468 *R/tree_write.R
 cabab83c282ffcf114cf36c7d2e72e78 *R/zzz.R
-71aa2599730df7b320213973abd9c32e *build/partial.rdb
+e59dc51c0aa3c32405b2efffb96db6a8 *build/partial.rdb
 487f764e52bf0ea57a5ee9db0802f813 *build/vignette.rds
 4f7f08498760060495a1138f1e456d8f *data/Lobo.RData
 7a12bfe34746d63554ed9b3d31a0fb5c *data/brewer.R
@@ -63,16 +63,16 @@ bb0b8e0646742b8bbbe06122ab81a938 *data/nRootedShapes.R
 806aadf10ac2e0ae477ffce74b720f72 *data/unrootedKeys.rda
 4bb2871abca594fea430d792e2cfd664 *inst/CITATION
 1fc6b50d11df513cef6ce11652e8e67f *inst/REFERENCES.bib
-14017acb34b49e69668fe9cc77d39f00 *inst/WORDLIST
+045e9e19afe95c8b0eede4a6c31da6d1 *inst/WORDLIST
 734ea9eaecb7caaab5176f7a687234fa *inst/apa-old-doi-prefix.csl
 79bd15f99ce3ac76b76e131dbde7f650 *inst/doc/filesystem-navigation.Rmd
-a0b28d9674d8884baadbb0ea0d7beda2 *inst/doc/filesystem-navigation.html
+389e0354579ee82764f5b20bf7c7e1bd *inst/doc/filesystem-navigation.html
 1c7829677c4f571369cdf1ff7bbc0b2e *inst/doc/load-data.R
-2b03d76e39bbb89e2167ffd3fa100481 *inst/doc/load-data.Rmd
-35df9a7cfeb17fc129f39779c98c89a9 *inst/doc/load-data.html
+fd1cb4d79c382c23eb64b8218a77aeda *inst/doc/load-data.Rmd
+ee15d54692a1a55bb2e70b3e357cd254 *inst/doc/load-data.html
 fce8f3654195182108b222469b871af9 *inst/doc/load-trees.R
 b6e52b0d84790c5778681cc5424747fc *inst/doc/load-trees.Rmd
-860d1fa951e59dfb24ec98fecf48ed47 *inst/doc/load-trees.html
+a8c1fa5e5ab6b68e8e21a0fed7308e3d *inst/doc/load-trees.html
 38de4a03e1e8a5f07d46535ffc77277e *inst/extdata/input/dataset.nex
 19f1db8c0e63bd7586e92197482f2558 *inst/extdata/input/notes.nex
 d41d8cd98f00b204e9800998ecf8427e *inst/extdata/otherfolder/empty.file
@@ -152,7 +152,7 @@ ff618819cfd4099514d1d0d1b1d26686 *man/NodeOrder.Rd
 415d33bb7ede5363b43bd7c67f30de68 *man/PathLengths.Rd
 e0fee2b538c5f56c57d30e711609197b *man/PhyToString.Rd
 394b8792ebbb7b3c352ae78c14df89b1 *man/PolarizeSplits.Rd
-ff751a61baa73d2a94d5cc8251a7ab7f *man/ReadCharacters.Rd
+0eddc83dfa22f378aa4ed03cf949ec7e *man/ReadCharacters.Rd
 cc732fc3ac34a7400608700706e77ae5 *man/ReadMrBayesTrees.Rd
 ad9d9ea6094edcac3a31903c053e6113 *man/ReadTntTree.Rd
 b8c43aae997faeef21cf98c8dd8d6d0a *man/Renumber.Rd
@@ -297,5 +297,5 @@ baae5ddd8cbf96cd9d07b2ca892ef6cf *tests/testthat/test-tree_information.R
 4c982d737bc741878b47f2fa9ecf5913 *tests/testthat/test-tree_shape.R
 c9285e5fcb808958364fecc554237b00 *tests/testthat/test-tree_write.R
 79bd15f99ce3ac76b76e131dbde7f650 *vignettes/filesystem-navigation.Rmd
-2b03d76e39bbb89e2167ffd3fa100481 *vignettes/load-data.Rmd
+fd1cb4d79c382c23eb64b8218a77aeda *vignettes/load-data.Rmd
 b6e52b0d84790c5778681cc5424747fc *vignettes/load-trees.Rmd
