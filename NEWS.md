@@ -1,3 +1,16 @@
+# TreeTools 1.14.0 (2025-05-13) #
+
+- `AddTip(lengthBelow = NA)` adds leaf at node without adding a new edge.
+
+- `BalancedTree()` and equivalent gain a `lengths` parameter to specify edge
+  lengths.
+
+- Fix taxa misplaced by `RoguePlot(sort = TRUE)`.
+
+- Fix unexpected polytomies in `Consensus()`
+  ([#168](https://github.com/ms609/TreeTools/issues/168)).
+
+
 # TreeTools 1.13.1 (2025-04-07) #
 
 - Support non-unique labels in `DropTip()` checks.
