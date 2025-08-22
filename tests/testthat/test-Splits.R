@@ -74,6 +74,11 @@ test_that("as.Splits()", {
                list(as.Splits(BalancedTree(3:9)),
                     as.Splits(BalancedTree(7:1),
                               tipLabels = as.character(c(3:7, 2:1)))))
+  
+  noNode <- structure(
+    list(edge = structure(integer(0), dim = c(0L, 2L)),
+         Nnode = 0L, tip.label = "a"), order = "preorder", class = "phylo")
+  expect_equal(as.Splits(noNode), as.Splits(SingleTaxonTree("a")))
 })
 
 test_that("as.Splits.phylo()", {
@@ -342,10 +347,10 @@ test_that("Renaming splits", {
                as.Splits(tree1, tipLabel = tree2))
 
   expect_equal(as.Splits(tree1, tipLabel = tree2),
-               as.Splits(as.Splits(tree1), tipLabel = tree2))
+               as.Splits(splits1, tipLabel = tree2))
 
   as.Splits(tree1, tipLabel = tree2)[]
-  as.Splits(as.Splits(tree1), tipLabel = tree2)[]
+  as.Splits(splits1, tipLabel = tree2)[]
 
 })
 

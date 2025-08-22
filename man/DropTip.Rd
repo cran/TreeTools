@@ -2,20 +2,31 @@
 % Please edit documentation in R/DropTip.R
 \name{DropTip}
 \alias{DropTip}
+\alias{KeepTip}
 \alias{DropTip.phylo}
+\alias{KeepTip.phylo}
+\alias{KeepTip.Splits}
 \alias{DropTip.Splits}
 \alias{DropTipPhylo}
 \alias{DropTip.multiPhylo}
+\alias{KeepTip.multiPhylo}
 \alias{DropTip.list}
+\alias{KeepTip.list}
 \alias{DropTip.NULL}
+\alias{KeepTip.NULL}
 \alias{KeepTipPreorder}
 \alias{KeepTipPostorder}
-\alias{KeepTip}
 \title{Drop leaves from tree}
 \usage{
 DropTip(tree, tip, preorder = TRUE, check = TRUE)
 
+KeepTip(tree, tip, preorder = TRUE, check = TRUE)
+
 \method{DropTip}{phylo}(tree, tip, preorder = TRUE, check = TRUE)
+
+\method{KeepTip}{phylo}(tree, tip, preorder = TRUE, check = TRUE)
+
+\method{KeepTip}{Splits}(tree, tip, preorder = TRUE, check = TRUE)
 
 \method{DropTip}{Splits}(tree, tip, preorder, check = TRUE)
 
@@ -23,21 +34,26 @@ DropTipPhylo(tree, tip, preorder = TRUE, check = TRUE)
 
 \method{DropTip}{multiPhylo}(tree, tip, preorder = TRUE, check = TRUE)
 
+\method{KeepTip}{multiPhylo}(tree, tip, preorder = TRUE, check = TRUE)
+
 \method{DropTip}{list}(tree, tip, preorder = TRUE, check = TRUE)
 
+\method{KeepTip}{list}(tree, tip, preorder = TRUE, check = TRUE)
+
 \method{DropTip}{`NULL`}(tree, tip, preorder = TRUE, check = TRUE)
+
+\method{KeepTip}{`NULL`}(tree, tip, preorder = TRUE, check = TRUE)
 
 KeepTipPreorder(tree, tip)
 
 KeepTipPostorder(tree, tip)
-
-KeepTip(tree, tip, preorder = TRUE, check = TRUE)
 }
 \arguments{
 \item{tree}{A tree of class \code{\link[ape:read.tree]{phylo}}.}
 
 \item{tip}{Character vector specifying labels of leaves in tree to be
-dropped, or integer vector specifying the indices of leaves to be dropped.
+dropped or kept, or integer vector specifying the indices of leaves to be
+dropped or kept.
 Specifying the index of an internal node will drop all descendants of that
 node.}
 
@@ -113,6 +129,7 @@ Other tree manipulation:
 \code{\link{TrivialTree}}
 
 Other split manipulation functions: 
+\code{\link{SplitConsistent}()},
 \code{\link{Subsplit}()},
 \code{\link{TrivialSplits}()}
 }

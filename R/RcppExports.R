@@ -33,6 +33,10 @@ descendant_edges <- function(parent, child, postorder) {
     .Call(`_TreeTools_descendant_edges`, parent, child, postorder)
 }
 
+descendant_edges_single <- function(parent, child, postorder, edge_index, include_self = TRUE) {
+    .Call(`_TreeTools_descendant_edges_single`, parent, child, postorder, edge_index, include_self)
+}
+
 descendant_tips <- function(parent, child, postorder) {
     .Call(`_TreeTools_descendant_tips`, parent, child, postorder)
 }
@@ -65,8 +69,8 @@ minimum_spanning_tree <- function(order) {
     .Call(`_TreeTools_minimum_spanning_tree`, order)
 }
 
-path_lengths <- function(edge, weight) {
-    .Call(`_TreeTools_path_lengths`, edge, weight)
+path_lengths <- function(edge, weight, init_nas) {
+    .Call(`_TreeTools_path_lengths`, edge, weight, init_nas)
 }
 
 cpp_edge_to_splits <- function(edge, order, nTip) {
@@ -97,8 +101,24 @@ or_splits <- function(x, y) {
     .Call(`_TreeTools_or_splits`, x, y)
 }
 
+split_consistent <- function(needle, haystacks, invert) {
+    .Call(`_TreeTools_split_consistent`, needle, haystacks, invert)
+}
+
 thin_splits <- function(splits, drop) {
     .Call(`_TreeTools_thin_splits`, splits, drop)
+}
+
+pack_splits_logical <- function(x) {
+    .Call(`_TreeTools_pack_splits_logical`, x)
+}
+
+pack_splits_logical_vec <- function(x) {
+    .Call(`_TreeTools_pack_splits_logical_vec`, x)
+}
+
+cpp_count_splits <- function(edge, nTip) {
+    .Call(`_TreeTools_cpp_count_splits`, edge, nTip)
 }
 
 splits_to_edge <- function(splits, nTip) {

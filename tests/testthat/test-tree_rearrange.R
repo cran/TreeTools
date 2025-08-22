@@ -356,13 +356,18 @@ test_that("CollapseNode() handles node labels", {
                AddTip(bal6, where = 1)[["node.label"]])
 })
 
+test_that("MakeTreeBinary() edge lengths", {
+  tree <- ape::read.tree(text = "(a:1, b:2, c:3, d:4);")
+  # Not yet supported; ensure they are removed
+  expect_null(MakeTreeBinary(tree)$edge.length)
+})
+
 test_that("Binarification is uniform", {
   set.seed(0)
   Test <- function(tree, nTree, nSamples = 200L, ape = FALSE) {
     counts <- table(replicate64(nSamples, as.TreeNumber(MakeTreeBinary(tree))))
     expect_equal(nTree, length(counts))
     expect_gt(chisq.test(counts)$p.value, 0.001)
-
   }
 
   Test(CollapseNode(PectinateTree(6), 8:9), NUnrooted(4))
