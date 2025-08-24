@@ -39,6 +39,16 @@ namespace TreeTools {
   constexpr int_fast32_t ct_max_leaves = 16383;
   constexpr int_fast32_t ct_stack_size = 4;
   
+  template <typename T>
+  inline void resize_uninitialized(std::vector<T>& v, std::size_t n) {
+    static_assert(std::is_trivial<T>::value, "Requires trivial type");
+    if (n > v.size()) {
+      v.reserve(n);
+      v.insert(v.end(), n - v.size(), T{});
+    } else {
+      v.resize(n);
+    }
+  }
   
   class ClusterTable {
     
@@ -391,15 +401,18 @@ namespace TreeTools {
     T = std::vector<int16>(Tlen);
     T_ptr = T.data();
 
-    leftmost_leaf.reserve(n_vertex);
-    visited_nth.reserve(n_leaves);
-    internal_label.reserve(1 + n_leaves); // We're not using -1.
+    resize_uninitialized(leftmost_leaf, n_vertex);
+    resize_uninitialized(visited_nth, n_leaves);
+    resize_uninitialized(internal_label, 1 + n_leaves); // We're not using -1
+    ASSERT(leftmost_leaf.size() >= static_cast<size_t>(n_vertex));
+    ASSERT(visited_nth.size()   >= static_cast<size_t>(n_leaves));
+    ASSERT(internal_label.size()>= static_cast<size_t>(1 + n_leaves));
     internal_label_ptr = internal_label.data();
     int16 n_visited = 0;
     std::vector<int16> weights(1 + n_vertex);
 
     for (int16 i = 1; i != n_leaves + 1; ++i) {
-      SET_LEFTMOST(i, i);
+      SET_LEFTMOST(i, i); // Line 402
       weights[i] = 0;
     }
     for (int16 i = 1 + n_leaves; i != 1 + n_vertex; ++i) {
