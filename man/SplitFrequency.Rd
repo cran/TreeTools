@@ -2,18 +2,9 @@
 % Please edit documentation in R/Support.R
 \name{SplitFrequency}
 \alias{SplitFrequency}
-\alias{SplitNumber}
-\alias{ForestSplits}
-\alias{TreeSplits}
 \title{Frequency of splits}
 \usage{
 SplitFrequency(reference, forest)
-
-SplitNumber(tips, tree, tipIndex, powersOf2)
-
-ForestSplits(forest, powersOf2)
-
-TreeSplits(tree)
 }
 \arguments{
 \item{reference}{A tree of class \code{phylo}, a \code{Splits} object.}
@@ -22,16 +13,6 @@ TreeSplits(tree)
 \code{Splits} object. See
 \href{https://ms609.github.io/TreeTools/articles/load-trees.html}{vignette} for
 possible methods of loading trees into R.}
-
-\item{tips}{Integer vector specifying the tips of the tree within the chosen
-split.}
-
-\item{tree}{A tree of class \code{\link[ape:read.tree]{phylo}}.}
-
-\item{tipIndex}{Character vector of tip names, in a fixed order.}
-
-\item{powersOf2}{Integer vector of same length as \code{tipIndex}, specifying a
-power of 2 to be associated with each tip in turn.}
 }
 \value{
 \code{SplitFrequency()} returns the number of trees in \code{forest} that
@@ -51,16 +32,6 @@ or bootstrap trees.
 If multiple calculations are required, some time can be saved by using the
 constituent functions (see examples).
 }
-\section{Functions}{
-\itemize{
-\item \code{SplitNumber()}: Assign a unique integer to each split
-
-\item \code{ForestSplits()}: Frequency of splits in a given forest of trees
-
-\item \code{TreeSplits()}: Deprecated. Listed the splits in a given tree.
-Use as.Splits instead.
-
-}}
 \examples{
 # An example forest of 100 trees, some identical
 forest <- as.phylo(c(1, rep(10, 79), rep(100, 15), rep(1000, 5)), nTip = 9)

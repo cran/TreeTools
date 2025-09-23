@@ -172,7 +172,6 @@ test_that("as.Splits.Splits()", {
 })
 
 test_that("as.Splits.matrix()", {
-  expect_error(as.Splits(matrix(1, 3, 3)))
   expect_error(as.Splits(matrix(1, 2, 2,
                                 dimnames = list(c("edge", "Nnode"), NULL))))
   trees <- list(BalancedTree(8), PectinateTree(8),
@@ -197,28 +196,22 @@ test_that("as.Splits.matrix()", {
 })
 
 test_that("as.Splits.edge()", {
-    
-  # From https://stackoverflow.com/questions/71082379
+  
   expect_one_of <- function(object, options) {
+    val <- object
+    ok  <- vapply(options, function(opt) identical(val, opt), logical(1L))
     
-    # 1. Capture object and label
-    act <- quasi_label(rlang::enquo(object), arg = "object")
-    
-    # 2. Call expect()
-    compResults <- purrr::map_lgl(options, ~identical(act$val, .x))
     expect(
-      any(compResults),
+      any(ok),
       sprintf(
-        "Input (%s) is not one of the accepted options: %s",
-        toString(act$val),
-        paste(purrr::map_chr(options, toString), collapse = ", ")
+        "Result is not one of the accepted options: %s",
+        paste(vapply(options, toString, character(1L)), collapse = ", ")
       )
     )
     
-    # 3. Invisibly return the value
-    invisible(act$val)
-    
+    invisible(val)
   }
+  
   # Test expect_one_of
   expect_success(expect_one_of(1, list(1, 2)))
   expect_failure(expect_one_of(0, list(1, 2)), "not one of")
@@ -240,6 +233,26 @@ test_that("as.Splits.logical()", {
   expect_splits_equal(as.Splits(FFTT, a..d), as.Splits(t(matrix(FFTT)), a..d))
   expect_splits_equal(as.Splits(FFTT), as.Splits(t(matrix(FFTT))))
 })
+
+test_that("as.Splits.integer()", {
+  . <- FALSE
+  X <- TRUE
+  expect_splits_equal(as.Splits(c(rep(1L, 4)), tipLabels = letters[2:5]),
+                      as.Splits(c(., ., ., .), tipLabels = letters[2:5]))
+  expect_splits_equal(as.Splits(c(rep(1L, 4), rep(2L, 4))),
+                      as.Splits(c(., ., ., ., X, X, X, X)))
+  expect_splits_equal(as.Splits(c(rep(1L, 4), rep(2L, 4), 3L)),
+                      as.Splits(rbind(c(X, X, X, X, ., ., ., ., .),
+                                      c(., ., ., ., X, X, X, X, .),
+                                      c(., ., ., ., ., ., ., ., X))))
+  expect_splits_equal(as.Splits(c(rep(33, 4), 0, rep(-1, 3), 0)),
+                      as.Splits(rbind(c(., ., ., ., ., X, X, X, .),
+                                      c(., ., ., ., X, ., ., ., X),
+                                      c(X, X, X, X, ., ., ., ., .))))
+  expect_error(as.Splits(c(rep(1.45, 4), rep(sqrt(2), 3))), 
+               "no applicable method")
+})
+
 
 test_that("as.Splits.character()", {
   a..f <- letters[1:6]

@@ -1,3 +1,24 @@
+# TreeTools 2.0.0 (2025-09-23) #
+
+## New functionality
+- `Cherries()` counts the cherries in a binary tree.
+- New method `as.Splits.integer()`.
+- Add methods for `NULL` objects.
+
+## Fixes and enhancements
+- Fix `RoguePlot(sort = TRUE)`
+  [Rogue#33](https://github.com/ms609/Rogue/issues/33).
+- Remove R.cache dependency: `UnrootedKeys()` now uses a native cache
+  implementation.
+  
+## Backward incompatible changes
+- Require R 3.6.
+- Remove deprecated functions `AllDescendantEdges()`, `.EnforceOutgroup()`,
+  `ForestSplits()`, `in.Splits()`, `PhylogeneticInfo()`, `SpectrumLegend()`,
+  `SplitNumber()`, `TreeSplits()`.
+- Remove deprecated C++ macro `TREETOOLS_SPLITLIST_INIT`.
+
+
 # TreeTools 1.16.1 (2025-08-24) #
 
 - Compiler-safe vector initialization, resolving M1-SAN warnings.

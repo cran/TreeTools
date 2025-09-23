@@ -107,48 +107,6 @@ LabelSplits <- function(tree, labels = NULL, unit = "", ...) {
   invisible()
 }
 
-#' @describeIn SplitFrequency Assign a unique integer to each split
-#' @param tips Integer vector specifying the tips of the tree within the chosen
-#' split.
-#' @template treeParam
-#' @param tipIndex Character vector of tip names, in a fixed order.
-#' @param powersOf2 Integer vector of same length as `tipIndex`, specifying a
-#' power of 2 to be associated with each tip in turn.
-#' @export
-SplitNumber <- function(tips, tree, tipIndex, powersOf2) { # nocov start
-  .Deprecated("SplitFrequency")
-  included <- tipIndex %in% tree[["tip.label"]][tips]
-  as.character(min(c(sum(powersOf2[included]), sum(powersOf2[!included]))))
-}
-
-#' @describeIn SplitFrequency Frequency of splits in a given forest of trees
-#' @export
-ForestSplits <- function(forest, powersOf2) {
-  .Deprecated("SplitFrequency")
-  if (inherits(forest, "phylo")) forest <- c(forest)
-  tipIndex <- sort(forest[[1]][["tip.label"]])
-  nTip <- length(tipIndex)
-
-  # Return:
-  table(vapply(forest, function(tr) {
-    edge <- tr[["edge"]]
-    parent <- edge[, 1]
-    child <- edge[, 2]
-    # +2: Don't consider root node (not a node) or first node (duplicated)
-    vapply(.DescendantTips(parent, child, nTip,
-                           nodes = nTip + 2L + seq_len(nTip - 3L)),
-           SplitNumber, character(1), tr, tipIndex, powersOf2)
-  }, character(nTip - 3L)))
-}
-
-#' @describeIn SplitFrequency Deprecated. Listed the splits in a given tree.
-#' Use as.Splits instead.
-#' @importFrom lifecycle deprecate_warn
-#' @export
-TreeSplits <- function(tree) {
-  deprecate_warn("1.0.0", "TreeSplits()", "as.Splits()")
-} # nocov end
-
 #' Colour for node support value
 #'
 #' Colour value with which to display node support.
@@ -169,25 +127,24 @@ TreeSplits <- function(tree) {
 #' @seealso Use in conjunction with [`LabelSplits()`] to colour split labels,
 #' possibly calculated using [`SplitFrequency()`].
 #'
-# TODO replace with grDevices palette when require R>3.6.0
-#' @importFrom colorspace diverge_hcl
+#' @importFrom grDevices colorRampPalette
 #' @export
 SupportColour <- function(support,
-                           show1 = TRUE,
-                           scale = rev(diverge_hcl(101, h = c(260, 0), c = 100,
-                                                   l = c(50, 90),
-                                                   power = 1.0)),
-                           outOfRange = "red") {
-  # continuousScale <- rev(colorspace::heat_hcl(101, h=c(300, 75), c.=c(35, 95),
-  #  l=c(15, 90), power=c(0.8, 1.2))) # Viridis prefered
-
+                          show1 = TRUE,
+                          # Equivalent to hcl.colors(101, "Blue-Red 2", rev = TRUE),
+                          # but works safely on macOS
+                          scale = colorRampPalette(c("#D33F6A", "#e2e2e2", "#4A6FE3"))(101),
+                          outOfRange = "red") {
   sanitized <- support
   sanitized[!is.numeric(support) | support < 0 | support > 1] <- NA
-  ifelse(is.na(support) | support < 0 | support > 1 | support == "",
-         outOfRange,
-         ifelse(support == 1 & !show1,
-                "#ffffff00",
-                scale[(sanitized * 100) + 1L]))
+  inRange <- !is.na(support) & support >= 0 & support <= 1 & support != ""
+  ret <- character(length(support))
+  ret[!inRange] <- outOfRange
+  ret[inRange] <- scale[(sanitized[inRange] * 100) + 1L]
+  if (!isTRUE(show1)) {
+    ret[support == 1] <- "#ffffff00"
+  }
+  ret
 }
 
 #' @rdname SupportColour

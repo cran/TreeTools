@@ -74,12 +74,11 @@ RenumberTree <- function(parent, child, weight) {
 
 #' @rdname Reorder
 #'
-#' @param \dots Deprecated; included for compatibility with previous versions.
 #' @return `RenumberEdges()` formats the output of `RenumberTree()` into a list
 #' whose two entries correspond to the new parent and child vectors,
 #' in preorder.
 #' @export
-RenumberEdges <- function(parent, child, ...) {
+RenumberEdges <- function(parent, child) {
   oenn <- .Call(`_TreeTools_preorder_edges_and_nodes`, parent, child)
 
   # Return:
@@ -367,6 +366,10 @@ PostorderOrder.phylo <- function(tree) {
          postorder_order(edge))
 }
 
+#' @export
+PostorderOrder.NULL <- function(tree) NULL
+  
+  
 #' @rdname Reorder
 #' @export
 PostorderOrder.numeric <- function(tree) {

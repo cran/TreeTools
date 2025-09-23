@@ -35,7 +35,9 @@ test_that("Simple rogue plot", {
   )
   expect_equal(
     RoguePlot(trees, tip = "rogue", plot = FALSE, sort = TRUE)[["cons"]],
-    Preorder(SortTree(RoguePlot(trees, tip = "rogue", plot = FALSE)[["cons"]]))
+    RenumberTips(
+      SortTree(RoguePlot(trees, tip = "rogue", plot = FALSE)[["cons"]]),
+      TipLabels(trees[[1]]))
   )
 
   skip_if_not_installed("vdiffr", "1.0")
@@ -53,8 +55,24 @@ test_that("Simple rogue plot", {
 test_that("RoguePlot(sort = TRUE)", {
   trees <- c(PectinateTree(7), PectinateTree(7))
   rp <- RoguePlot(trees, "t5", sort = TRUE, plot = FALSE)
+  expect_equal(rp[["cons"]],
+               RenumberTips(SortTree(ConsensusWithout(trees, "t5")),
+                            PectinateTree(7)))
   expect_equal(rp[["atNode"]], rep(0, 5))
   expect_equal(rp[["onEdge"]], `[<-`(double(10), 4, 2))
+  
+  
+  trees <- list(read.tree(text = "(a, (b, (c, (rogue, (d, (e, f))))));"),
+                read.tree(text = "(rogue, (a, (b, (c, (d, (e, f))))));"),
+                read.tree(text = "((rogue, a), (b, (c, (d, (e, f)))));"),
+                read.tree(text = "(a, (b, ((c, d), (rogue, (e, f)))));"),
+                read.tree(text = "(a, (b, ((c, (rogue, d)), (e, f))));"),
+                read.tree(text = "(a, (b, (c, (d, (rogue, (e, f))))));"))[
+                  c(1, 1, 1, 1:6)]
+  unsorted <- RoguePlot(trees, "rogue", plot = FALSE)
+  sorted <- RoguePlot(trees, "rogue", plot = FALSE, sort = TRUE)
+  expect_equal(sorted$onEdge, unsorted$onEdge[c(2, 4, 7, 9, 8, 6, 5, 3, 1)])
+  expect_equal(sorted$atNode, unsorted$atNode)
 })
 
 test_that("polytomy id", {
@@ -100,6 +118,14 @@ test_that("Complex rogue plot", {
     RoguePlot(trees = trees1, tip = "rogue", plot = FALSE),
     list(cons = ExpectedCons("(a, (b, (c, d, (e, f))));"),
          onEdge = c(2, 1, 0, 0, 0, 1, 2, 0, 0),
+         atNode = c(1, 0, 5, 0),
+         legendLabels = LegendLabels(6))
+    )
+
+  expect_equal(
+    RoguePlot(trees = trees1, tip = "rogue", plot = FALSE, sort = TRUE),
+    list(cons = RenumberTips(SortTree(ExpectedCons("(a, (b, (c, d, (e, f))));")), trees1),
+         onEdge = c(2, 1, 0, 0, 0, 1, 2, 0, 0)[c(2, 4, 7, 9, 8, 6, 5, 3, 1)],
          atNode = c(1, 0, 5, 0),
          legendLabels = LegendLabels(6))
     )

@@ -65,7 +65,6 @@ Other tree manipulation:
 \code{\link{AddTip}()},
 \code{\link{CollapseNode}()},
 \code{\link{DropTip}()},
-\code{\link{EnforceOutgroup}()},
 \code{\link{ImposeConstraint}()},
 \code{\link{KeptPaths}()},
 \code{\link{KeptVerts}()},
@@ -81,6 +80,7 @@ Other tree manipulation:
 \code{\link{TrivialTree}}
 
 Other tree properties: 
+\code{\link{Cherries}()},
 \code{\link{LongBranch}()},
 \code{\link{MatchEdges}()},
 \code{\link{NSplits}()},
