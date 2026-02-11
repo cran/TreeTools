@@ -1,9 +1,13 @@
 test_that("ClusterTable fails gracefully", {
-  bigTree <- PectinateTree(2^14 + 1)
+  bigTree <- PectinateTree(100001)
   expect_error(
     as.ClusterTable(bigTree),
-    "Tree has too many leaves. Contact the .TreeTools. maintainer."
+    "Tree has too many leaves.*100000"
   )
+  
+  mediumTree <- PectinateTree(20000)
+  ct <- as.ClusterTable(mediumTree)
+  expect_equal(attr(ct, "nTip"), 20000)
 })
 
 test_that("ClusterTable class behaves", {
@@ -110,6 +114,7 @@ test_that("ClusterTable with multiple trees", {
 
 test_that("ClusterTable with complex trees", {
   skip_if_not_installed("TreeDist", "2.9.2.9000")
+  skip_on_cran()
   library("TreeDist")
   
   # Test exposes failures in C++ - constexpr not playing nicely with Rcpp

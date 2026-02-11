@@ -1,3 +1,17 @@
+# TreeTools 2.1.0 (2026-02-10) #
+
+- Add method `RenumberTips.Splits()`.
+- `FirstMatchingSplit(x)` provides performant alternative to `match(x)[[1]]`.
+- Support logical `pole` in `PolarizeSplits()`.
+- `RenumberTree()` supports numeric `tipOrder` input.
+- Support larger trees in `ClusterTable` objects.
+  * Retires `CT_PUSH` and `CT_POP` macros.
+- Support larger trees in `Consensus()`.
+  * Uses 32-bit integers, necessitating downstream changes to TreeDist.
+- Remove hard limit on tree size in `SplitList`.
+- `MatrixToPhyDat()` gains `tipLabels` parameter.
+- Document return value for `J1Index()`.
+
 # TreeTools 2.0.0 (2025-09-23) #
 
 ## New functionality
@@ -7,7 +21,7 @@
 
 ## Fixes and enhancements
 - Fix `RoguePlot(sort = TRUE)`
-  [Rogue#33](https://github.com/ms609/Rogue/issues/33).
+  ([Rogue#33](https://github.com/ms609/Rogue/issues/33)).
 - Remove R.cache dependency: `UnrootedKeys()` now uses a native cache
   implementation.
   

@@ -3,6 +3,7 @@
 \name{RenumberTips}
 \alias{RenumberTips}
 \alias{RenumberTips.phylo}
+\alias{RenumberTips.Splits}
 \alias{RenumberTips.multiPhylo}
 \alias{RenumberTips.list}
 \alias{RenumberTips.NULL}
@@ -11,6 +12,8 @@
 RenumberTips(tree, tipOrder)
 
 \method{RenumberTips}{phylo}(tree, tipOrder)
+
+\method{RenumberTips}{Splits}(tree, tipOrder)
 
 \method{RenumberTips}{multiPhylo}(tree, tipOrder)
 
@@ -22,8 +25,9 @@ RenumberTips(tree, tipOrder)
 \item{tree}{A tree of class \code{\link[ape:read.tree]{phylo}}.}
 
 \item{tipOrder}{A character vector containing the values of
-\code{tree[["tip.label"]]} in the desired sort order, or an object
-(perhaps of class \code{phylo} or \code{Splits}) with tip labels.}
+\code{tree[["tip.label"]]} in the desired sort order,
+an object (perhaps of class \code{phylo} or \code{Splits}) with tip labels,
+or a numeric specifying the desired order.}
 }
 \value{
 \code{RenumberTips()} returns \code{tree}, with the tips' internal
